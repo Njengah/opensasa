@@ -4,7 +4,7 @@ OpenSasa is intended to be local-first and privacy-first by default.
 
 The project is built around a clear trust boundary:
 
-> No source code uploaded by default. No private prompts uploaded by default. No contribution without explicit developer consent.
+> No source code uploaded by default. No private prompts are uploaded by default. No contribution without explicit developer consent.
 
 These principles should guide product design, implementation, documentation, and review.
 
@@ -32,9 +32,10 @@ Before any contribution, the developer should be able to review:
 - what data is excluded,
 - how the payload is anonymized,
 - how the payload may affect public aggregate views,
-- and whether contribution is enabled or disabled.
+- and whether the contribution is enabled or disabled.
 
-Consent should be specific to contribution. Using OpenSasa locally should not imply consent to share data.
+Consent should be specific to the contribution. Using OpenSasa locally should not imply consent to share data.
+This boundary should be treated as a product constraint, not a temporary implementation detail.
 
 ## Excluded By Default
 
@@ -89,7 +90,7 @@ The public contribution payload should use coarse buckets where exact values cou
 
 ## Inspect Before Share
 
-OpenSasa should make contribution payloads inspectable before upload.
+OpenSasa should make the contribution payloads inspectable before upload.
 
 The inspection flow should show:
 

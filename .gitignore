@@ -1,2 +1,8 @@
 BLUEPRINT.md
 product_plan.md
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+*.tsbuildinfo

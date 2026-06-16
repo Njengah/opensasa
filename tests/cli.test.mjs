@@ -243,3 +243,79 @@ test("lists saved sessions with safe summary fields sorted newest first", async 
   assert.ok(newerIndex < olderIndex);
   assert.doesNotMatch(stdout, /TypeScript/);
 });
+
+test("prints report help", async () => {
+  const { stdout } = await execFileAsync("node", ["./dist/index.js", "report", "--help"]);
+
+  assert.match(stdout, /Generate a local personal report/);
+  assert.match(stdout, /--db-path/);
+});
+
+test("prints an empty local report with unknown rates", async () => {
+  const dbPath = join(tmpRoot, "empty-report.db");
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "report",
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.match(stdout, /OpenSasa Local Report/);
+  assert.match(stdout, /Total sessions: 0/);
+  assert.match(stdout, /Estimated total cost: unknown/);
+  assert.match(stdout, /Useful outcome rate: unknown \(0\/0\)/);
+  assert.match(stdout, /Verified success rate: unknown \(0\/0\)/);
+});
+
+test("prints a local report from saved sessions", async () => {
+  const dbPath = join(tmpRoot, "report.db");
+  const store = openStore(dbPath);
+
+  try {
+    store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      retry_count: 1,
+      estimated_cost_usd: 0.5,
+      language: "TypeScript",
+    });
+    store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "claude-sonnet-4.5",
+      task_type: "feature",
+      final_outcome: "rejected",
+      work_mode: "manual_log",
+      tests_outcome: "failed",
+      retry_count: 2,
+      estimated_cost_usd: 1,
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "report",
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.match(stdout, /Total sessions: 2/);
+  assert.match(stdout, /OpenAI\/gpt-5: 1/);
+  assert.match(stdout, /Anthropic\/claude-sonnet-4\.5: 1/);
+  assert.match(stdout, /bug_fix: 1/);
+  assert.match(stdout, /feature: 1/);
+  assert.match(stdout, /Accepted or partially accepted: 1/);
+  assert.match(stdout, /Rejected: 1/);
+  assert.match(stdout, /Estimated total cost: \$1\.5000/);
+  assert.match(stdout, /Retry burden: 1\.00/);
+  assert.match(stdout, /Useful outcome rate: 50\.0% \(1\/2\)/);
+  assert.match(stdout, /Verified success rate: 50\.0% \(1\/2\)/);
+  assert.doesNotMatch(stdout, /TypeScript/);
+});

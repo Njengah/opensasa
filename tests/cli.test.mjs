@@ -164,3 +164,82 @@ test("rejects invalid manual session metadata before writing", async () => {
     store.close();
   }
 });
+
+test("prints sessions help", async () => {
+  const { stdout } = await execFileAsync("node", ["./dist/index.js", "sessions", "--help"]);
+
+  assert.match(stdout, /List local AI coding sessions/);
+  assert.match(stdout, /--db-path/);
+});
+
+test("prints a clear sessions empty state", async () => {
+  const dbPath = join(tmpRoot, "empty-sessions.db");
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "sessions",
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.equal(stdout.trim(), "No local sessions found.");
+});
+
+test("lists saved sessions with safe summary fields sorted newest first", async () => {
+  const dbPath = join(tmpRoot, "list-sessions.db");
+  const store = openStore(dbPath);
+  let older;
+  let newer;
+
+  try {
+    older = store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      estimated_cost_usd: 0.25,
+      language: "TypeScript",
+    });
+    newer = store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "claude-sonnet-4.5",
+      task_type: "feature",
+      final_outcome: "unknown",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "sessions",
+    "--db-path",
+    dbPath,
+  ]);
+  const newerIndex = stdout.indexOf(newer.session_id);
+  const olderIndex = stdout.indexOf(older.session_id);
+
+  assert.match(stdout, /Session ID/);
+  assert.match(stdout, /Timestamp/);
+  assert.match(stdout, /Provider/);
+  assert.match(stdout, /Model/);
+  assert.match(stdout, /Task/);
+  assert.match(stdout, /Outcome/);
+  assert.match(stdout, /Verified/);
+  assert.match(stdout, /Cost/);
+  assert.match(stdout, /OpenAI/);
+  assert.match(stdout, /gpt-5/);
+  assert.match(stdout, /bug_fix/);
+  assert.match(stdout, /accepted/);
+  assert.match(stdout, /yes/);
+  assert.match(stdout, /\$0\.2500/);
+  assert.match(stdout, /unknown/);
+  assert.ok(newerIndex > -1);
+  assert.ok(olderIndex > -1);
+  assert.ok(newerIndex < olderIndex);
+  assert.doesNotMatch(stdout, /TypeScript/);
+});

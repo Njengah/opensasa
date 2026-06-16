@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import { ZodError } from "zod";
+import { deriveVerifiedSuccess, type LocalSession } from "./schema.js";
 import { openStore } from "./storage.js";
 
 const program = new Command();
@@ -35,6 +36,10 @@ type LogOptions = {
   lintOutcome?: string;
   typecheckOutcome?: string;
   manualReviewOutcome?: string;
+  dbPath?: string;
+};
+
+type StoreOptions = {
   dbPath?: string;
 };
 
@@ -137,9 +142,26 @@ program
 
 program
   .command("sessions")
-  .description("List local AI coding sessions. Not implemented yet.")
-  .action(() => {
-    console.log("opensasa sessions is not implemented yet.");
+  .description("List local AI coding sessions.")
+  .option("--db-path <path>", "override local database path")
+  .action((options: StoreOptions) => {
+    let store;
+    try {
+      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      const sessions = store.listSessions();
+
+      if (sessions.length === 0) {
+        console.log("No local sessions found.");
+        return;
+      }
+
+      console.log(formatSessions(sessions));
+    } catch (error) {
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    } finally {
+      store?.close();
+    }
   });
 
 program
@@ -190,4 +212,88 @@ function formatCliError(error: unknown): string {
   }
 
   return "Unable to log session.";
+}
+
+function formatSessions(sessions: LocalSession[]): string {
+  const rows = sessions.map((session) => ({
+    id: session.session_id ?? "",
+    timestamp: session.timestamp,
+    provider: session.provider,
+    model: session.model_id,
+    task: session.task_type,
+    outcome: session.final_outcome,
+    verified: formatVerifiedSuccess(session),
+    cost: formatEstimatedCost(session.estimated_cost_usd),
+  }));
+  const headers = {
+    id: "Session ID",
+    timestamp: "Timestamp",
+    provider: "Provider",
+    model: "Model",
+    task: "Task",
+    outcome: "Outcome",
+    verified: "Verified",
+    cost: "Cost",
+  };
+  const widths = Object.fromEntries(
+    Object.keys(headers).map((key) => [
+      key,
+      Math.max(
+        headers[key as keyof typeof headers].length,
+        ...rows.map((row) => row[key as keyof typeof row].length),
+      ),
+    ]),
+  ) as Record<keyof typeof headers, number>;
+
+  return [
+    formatSessionRow(headers, widths),
+    formatSessionRow(
+      {
+        id: "-".repeat(widths.id),
+        timestamp: "-".repeat(widths.timestamp),
+        provider: "-".repeat(widths.provider),
+        model: "-".repeat(widths.model),
+        task: "-".repeat(widths.task),
+        outcome: "-".repeat(widths.outcome),
+        verified: "-".repeat(widths.verified),
+        cost: "-".repeat(widths.cost),
+      },
+      widths,
+    ),
+    ...rows.map((row) => formatSessionRow(row, widths)),
+  ].join("\n");
+}
+
+function formatSessionRow(
+  row: Record<"id" | "timestamp" | "provider" | "model" | "task" | "outcome" | "verified" | "cost", string>,
+  widths: Record<"id" | "timestamp" | "provider" | "model" | "task" | "outcome" | "verified" | "cost", number>,
+): string {
+  return [
+    row.id.padEnd(widths.id),
+    row.timestamp.padEnd(widths.timestamp),
+    row.provider.padEnd(widths.provider),
+    row.model.padEnd(widths.model),
+    row.task.padEnd(widths.task),
+    row.outcome.padEnd(widths.outcome),
+    row.verified.padEnd(widths.verified),
+    row.cost.padStart(widths.cost),
+  ].join("  ");
+}
+
+function formatVerifiedSuccess(session: LocalSession): string {
+  if (
+    session.tests_outcome === "unknown" &&
+    session.build_outcome === "unknown" &&
+    session.lint_outcome === "unknown" &&
+    session.typecheck_outcome === "unknown" &&
+    session.manual_review_outcome === "unknown"
+  ) {
+    return "unknown";
+  }
+
+  return deriveVerifiedSuccess(session) ? "yes" : "no";
+}
+
+function formatEstimatedCost(cost: number | undefined): string {
+  return cost === undefined ? "unknown" : `$${cost.toFixed(4)}`;
 }

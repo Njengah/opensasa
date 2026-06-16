@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import { ZodError } from "zod";
+import { calculateLocalReport, formatLocalReport } from "./report.js";
 import { deriveVerifiedSuccess, type LocalSession } from "./schema.js";
 import { openStore } from "./storage.js";
 
@@ -166,9 +167,20 @@ program
 
 program
   .command("report")
-  .description("Generate a local personal report. Not implemented yet.")
-  .action(() => {
-    console.log("opensasa report is not implemented yet.");
+  .description("Generate a local personal report.")
+  .option("--db-path <path>", "override local database path")
+  .action((options: StoreOptions) => {
+    let store;
+    try {
+      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      const report = calculateLocalReport(store.listSessions());
+      console.log(formatLocalReport(report));
+    } catch (error) {
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    } finally {
+      store?.close();
+    }
   });
 
 program

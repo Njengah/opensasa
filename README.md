@@ -62,20 +62,194 @@ Data excluded by default should include source code, private prompts, model resp
 
 ## Project Status
 
-This repository is currently in blueprint stage.
+This repository now contains the first CLI-first MVP workflow for local manual
+tracking.
 
-There is no product code yet. The first public work is to define the project clearly before implementation:
+Implemented local commands:
 
-- mission,
-- privacy model,
-- metadata boundaries,
-- scoring principles,
-- public index design,
-- local tracker workflow,
-- contribution model,
-- and anti-gaming strategy.
+- `opensasa log`
+- `opensasa sessions`
+- `opensasa report`
+- `opensasa inspect`
 
-The public development and versioning approach is described in [Development Cycle](./docs/DEVELOPMENT_CYCLE.md).
+The current product is intentionally local-only. It can log safe AI coding
+session metadata, store records in a local SQLite database, list previous
+sessions, generate a personal report, and preview a sanitized contribution
+payload. It does not upload data or publish rankings.
+
+The public development and versioning approach is described in
+[Development Cycle](./docs/DEVELOPMENT_CYCLE.md). The MVP workflow is described
+in [MVP Workflow](./docs/MVP_WORKFLOW.md).
+
+## Local CLI Usage
+
+Install dependencies and build the CLI:
+
+```bash
+npm install
+npm run build
+```
+
+Run the CLI locally:
+
+```bash
+node ./dist/index.js --help
+```
+
+When installed as a package, the executable name is:
+
+```bash
+opensasa
+```
+
+### Log A Session
+
+`opensasa log` records one AI-assisted coding session manually.
+
+Required fields:
+
+- provider,
+- model ID,
+- task type,
+- final outcome.
+
+Example:
+
+```bash
+node ./dist/index.js log \
+  --provider OpenAI \
+  --model-id gpt-5 \
+  --task-type bug_fix \
+  --final-outcome accepted \
+  --tests-outcome passed \
+  --estimated-cost-usd 0.42
+```
+
+The command stores the record locally and prints the generated session ID.
+
+Useful optional fields include:
+
+- `--timestamp`
+- `--model-version`
+- `--tool`
+- `--language`
+- `--framework`
+- `--duration-seconds`
+- `--retry-count`
+- `--error-count`
+- `--input-tokens-estimate`
+- `--output-tokens-estimate`
+- `--cached-tokens-estimate`
+- `--cost-source`
+- `--repo-size-bucket`
+- `--file-count-bucket`
+- `--changed-file-count-bucket`
+- `--lines-added-bucket`
+- `--lines-removed-bucket`
+- `--tests-outcome`
+- `--build-outcome`
+- `--lint-outcome`
+- `--typecheck-outcome`
+- `--manual-review-outcome`
+
+For tests or temporary runs, override the database path:
+
+```bash
+node ./dist/index.js log \
+  --db-path ./opensasa-dev.db \
+  --provider OpenAI \
+  --model-id gpt-5 \
+  --task-type feature \
+  --final-outcome partially_accepted
+```
+
+### List Sessions
+
+```bash
+node ./dist/index.js sessions
+```
+
+The list output shows:
+
+- session ID,
+- timestamp,
+- provider,
+- model ID,
+- task type,
+- final outcome,
+- verified success status,
+- estimated cost when known.
+
+### Generate A Local Report
+
+```bash
+node ./dist/index.js report
+```
+
+The report is generated from local data only. It includes:
+
+- total sessions,
+- sessions by model,
+- sessions by task type,
+- accepted and partially accepted count,
+- rejected count,
+- unknown outcome count,
+- estimated total cost,
+- cost by model,
+- retry summary,
+- verification outcome summary,
+- useful outcome rate,
+- verified success rate.
+
+Unknown or missing data is labeled directly.
+
+### Inspect A Session
+
+```bash
+node ./dist/index.js inspect <session-id>
+```
+
+This shows the local record for one session and repeats the privacy boundary.
+
+### Preview A Contribution Payload
+
+```bash
+node ./dist/index.js inspect <session-id> --contribution
+```
+
+This generates a local preview of what a future contribution payload could
+include. The preview shows included fields, excluded fields, bucketed values,
+schema version, data source, consent status, and no-upload status.
+
+Uploads are not enabled in the MVP.
+
+## Local Storage
+
+By default, OpenSasa stores records at:
+
+```text
+~/.opensasa/opensasa.db
+```
+
+The database path can be overridden with `--db-path` or `OPENSASA_DB_PATH`.
+
+## Current Limitations
+
+The MVP does not include:
+
+- public uploads,
+- public rankings,
+- hosted backend,
+- web dashboard,
+- team dashboard,
+- automatic imports from AI coding tools,
+- editing existing sessions,
+- JSON output,
+- filtering or pagination,
+- contribution submission.
+
+Bucket thresholds and report formatting are early implementation defaults and
+may change as the methodology matures.
 
 ## Positioning
 

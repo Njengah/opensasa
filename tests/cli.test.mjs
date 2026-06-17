@@ -319,3 +319,111 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /Verified success rate: 50\.0% \(1\/2\)/);
   assert.doesNotMatch(stdout, /TypeScript/);
 });
+
+test("prints inspect help", async () => {
+  const { stdout } = await execFileAsync("node", ["./dist/index.js", "inspect", "--help"]);
+
+  assert.match(stdout, /Inspect a local session or contribution preview/);
+  assert.match(stdout, /--contribution/);
+  assert.match(stdout, /--db-path/);
+});
+
+test("inspects a local session record", async () => {
+  const dbPath = join(tmpRoot, "inspect.db");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      estimated_cost_usd: 0.5,
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "inspect",
+    session.session_id,
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.match(stdout, /OpenSasa Session Inspection/);
+  assert.match(stdout, new RegExp(`session_id: ${session.session_id}`));
+  assert.match(stdout, /provider: OpenAI/);
+  assert.match(stdout, /model_id: gpt-5/);
+  assert.match(stdout, /estimated_cost_usd: 0.5/);
+  assert.match(stdout, /verified_success: true/);
+  assert.match(stdout, /No source code stored/);
+});
+
+test("previews a sanitized contribution payload without upload", async () => {
+  const dbPath = join(tmpRoot, "contribution-preview.db");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:34:56.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      input_tokens_estimate: 1200,
+      estimated_cost_usd: 0.5,
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "inspect",
+    session.session_id,
+    "--contribution",
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.match(stdout, /OpenSasa Contribution Preview/);
+  assert.match(stdout, /Status: preview only/);
+  assert.match(stdout, /Consent: not granted/);
+  assert.match(stdout, /Upload enabled: no/);
+  assert.match(stdout, /No upload will occur in this MVP/);
+  assert.match(stdout, /timestamp_bucket: 2026-06-09/);
+  assert.match(stdout, /input_tokens_bucket: large/);
+  assert.match(stdout, /estimated_cost_bucket: under_1_usd/);
+  assert.match(stdout, /source code/);
+  assert.match(stdout, /terminal output/);
+  assert.doesNotMatch(stdout, new RegExp(`session_id: ${session.session_id}`));
+  assert.doesNotMatch(stdout, /timestamp: 2026-06-09T12:34:56.000Z/);
+  assert.doesNotMatch(stdout, /estimated_cost_usd: 0.5/);
+});
+
+test("returns an error when inspecting a missing session", async () => {
+  const dbPath = join(tmpRoot, "missing-inspect.db");
+
+  await assert.rejects(
+    execFileAsync("node", [
+      "./dist/index.js",
+      "inspect",
+      "missing-session",
+      "--db-path",
+      dbPath,
+    ]),
+    (error) => {
+      assert.match(error.stderr, /Session not found: missing-session/);
+      return true;
+    },
+  );
+});

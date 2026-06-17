@@ -1,0 +1,257 @@
+import { createHash } from "node:crypto";
+import {
+  deriveVerifiedSuccess,
+  schemaVersion,
+  type LocalSession,
+} from "./schema.js";
+
+const excludedContributionFields = [
+  "source code",
+  "private prompts",
+  "model responses",
+  "exact file paths",
+  "repository names",
+  "organization names",
+  "company names",
+  "customer names",
+  "secrets",
+  "API keys",
+  "terminal output",
+  "private local notes",
+  "personally identifying information",
+] as const;
+
+type ContributionPreview = {
+  schema_version: string;
+  contribution_id: string;
+  timestamp_bucket: string;
+  provider: string;
+  model_id: string;
+  model_version?: string;
+  tool?: string;
+  task_type: string;
+  language?: string;
+  framework?: string;
+  repo_size_bucket?: string;
+  file_count_bucket?: string;
+  changed_file_count_bucket?: string;
+  lines_added_bucket?: string;
+  lines_removed_bucket?: string;
+  input_tokens_bucket: string;
+  output_tokens_bucket: string;
+  cached_tokens_bucket: string;
+  estimated_cost_bucket: string;
+  duration_bucket: string;
+  retry_count_bucket: string;
+  error_count_bucket: string;
+  tests_outcome: string;
+  build_outcome: string;
+  lint_outcome: string;
+  typecheck_outcome: string;
+  final_outcome: string;
+  verified_success: boolean;
+  data_source: string;
+};
+
+export function formatLocalInspection(session: LocalSession): string {
+  return [
+    "OpenSasa Session Inspection",
+    "",
+    "Local record:",
+    ...formatObject(localInspectionFields(session)),
+    "",
+    "Privacy boundary:",
+    "- No source code stored.",
+    "- No private prompts stored.",
+    "- No model responses stored.",
+    "- No exact file paths stored.",
+    "- No raw terminal output stored.",
+  ].join("\n");
+}
+
+export function formatContributionPreview(session: LocalSession): string {
+  const preview = buildContributionPreview(session);
+
+  return [
+    "OpenSasa Contribution Preview",
+    "",
+    "Status: preview only",
+    "Consent: not granted",
+    "Upload enabled: no",
+    "Destination: none",
+    "No upload will occur in this MVP.",
+    "",
+    "Included fields:",
+    ...formatObject(preview),
+    "",
+    "Excluded fields:",
+    ...excludedContributionFields.map((field) => `- ${field}`),
+  ].join("\n");
+}
+
+export function buildContributionPreview(session: LocalSession): ContributionPreview {
+  return removeUndefinedValues({
+    schema_version: schemaVersion,
+    contribution_id: contributionIdFor(session),
+    timestamp_bucket: timestampBucket(session.timestamp),
+    provider: session.provider,
+    model_id: session.model_id,
+    model_version: session.model_version,
+    tool: session.tool,
+    task_type: session.task_type,
+    language: session.language,
+    framework: session.framework,
+    repo_size_bucket: session.repo_size_bucket,
+    file_count_bucket: session.file_count_bucket,
+    changed_file_count_bucket: session.changed_file_count_bucket,
+    lines_added_bucket: session.lines_added_bucket,
+    lines_removed_bucket: session.lines_removed_bucket,
+    input_tokens_bucket: countBucket(session.input_tokens_estimate),
+    output_tokens_bucket: countBucket(session.output_tokens_estimate),
+    cached_tokens_bucket: countBucket(session.cached_tokens_estimate),
+    estimated_cost_bucket: costBucket(session.estimated_cost_usd),
+    duration_bucket: durationBucket(session.duration_seconds),
+    retry_count_bucket: countBucket(session.retry_count),
+    error_count_bucket: countBucket(session.error_count),
+    tests_outcome: session.tests_outcome,
+    build_outcome: session.build_outcome,
+    lint_outcome: session.lint_outcome,
+    typecheck_outcome: session.typecheck_outcome,
+    final_outcome: session.final_outcome,
+    verified_success: deriveVerifiedSuccess(session),
+    data_source: dataSourceFor(session),
+  });
+}
+
+function localInspectionFields(session: LocalSession): Record<string, unknown> {
+  return {
+    schema_version: session.schema_version,
+    session_id: session.session_id,
+    timestamp: session.timestamp,
+    provider: session.provider,
+    model_id: session.model_id,
+    model_version: session.model_version,
+    tool: session.tool,
+    task_type: session.task_type,
+    final_outcome: session.final_outcome,
+    work_mode: session.work_mode,
+    language: session.language,
+    framework: session.framework,
+    duration_seconds: session.duration_seconds,
+    retry_count: session.retry_count,
+    error_count: session.error_count,
+    input_tokens_estimate: session.input_tokens_estimate,
+    output_tokens_estimate: session.output_tokens_estimate,
+    cached_tokens_estimate: session.cached_tokens_estimate,
+    estimated_cost_usd: session.estimated_cost_usd,
+    cost_source: session.cost_source,
+    repo_size_bucket: session.repo_size_bucket,
+    file_count_bucket: session.file_count_bucket,
+    changed_file_count_bucket: session.changed_file_count_bucket,
+    lines_added_bucket: session.lines_added_bucket,
+    lines_removed_bucket: session.lines_removed_bucket,
+    tests_outcome: session.tests_outcome,
+    build_outcome: session.build_outcome,
+    lint_outcome: session.lint_outcome,
+    typecheck_outcome: session.typecheck_outcome,
+    manual_review_outcome: session.manual_review_outcome,
+    verified_success: deriveVerifiedSuccess(session),
+  };
+}
+
+function formatObject(record: Record<string, unknown>): string[] {
+  return Object.entries(record)
+    .filter(([, value]) => value !== undefined)
+    .map(([key, value]) => `- ${key}: ${String(value)}`);
+}
+
+function removeUndefinedValues<T extends Record<string, unknown>>(record: T): T {
+  return Object.fromEntries(
+    Object.entries(record).filter(([, value]) => value !== undefined),
+  ) as T;
+}
+
+function contributionIdFor(session: LocalSession): string {
+  const input = session.session_id ?? `${session.provider}:${session.model_id}:${session.timestamp}`;
+  return `contrib_${createHash("sha256").update(input).digest("hex").slice(0, 16)}`;
+}
+
+function timestampBucket(timestamp: string): string {
+  return timestamp.slice(0, 10);
+}
+
+function countBucket(value: number | undefined): string {
+  if (value === undefined) {
+    return "unknown";
+  }
+  if (value === 0) {
+    return "zero";
+  }
+  if (value <= 10) {
+    return "tiny";
+  }
+  if (value <= 100) {
+    return "small";
+  }
+  if (value <= 1000) {
+    return "medium";
+  }
+  if (value <= 10000) {
+    return "large";
+  }
+  return "very_large";
+}
+
+function durationBucket(value: number | undefined): string {
+  if (value === undefined) {
+    return "unknown";
+  }
+  if (value <= 60) {
+    return "under_1m";
+  }
+  if (value <= 300) {
+    return "1m_to_5m";
+  }
+  if (value <= 1800) {
+    return "5m_to_30m";
+  }
+  if (value <= 7200) {
+    return "30m_to_2h";
+  }
+  return "over_2h";
+}
+
+function costBucket(value: number | undefined): string {
+  if (value === undefined) {
+    return "unknown";
+  }
+  if (value === 0) {
+    return "free";
+  }
+  if (value < 0.01) {
+    return "under_1_cent";
+  }
+  if (value < 0.1) {
+    return "under_10_cents";
+  }
+  if (value < 1) {
+    return "under_1_usd";
+  }
+  if (value < 10) {
+    return "under_10_usd";
+  }
+  return "over_10_usd";
+}
+
+function dataSourceFor(session: LocalSession): string {
+  switch (session.work_mode) {
+    case "manual_log":
+      return "manual";
+    case "tool_import":
+      return "imported";
+    case "cli_wrapper":
+      return "wrapper";
+    default:
+      return "unknown";
+  }
+}

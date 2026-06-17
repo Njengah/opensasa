@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import { ZodError } from "zod";
+import { formatContributionPreview, formatLocalInspection } from "./inspect.js";
 import { calculateLocalReport, formatLocalReport } from "./report.js";
 import { deriveVerifiedSuccess, type LocalSession } from "./schema.js";
 import { openStore } from "./storage.js";
@@ -42,6 +43,10 @@ type LogOptions = {
 
 type StoreOptions = {
   dbPath?: string;
+};
+
+type InspectOptions = StoreOptions & {
+  contribution?: boolean;
 };
 
 program
@@ -185,11 +190,33 @@ program
 
 program
   .command("inspect")
-  .description("Inspect a local session or contribution preview. Not implemented yet.")
-  .argument("[session-id]", "local session ID to inspect")
+  .description("Inspect a local session or contribution preview.")
+  .argument("<session-id>", "local session ID to inspect")
   .option("--contribution", "preview a sanitized contribution payload")
-  .action(() => {
-    console.log("opensasa inspect is not implemented yet.");
+  .option("--db-path <path>", "override local database path")
+  .action((sessionId: string, options: InspectOptions) => {
+    let store;
+    try {
+      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      const session = store.getSession(sessionId);
+
+      if (!session) {
+        process.exitCode = 1;
+        console.error(`Session not found: ${sessionId}`);
+        return;
+      }
+
+      console.log(
+        options.contribution
+          ? formatContributionPreview(session)
+          : formatLocalInspection(session),
+      );
+    } catch (error) {
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    } finally {
+      store?.close();
+    }
   });
 
 program.parse();

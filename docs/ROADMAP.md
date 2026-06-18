@@ -20,7 +20,8 @@ OpenSasa should:
 
 ## Current Status
 
-OpenSasa is in foundation stage.
+OpenSasa has completed the foundation stage and now has a first CLI-first local
+MVP workflow.
 
 Completed foundation work:
 
@@ -28,15 +29,34 @@ Completed foundation work:
 - development cycle,
 - privacy principles,
 - metadata schema draft,
-- methodology draft.
-
-Remaining pre-implementation work:
-
+- methodology draft,
 - public roadmap,
 - contribution rules,
 - first public launch post draft,
 - first MVP workflow decision,
-- CLI-first or public-site-first decision.
+- CLI-first decision.
+
+Implemented MVP workflow:
+
+- CLI scaffold,
+- local metadata schema validation,
+- local SQLite storage,
+- manual session logging,
+- session listing,
+- local personal report,
+- local session inspection,
+- no-upload contribution preview,
+- README local workflow documentation.
+
+Current release target:
+
+```text
+v0.1.0-alpha.1
+```
+
+Next work should harden the local workflow, refine methodology and bucket
+definitions, and prepare contribution rules before any upload or public index
+behavior exists.
 
 ## Milestone 0: Foundation
 
@@ -115,6 +135,12 @@ Suggested version:
 v0.1.0-alpha.1
 ```
 
+Status:
+
+```text
+implemented
+```
+
 ## Milestone 2: Local Reports
 
 Goal:
@@ -150,6 +176,13 @@ Suggested version:
 
 ```text
 v0.1.0-alpha.2
+```
+
+Status:
+
+```text
+implemented in the first local MVP; future work may refine report output,
+filters, and methodology thresholds.
 ```
 
 ## Milestone 3: Public Methodology Package
@@ -227,6 +260,13 @@ Suggested version:
 
 ```text
 v0.2.0
+```
+
+Status:
+
+```text
+preview implemented locally; upload, consent flow, destination handling, and
+contribution submission remain out of scope.
 ```
 
 ## Milestone 5: Public Index Prototype
@@ -315,14 +355,14 @@ These should come after the local tracker, reports, contribution preview, and me
 
 ## Near-Term Decisions
 
-Before implementation starts, the project should decide:
+Before upload or public index work starts, the project should decide:
 
-- whether the first MVP is CLI-only or includes a generated static report,
-- whether local storage starts with SQLite,
-- which manual logging fields are required in the first release,
-- how bucket ranges are defined,
-- what verification evidence counts for the first MVP,
-- whether contribution upload exists in the first product release or only preview,
+- how bucket ranges are defined and versioned,
+- whether reports should add JSON output,
+- whether sessions can be edited after logging,
+- what contribution consent flow is required before upload exists,
+- how contribution payload validation should reject excluded fields,
+- how methodology changelogs should be published,
 - and whether the public site starts as documentation, seed-data dashboard, or later index.
 
 ## Not In Scope Yet

@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  buildContributionPreviewInspection,
+  buildLocalInspection,
   buildContributionPreview,
   formatContributionPreview,
+  formatContributionPreviewJson,
   formatLocalInspection,
+  formatLocalInspectionJson,
 } from "../dist/inspect.js";
 import { localSessionSchema } from "../dist/schema.js";
 
@@ -70,6 +74,16 @@ test("formats local inspection with local record and privacy boundary", () => {
   assert.match(output, /No private prompts stored/);
 });
 
+test("builds and formats local inspection as JSON", () => {
+  const inspection = buildLocalInspection(baseSession);
+  const parsed = JSON.parse(formatLocalInspectionJson(baseSession));
+
+  assert.equal(inspection.local_record.session_id, "session-123");
+  assert.equal(inspection.local_record.verified_success, true);
+  assert.deepEqual(parsed, inspection);
+  assert.match(parsed.privacy_boundary.join("\n"), /No source code stored/);
+});
+
 test("formats contribution preview with no-upload status and excluded fields", () => {
   const output = formatContributionPreview(baseSession);
 
@@ -85,4 +99,20 @@ test("formats contribution preview with no-upload status and excluded fields", (
   assert.doesNotMatch(output, /session_id: session-123/);
   assert.doesNotMatch(output, /timestamp: 2026-06-09T12:34:56.000Z/);
   assert.doesNotMatch(output, /estimated_cost_usd: 0.42/);
+});
+
+test("builds and formats contribution preview as JSON", () => {
+  const inspection = buildContributionPreviewInspection(baseSession);
+  const parsed = JSON.parse(formatContributionPreviewJson(baseSession));
+
+  assert.equal(inspection.status, "preview only");
+  assert.equal(inspection.consent, "not granted");
+  assert.equal(inspection.upload_enabled, false);
+  assert.equal(inspection.destination, "none");
+  assert.equal(inspection.included_fields.timestamp_bucket, "2026-06-09");
+  assert.equal(inspection.included_fields.estimated_cost_bucket, "under_1_usd");
+  assert.equal(inspection.included_fields.verified_success, true);
+  assert.equal(Object.hasOwn(inspection.included_fields, "session_id"), false);
+  assert.deepEqual(parsed, inspection);
+  assert.match(parsed.excluded_fields.join("\n"), /source code/);
 });

@@ -2,7 +2,12 @@
 
 import { Command } from "commander";
 import { ZodError } from "zod";
-import { formatContributionPreview, formatLocalInspection } from "./inspect.js";
+import {
+  formatContributionPreview,
+  formatContributionPreviewJson,
+  formatLocalInspection,
+  formatLocalInspectionJson,
+} from "./inspect.js";
 import { calculateLocalReport, formatLocalReport, formatLocalReportJson } from "./report.js";
 import { deriveVerifiedSuccess, type LocalSession } from "./schema.js";
 import { openStore } from "./storage.js";
@@ -55,6 +60,7 @@ type ReportOptions = StoreOptions & {
 
 type InspectOptions = StoreOptions & {
   contribution?: boolean;
+  json?: boolean;
 };
 
 program
@@ -209,6 +215,7 @@ program
   .argument("<session-id>", "local session ID to inspect")
   .option("--contribution", "preview a sanitized contribution payload")
   .option("--db-path <path>", "override local database path")
+  .option("--json", "output the inspection as JSON")
   .action((sessionId: string, options: InspectOptions) => {
     let store;
     try {
@@ -221,11 +228,15 @@ program
         return;
       }
 
-      console.log(
-        options.contribution
-          ? formatContributionPreview(session)
-          : formatLocalInspection(session),
-      );
+      const output = options.contribution
+        ? options.json
+          ? formatContributionPreviewJson(session)
+          : `${formatContributionPreview(session)}\n`
+        : options.json
+          ? formatLocalInspectionJson(session)
+          : `${formatLocalInspection(session)}\n`;
+
+      process.stdout.write(output);
     } catch (error) {
       process.exitCode = 1;
       console.error(formatCliError(error));

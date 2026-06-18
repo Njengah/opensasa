@@ -170,6 +170,7 @@ test("prints sessions help", async () => {
 
   assert.match(stdout, /List local AI coding sessions/);
   assert.match(stdout, /--db-path/);
+  assert.match(stdout, /--json/);
 });
 
 test("prints a clear sessions empty state", async () => {
@@ -242,6 +243,80 @@ test("lists saved sessions with safe summary fields sorted newest first", async 
   assert.ok(olderIndex > -1);
   assert.ok(newerIndex < olderIndex);
   assert.doesNotMatch(stdout, /TypeScript/);
+});
+
+test("prints empty sessions as JSON", async () => {
+  const dbPath = join(tmpRoot, "empty-sessions-json.db");
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "sessions",
+    "--json",
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.deepEqual(JSON.parse(stdout), []);
+});
+
+test("lists saved sessions as safe JSON summaries sorted newest first", async () => {
+  const dbPath = join(tmpRoot, "list-sessions-json.db");
+  const store = openStore(dbPath);
+  let older;
+  let newer;
+
+  try {
+    older = store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      estimated_cost_usd: 0.25,
+      language: "TypeScript",
+    });
+    newer = store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "claude-sonnet-4.5",
+      task_type: "feature",
+      final_outcome: "unknown",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "sessions",
+    "--json",
+    "--db-path",
+    dbPath,
+  ]);
+  const sessions = JSON.parse(stdout);
+
+  assert.equal(sessions.length, 2);
+  assert.equal(sessions[0].id, newer.session_id);
+  assert.equal(sessions[1].id, older.session_id);
+  assert.deepEqual(Object.keys(sessions[0]), [
+    "id",
+    "timestamp",
+    "provider",
+    "model",
+    "task",
+    "outcome",
+    "verified",
+    "cost",
+  ]);
+  assert.equal(sessions[1].provider, "OpenAI");
+  assert.equal(sessions[1].model, "gpt-5");
+  assert.equal(sessions[1].task, "bug_fix");
+  assert.equal(sessions[1].outcome, "accepted");
+  assert.equal(sessions[1].verified, "yes");
+  assert.equal(sessions[1].cost, "$0.2500");
+  assert.equal(Object.hasOwn(sessions[1], "language"), false);
 });
 
 test("prints report help", async () => {

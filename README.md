@@ -169,6 +169,12 @@ node ./dist/index.js log \
 node ./dist/index.js sessions
 ```
 
+Use JSON output for scripting:
+
+```bash
+node ./dist/index.js sessions --json
+```
+
 The list output shows:
 
 - session ID,
@@ -251,6 +257,7 @@ The MVP does not include:
 - automatic imports from AI coding tools,
 - editing existing sessions,
 - filtering or pagination,
+- JSON output for `log` and `inspect`,
 - contribution submission.
 
 Bucket thresholds and report formatting are early implementation defaults and

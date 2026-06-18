@@ -312,6 +312,10 @@ Scoring should work from safe metadata only. It should not require:
 - or private local notes.
 
 When exact values could expose sensitive context, public payloads should use buckets.
+The first local MVP bucket ranges for generated token, cost, duration, retry,
+and error fields are defined in `docs/METADATA_SCHEMA.md`. These ranges should
+be versioned before any public contribution or aggregate scoring depends on
+them.
 
 ## Open Questions
 

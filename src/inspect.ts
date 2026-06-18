@@ -22,6 +22,11 @@ const excludedContributionFields = [
   "personally identifying information",
 ] as const;
 
+type LocalInspection = {
+  local_record: Record<string, unknown>;
+  privacy_boundary: string[];
+};
+
 type ContributionPreview = {
   schema_version: string;
   contribution_id: string;
@@ -54,40 +59,83 @@ type ContributionPreview = {
   data_source: string;
 };
 
+type ContributionPreviewInspection = {
+  status: "preview only";
+  consent: "not granted";
+  upload_enabled: false;
+  destination: "none";
+  no_upload_notice: string;
+  included_fields: ContributionPreview;
+  excluded_fields: string[];
+};
+
 export function formatLocalInspection(session: LocalSession): string {
+  const inspection = buildLocalInspection(session);
+
   return [
     "OpenSasa Session Inspection",
     "",
     "Local record:",
-    ...formatObject(localInspectionFields(session)),
+    ...formatObject(inspection.local_record),
     "",
     "Privacy boundary:",
-    "- No source code stored.",
-    "- No private prompts stored.",
-    "- No model responses stored.",
-    "- No exact file paths stored.",
-    "- No raw terminal output stored.",
+    ...inspection.privacy_boundary.map((item) => `- ${item}`),
   ].join("\n");
 }
 
 export function formatContributionPreview(session: LocalSession): string {
-  const preview = buildContributionPreview(session);
+  const preview = buildContributionPreviewInspection(session);
 
   return [
     "OpenSasa Contribution Preview",
     "",
-    "Status: preview only",
-    "Consent: not granted",
-    "Upload enabled: no",
-    "Destination: none",
-    "No upload will occur in this MVP.",
+    `Status: ${preview.status}`,
+    `Consent: ${preview.consent}`,
+    `Upload enabled: ${preview.upload_enabled ? "yes" : "no"}`,
+    `Destination: ${preview.destination}`,
+    preview.no_upload_notice,
     "",
     "Included fields:",
-    ...formatObject(preview),
+    ...formatObject(preview.included_fields),
     "",
     "Excluded fields:",
-    ...excludedContributionFields.map((field) => `- ${field}`),
+    ...preview.excluded_fields.map((field) => `- ${field}`),
   ].join("\n");
+}
+
+export function formatLocalInspectionJson(session: LocalSession): string {
+  return `${JSON.stringify(buildLocalInspection(session), null, 2)}\n`;
+}
+
+export function formatContributionPreviewJson(session: LocalSession): string {
+  return `${JSON.stringify(buildContributionPreviewInspection(session), null, 2)}\n`;
+}
+
+export function buildLocalInspection(session: LocalSession): LocalInspection {
+  return {
+    local_record: localInspectionFields(session),
+    privacy_boundary: [
+      "No source code stored.",
+      "No private prompts stored.",
+      "No model responses stored.",
+      "No exact file paths stored.",
+      "No raw terminal output stored.",
+    ],
+  };
+}
+
+export function buildContributionPreviewInspection(
+  session: LocalSession,
+): ContributionPreviewInspection {
+  return {
+    status: "preview only",
+    consent: "not granted",
+    upload_enabled: false,
+    destination: "none",
+    no_upload_notice: "No upload will occur in this MVP.",
+    included_fields: buildContributionPreview(session),
+    excluded_fields: [...excludedContributionFields],
+  };
 }
 
 export function buildContributionPreview(session: LocalSession): ContributionPreview {

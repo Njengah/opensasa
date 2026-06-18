@@ -221,12 +221,24 @@ Unknown or missing data is labeled directly.
 node ./dist/index.js inspect <session-id>
 ```
 
+Use JSON output for scripting:
+
+```bash
+node ./dist/index.js inspect <session-id> --json
+```
+
 This shows the local record for one session and repeats the privacy boundary.
 
 ### Preview A Contribution Payload
 
 ```bash
 node ./dist/index.js inspect <session-id> --contribution
+```
+
+Use JSON output for scripting:
+
+```bash
+node ./dist/index.js inspect <session-id> --contribution --json
 ```
 
 This generates a local preview of what a future contribution payload could
@@ -257,7 +269,7 @@ The MVP does not include:
 - automatic imports from AI coding tools,
 - editing existing sessions,
 - filtering or pagination,
-- JSON output for `log` and `inspect`,
+- JSON output for `log`,
 - contribution submission.
 
 Bucket thresholds and report formatting are early implementation defaults and

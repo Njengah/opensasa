@@ -468,6 +468,7 @@ test("prints inspect help", async () => {
   assert.match(stdout, /Inspect a local session or contribution preview/);
   assert.match(stdout, /--contribution/);
   assert.match(stdout, /--db-path/);
+  assert.match(stdout, /--json/);
 });
 
 test("inspects a local session record", async () => {
@@ -505,6 +506,43 @@ test("inspects a local session record", async () => {
   assert.match(stdout, /estimated_cost_usd: 0.5/);
   assert.match(stdout, /verified_success: true/);
   assert.match(stdout, /No source code stored/);
+});
+
+test("inspects a local session record as JSON", async () => {
+  const dbPath = join(tmpRoot, "inspect-json.db");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      estimated_cost_usd: 0.5,
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "inspect",
+    session.session_id,
+    "--json",
+    "--db-path",
+    dbPath,
+  ]);
+  const inspection = JSON.parse(stdout);
+
+  assert.equal(inspection.local_record.session_id, session.session_id);
+  assert.equal(inspection.local_record.provider, "OpenAI");
+  assert.equal(inspection.local_record.estimated_cost_usd, 0.5);
+  assert.equal(inspection.local_record.verified_success, true);
+  assert.match(inspection.privacy_boundary.join("\n"), /No source code stored/);
 });
 
 test("previews a sanitized contribution payload without upload", async () => {
@@ -550,6 +588,51 @@ test("previews a sanitized contribution payload without upload", async () => {
   assert.doesNotMatch(stdout, new RegExp(`session_id: ${session.session_id}`));
   assert.doesNotMatch(stdout, /timestamp: 2026-06-09T12:34:56.000Z/);
   assert.doesNotMatch(stdout, /estimated_cost_usd: 0.5/);
+});
+
+test("previews a sanitized contribution payload as JSON without upload", async () => {
+  const dbPath = join(tmpRoot, "contribution-preview-json.db");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:34:56.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      input_tokens_estimate: 1200,
+      estimated_cost_usd: 0.5,
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "inspect",
+    session.session_id,
+    "--contribution",
+    "--json",
+    "--db-path",
+    dbPath,
+  ]);
+  const preview = JSON.parse(stdout);
+
+  assert.equal(preview.status, "preview only");
+  assert.equal(preview.consent, "not granted");
+  assert.equal(preview.upload_enabled, false);
+  assert.equal(preview.destination, "none");
+  assert.equal(preview.included_fields.timestamp_bucket, "2026-06-09");
+  assert.equal(preview.included_fields.input_tokens_bucket, "large");
+  assert.equal(preview.included_fields.estimated_cost_bucket, "under_1_usd");
+  assert.equal(Object.hasOwn(preview.included_fields, "session_id"), false);
+  assert.equal(Object.hasOwn(preview.included_fields, "timestamp"), false);
+  assert.equal(Object.hasOwn(preview.included_fields, "estimated_cost_usd"), false);
+  assert.match(preview.excluded_fields.join("\n"), /terminal output/);
 });
 
 test("returns an error when inspecting a missing session", async () => {

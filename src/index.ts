@@ -45,6 +45,10 @@ type StoreOptions = {
   dbPath?: string;
 };
 
+type SessionsOptions = StoreOptions & {
+  json?: boolean;
+};
+
 type ReportOptions = StoreOptions & {
   json?: boolean;
 };
@@ -154,11 +158,17 @@ program
   .command("sessions")
   .description("List local AI coding sessions.")
   .option("--db-path <path>", "override local database path")
-  .action((options: StoreOptions) => {
+  .option("--json", "output sessions as JSON")
+  .action((options: SessionsOptions) => {
     let store;
     try {
       store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
       const sessions = store.listSessions();
+
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify(sessions.map(sessionSummary), null, 2)}\n`);
+        return;
+      }
 
       if (sessions.length === 0) {
         console.log("No local sessions found.");
@@ -259,16 +269,7 @@ function formatCliError(error: unknown): string {
 }
 
 function formatSessions(sessions: LocalSession[]): string {
-  const rows = sessions.map((session) => ({
-    id: session.session_id ?? "",
-    timestamp: session.timestamp,
-    provider: session.provider,
-    model: session.model_id,
-    task: session.task_type,
-    outcome: session.final_outcome,
-    verified: formatVerifiedSuccess(session),
-    cost: formatEstimatedCost(session.estimated_cost_usd),
-  }));
+  const rows = sessions.map(sessionSummary);
   const headers = {
     id: "Session ID",
     timestamp: "Timestamp",
@@ -306,6 +307,19 @@ function formatSessions(sessions: LocalSession[]): string {
     ),
     ...rows.map((row) => formatSessionRow(row, widths)),
   ].join("\n");
+}
+
+function sessionSummary(session: LocalSession): Record<"id" | "timestamp" | "provider" | "model" | "task" | "outcome" | "verified" | "cost", string> {
+  return {
+    id: session.session_id ?? "",
+    timestamp: session.timestamp,
+    provider: session.provider,
+    model: session.model_id,
+    task: session.task_type,
+    outcome: session.final_outcome,
+    verified: formatVerifiedSuccess(session),
+    cost: formatEstimatedCost(session.estimated_cost_usd),
+  };
 }
 
 function formatSessionRow(

@@ -3,7 +3,7 @@
 import { Command } from "commander";
 import { ZodError } from "zod";
 import { formatContributionPreview, formatLocalInspection } from "./inspect.js";
-import { calculateLocalReport, formatLocalReport } from "./report.js";
+import { calculateLocalReport, formatLocalReport, formatLocalReportJson } from "./report.js";
 import { deriveVerifiedSuccess, type LocalSession } from "./schema.js";
 import { openStore } from "./storage.js";
 
@@ -43,6 +43,10 @@ type LogOptions = {
 
 type StoreOptions = {
   dbPath?: string;
+};
+
+type ReportOptions = StoreOptions & {
+  json?: boolean;
 };
 
 type InspectOptions = StoreOptions & {
@@ -174,12 +178,13 @@ program
   .command("report")
   .description("Generate a local personal report.")
   .option("--db-path <path>", "override local database path")
-  .action((options: StoreOptions) => {
+  .option("--json", "output the report as JSON")
+  .action((options: ReportOptions) => {
     let store;
     try {
       store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
       const report = calculateLocalReport(store.listSessions());
-      console.log(formatLocalReport(report));
+      process.stdout.write(options.json ? formatLocalReportJson(report) : `${formatLocalReport(report)}\n`);
     } catch (error) {
       process.exitCode = 1;
       console.error(formatCliError(error));

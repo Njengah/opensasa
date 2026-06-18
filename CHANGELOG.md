@@ -6,6 +6,7 @@ All notable changes to OpenSasa will be documented in this file.
 
 ### Added
 
+- `opensasa report --json` for script-friendly local report output.
 - CLI scaffold with `opensasa --help` and `opensasa --version`.
 - Local session metadata validation with Zod schemas and MVP enum values.
 - Local SQLite storage at `~/.opensasa/opensasa.db` with migration support.
@@ -31,7 +32,7 @@ All notable changes to OpenSasa will be documented in this file.
 
 ### Known Limitations
 
-- The CLI is text-only and does not yet provide JSON output.
+- Only `opensasa report` supports JSON output.
 - Sessions cannot be edited after logging.
 - Reports do not yet support filtering or pagination.
 - Contribution upload is not implemented.

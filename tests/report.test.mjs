@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { calculateLocalReport, formatLocalReport } from "../dist/report.js";
+import {
+  calculateLocalReport,
+  formatLocalReport,
+  formatLocalReportJson,
+} from "../dist/report.js";
 import { localSessionSchema } from "../dist/schema.js";
 
 const baseSession = {
@@ -136,4 +140,20 @@ test("formats a readable local report", () => {
   assert.match(output, /Estimated total cost: \$0\.5000/);
   assert.match(output, /Useful outcome rate: 100\.0% \(1\/1\)/);
   assert.match(output, /Verified success rate: 100\.0% \(1\/1\)/);
+});
+
+test("formats a local report as JSON", () => {
+  const report = calculateLocalReport([
+    session({
+      final_outcome: "accepted",
+      tests_outcome: "passed",
+      estimated_cost_usd: 0.5,
+    }),
+  ]);
+  const parsed = JSON.parse(formatLocalReportJson(report));
+
+  assert.equal(parsed.totalSessions, 1);
+  assert.equal(parsed.estimatedTotalCostUsd, 0.5);
+  assert.equal(parsed.usefulOutcomeRate.rate, 1);
+  assert.equal(parsed.verifiedSuccessRate.rate, 1);
 });

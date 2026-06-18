@@ -186,6 +186,12 @@ The list output shows:
 node ./dist/index.js report
 ```
 
+Use JSON output for scripting:
+
+```bash
+node ./dist/index.js report --json
+```
+
 The report is generated from local data only. It includes:
 
 - total sessions,
@@ -244,7 +250,6 @@ The MVP does not include:
 - team dashboard,
 - automatic imports from AI coding tools,
 - editing existing sessions,
-- JSON output,
 - filtering or pagination,
 - contribution submission.
 

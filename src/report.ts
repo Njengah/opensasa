@@ -107,6 +107,10 @@ export function formatLocalReport(report: LocalReport): string {
   ].join("\n");
 }
 
+export function formatLocalReportJson(report: LocalReport): string {
+  return `${JSON.stringify(report, null, 2)}\n`;
+}
+
 function countBy(sessions: LocalSession[], getKey: (session: LocalSession) => string): CountMap {
   return sessions.reduce<CountMap>((counts, session) => {
     const key = getKey(session);

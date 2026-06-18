@@ -172,7 +172,7 @@ Initial values:
 
 Exact values can expose sensitive context. Public contribution payloads should prefer buckets.
 
-Initial size buckets:
+Initial coarse size buckets for local manual entry:
 
 - `tiny`
 - `small`
@@ -181,7 +181,48 @@ Initial size buckets:
 - `very_large`
 - `unknown`
 
-Implementation docs should later define numeric ranges for each bucket.
+For user-provided repository, file, changed file, and line-change buckets,
+OpenSasa stores the label selected by the user. Numeric project-size thresholds
+are intentionally not inferred by the CLI yet.
+
+Initial generated count buckets for token, retry, and error estimates:
+
+| Bucket | Range |
+| --- | --- |
+| `unknown` | missing value |
+| `zero` | `0` |
+| `tiny` | `1-10` |
+| `small` | `11-100` |
+| `medium` | `101-1,000` |
+| `large` | `1,001-10,000` |
+| `very_large` | `10,001+` |
+
+Initial generated duration buckets:
+
+| Bucket | Range |
+| --- | --- |
+| `unknown` | missing value |
+| `under_1m` | `0-60` seconds |
+| `1m_to_5m` | `61-300` seconds |
+| `5m_to_30m` | `301-1,800` seconds |
+| `30m_to_2h` | `1,801-7,200` seconds |
+| `over_2h` | `7,201+` seconds |
+
+Initial generated cost buckets:
+
+| Bucket | Range |
+| --- | --- |
+| `unknown` | missing value |
+| `free` | exactly `$0` |
+| `under_1_cent` | greater than `$0` and less than `$0.01` |
+| `under_10_cents` | `$0.01` to less than `$0.10` |
+| `under_1_usd` | `$0.10` to less than `$1.00` |
+| `under_10_usd` | `$1.00` to less than `$10.00` |
+| `over_10_usd` | `$10.00+` |
+
+These first ranges are implementation defaults for the local MVP. Future
+methodology revisions may version bucket definitions before public contribution
+or public aggregate views rely on them.
 
 ## Contribution Payload
 
@@ -269,7 +310,6 @@ Contribution validation should reject payloads containing excluded fields or raw
 
 ## Open Questions
 
-- What numeric ranges should define repo size, file count, changed file count, lines changed, token, cost, retry, and duration buckets?
 - Should timestamp buckets be daily, weekly, or monthly for public contribution?
 - How should cost be estimated when tools hide token usage?
 - Should model aliases normalize into canonical model IDs?

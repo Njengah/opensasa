@@ -10,6 +10,7 @@ All notable changes to OpenSasa will be documented in this file.
 - `opensasa sessions --json` for script-friendly local session summaries.
 - `opensasa inspect --json` and `opensasa inspect --contribution --json` for
   script-friendly inspection output.
+- `opensasa log --json` for script-friendly local session creation output.
 - CLI scaffold with `opensasa --help` and `opensasa --version`.
 - Local session metadata validation with Zod schemas and MVP enum values.
 - Local SQLite storage at `~/.opensasa/opensasa.db` with migration support.
@@ -35,7 +36,6 @@ All notable changes to OpenSasa will be documented in this file.
 
 ### Known Limitations
 
-- Only `opensasa log` does not support JSON output.
 - Sessions cannot be edited after logging.
 - Reports do not yet support filtering or pagination.
 - Contribution upload is not implemented.

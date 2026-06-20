@@ -127,6 +127,17 @@ node ./dist/index.js log \
 
 The command stores the record locally and prints the generated session ID.
 
+Use JSON output for scripting:
+
+```bash
+node ./dist/index.js log \
+  --json \
+  --provider OpenAI \
+  --model-id gpt-5 \
+  --task-type bug_fix \
+  --final-outcome accepted
+```
+
 Useful optional fields include:
 
 - `--timestamp`
@@ -269,7 +280,6 @@ The MVP does not include:
 - automatic imports from AI coding tools,
 - editing existing sessions,
 - filtering or pagination,
-- JSON output for `log`,
 - contribution submission.
 
 Bucket thresholds and report formatting are early implementation defaults and

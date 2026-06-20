@@ -37,6 +37,7 @@ test("prints log help with manual session options", async () => {
   assert.match(stdout, /--model-id/);
   assert.match(stdout, /--task-type/);
   assert.match(stdout, /--final-outcome/);
+  assert.match(stdout, /--json/);
   assert.doesNotMatch(stdout, /prompt/i);
   assert.doesNotMatch(stdout, /source-code/i);
 });
@@ -74,6 +75,52 @@ test("logs a valid manual session to the local database", async () => {
     assert.equal(session.final_outcome, "accepted");
     assert.equal(session.work_mode, "manual_log");
     assert.equal(session.tests_outcome, "passed");
+  } finally {
+    store.close();
+  }
+});
+
+test("logs a valid manual session as JSON", async () => {
+  const dbPath = join(tmpRoot, "valid-log-json.db");
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "log",
+    "--json",
+    "--db-path",
+    dbPath,
+    "--provider",
+    "OpenAI",
+    "--model-id",
+    "gpt-5",
+    "--task-type",
+    "bug_fix",
+    "--final-outcome",
+    "accepted",
+    "--timestamp",
+    "2026-06-09T12:00:00.000Z",
+    "--tests-outcome",
+    "passed",
+    "--estimated-cost-usd",
+    "0.25",
+  ]);
+  const payload = JSON.parse(stdout);
+  const store = openStore(dbPath);
+
+  try {
+    const session = store.getSession(payload.session.session_id);
+
+    assert.equal(payload.status, "logged");
+    assert.match(payload.session.session_id, /^[0-9a-f-]{36}$/);
+    assert.equal(payload.session.provider, "OpenAI");
+    assert.equal(payload.session.model_id, "gpt-5");
+    assert.equal(payload.session.task_type, "bug_fix");
+    assert.equal(payload.session.final_outcome, "accepted");
+    assert.equal(payload.session.work_mode, "manual_log");
+    assert.equal(payload.session.tests_outcome, "passed");
+    assert.equal(payload.session.estimated_cost_usd, 0.25);
+    assert.deepEqual(session, payload.session);
+    assert.equal(Object.hasOwn(payload.session, "prompt"), false);
+    assert.equal(Object.hasOwn(payload.session, "source_code"), false);
   } finally {
     store.close();
   }

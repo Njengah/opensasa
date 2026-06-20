@@ -54,6 +54,10 @@ type StoreOptions = {
 type SessionsOptions = StoreOptions & {
   json?: boolean;
   limit?: number;
+  provider?: string;
+  modelId?: string;
+  taskType?: string;
+  finalOutcome?: string;
 };
 
 type ReportOptions = StoreOptions & {
@@ -173,12 +177,22 @@ program
   .description("List local AI coding sessions.")
   .option("--db-path <path>", "override local database path")
   .option("--limit <count>", "maximum number of sessions to list", parsePositiveInteger)
+  .option("--provider <provider>", "filter sessions by provider")
+  .option("--model-id <model-id>", "filter sessions by model ID")
+  .option("--task-type <task-type>", "filter sessions by task type")
+  .option("--final-outcome <final-outcome>", "filter sessions by final outcome")
   .option("--json", "output sessions as JSON")
   .action((options: SessionsOptions) => {
     let store;
     try {
       store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
-      const sessions = store.listSessions({ limit: options.limit });
+      const sessions = store.listSessions({
+        limit: options.limit,
+        provider: options.provider,
+        modelId: options.modelId,
+        taskType: options.taskType,
+        finalOutcome: options.finalOutcome,
+      });
 
       if (options.json) {
         process.stdout.write(`${JSON.stringify(sessions.map(sessionSummary), null, 2)}\n`);

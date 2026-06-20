@@ -54,6 +54,10 @@ type SessionColumn = (typeof sessionColumns)[number];
 type SessionRow = Record<SessionColumn, unknown>;
 type ListSessionsOptions = {
   limit?: number;
+  provider?: string;
+  modelId?: string;
+  taskType?: string;
+  finalOutcome?: string;
 };
 
 export function getDefaultDatabasePath(): string {
@@ -104,14 +108,40 @@ export class OpenSasaStore {
   }
 
   listSessions(options: ListSessionsOptions = {}): LocalSession[] {
-    const rows =
-      options.limit === undefined
-        ? (this.database
-            .prepare("SELECT * FROM sessions ORDER BY timestamp DESC, session_id DESC")
-            .all() as SessionRow[])
-        : (this.database
-            .prepare("SELECT * FROM sessions ORDER BY timestamp DESC, session_id DESC LIMIT ?")
-            .all(options.limit) as SessionRow[]);
+    const filters: string[] = [];
+    const parameters: Record<string, string | number> = {};
+
+    if (options.provider !== undefined) {
+      filters.push("provider = @provider");
+      parameters.provider = options.provider;
+    }
+
+    if (options.modelId !== undefined) {
+      filters.push("model_id = @modelId");
+      parameters.modelId = options.modelId;
+    }
+
+    if (options.taskType !== undefined) {
+      filters.push("task_type = @taskType");
+      parameters.taskType = options.taskType;
+    }
+
+    if (options.finalOutcome !== undefined) {
+      filters.push("final_outcome = @finalOutcome");
+      parameters.finalOutcome = options.finalOutcome;
+    }
+
+    if (options.limit !== undefined) {
+      parameters.limit = options.limit;
+    }
+
+    const whereClause = filters.length > 0 ? ` WHERE ${filters.join(" AND ")}` : "";
+    const limitClause = options.limit === undefined ? "" : " LIMIT @limit";
+    const rows = this.database
+      .prepare(
+        `SELECT * FROM sessions${whereClause} ORDER BY timestamp DESC, session_id DESC${limitClause}`,
+      )
+      .all(parameters) as SessionRow[];
 
     return rows.map(parseSessionRow);
   }

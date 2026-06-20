@@ -218,6 +218,10 @@ test("prints sessions help", async () => {
   assert.match(stdout, /List local AI coding sessions/);
   assert.match(stdout, /--db-path/);
   assert.match(stdout, /--limit/);
+  assert.match(stdout, /--provider/);
+  assert.match(stdout, /--model-id/);
+  assert.match(stdout, /--task-type/);
+  assert.match(stdout, /--final-outcome/);
   assert.match(stdout, /--json/);
 });
 
@@ -362,6 +366,91 @@ test("limits saved sessions in text output", async () => {
   assert.doesNotMatch(stdout, new RegExp(oldest.session_id));
 });
 
+test("filters saved sessions in text output", async () => {
+  const dbPath = join(tmpRoot, "filter-sessions.db");
+  const store = openStore(dbPath);
+  let matching;
+  let differentProvider;
+  let differentTask;
+
+  try {
+    matching = store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+    differentProvider = store.createSession({
+      timestamp: "2026-06-11T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "claude-sonnet-4.5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+    differentTask = store.createSession({
+      timestamp: "2026-06-12T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "documentation",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "sessions",
+    "--provider",
+    "OpenAI",
+    "--model-id",
+    "gpt-5",
+    "--task-type",
+    "bug_fix",
+    "--final-outcome",
+    "accepted",
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.match(stdout, new RegExp(matching.session_id));
+  assert.doesNotMatch(stdout, new RegExp(differentProvider.session_id));
+  assert.doesNotMatch(stdout, new RegExp(differentTask.session_id));
+});
+
+test("prints the sessions empty state when filters match nothing", async () => {
+  const dbPath = join(tmpRoot, "filter-sessions-empty.db");
+  const store = openStore(dbPath);
+
+  try {
+    store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "sessions",
+    "--provider",
+    "Anthropic",
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.equal(stdout.trim(), "No local sessions found.");
+});
+
 test("prints empty sessions as JSON", async () => {
   const dbPath = join(tmpRoot, "empty-sessions-json.db");
   const { stdout } = await execFileAsync("node", [
@@ -475,6 +564,59 @@ test("limits saved sessions in JSON output", async () => {
 
   assert.equal(sessions.length, 1);
   assert.equal(sessions[0].id, newest.session_id);
+});
+
+test("filters saved sessions in JSON output", async () => {
+  const dbPath = join(tmpRoot, "filter-sessions-json.db");
+  const store = openStore(dbPath);
+  let matching;
+
+  try {
+    store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "feature",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+    matching = store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+    store.createSession({
+      timestamp: "2026-06-11T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "claude-sonnet-4.5",
+      task_type: "bug_fix",
+      final_outcome: "rejected",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "sessions",
+    "--json",
+    "--provider",
+    "OpenAI",
+    "--task-type",
+    "bug_fix",
+    "--db-path",
+    dbPath,
+  ]);
+  const sessions = JSON.parse(stdout);
+
+  assert.equal(sessions.length, 1);
+  assert.equal(sessions[0].id, matching.session_id);
+  assert.equal(sessions[0].provider, "OpenAI");
+  assert.equal(sessions[0].task, "bug_fix");
 });
 
 test("prints report help", async () => {

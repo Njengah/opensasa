@@ -225,6 +225,16 @@ Use JSON output for scripting:
 node ./dist/index.js report --json
 ```
 
+Filter the report by safe metadata fields:
+
+```bash
+node ./dist/index.js report \
+  --provider OpenAI \
+  --model-id gpt-5 \
+  --task-type bug_fix \
+  --final-outcome accepted
+```
+
 The report is generated from local data only. It includes:
 
 - total sessions,

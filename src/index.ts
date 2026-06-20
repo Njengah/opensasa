@@ -62,6 +62,10 @@ type SessionsOptions = StoreOptions & {
 
 type ReportOptions = StoreOptions & {
   json?: boolean;
+  provider?: string;
+  modelId?: string;
+  taskType?: string;
+  finalOutcome?: string;
 };
 
 type InspectOptions = StoreOptions & {
@@ -217,12 +221,22 @@ program
   .command("report")
   .description("Generate a local personal report.")
   .option("--db-path <path>", "override local database path")
+  .option("--provider <provider>", "filter report by provider")
+  .option("--model-id <model-id>", "filter report by model ID")
+  .option("--task-type <task-type>", "filter report by task type")
+  .option("--final-outcome <final-outcome>", "filter report by final outcome")
   .option("--json", "output the report as JSON")
   .action((options: ReportOptions) => {
     let store;
     try {
       store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
-      const report = calculateLocalReport(store.listSessions());
+      const sessions = store.listSessions({
+        provider: options.provider,
+        modelId: options.modelId,
+        taskType: options.taskType,
+        finalOutcome: options.finalOutcome,
+      });
+      const report = calculateLocalReport(sessions);
       process.stdout.write(options.json ? formatLocalReportJson(report) : `${formatLocalReport(report)}\n`);
     } catch (error) {
       process.exitCode = 1;

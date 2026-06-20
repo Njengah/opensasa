@@ -624,6 +624,10 @@ test("prints report help", async () => {
 
   assert.match(stdout, /Generate a local personal report/);
   assert.match(stdout, /--db-path/);
+  assert.match(stdout, /--provider/);
+  assert.match(stdout, /--model-id/);
+  assert.match(stdout, /--task-type/);
+  assert.match(stdout, /--final-outcome/);
   assert.match(stdout, /--json/);
 });
 
@@ -696,6 +700,73 @@ test("prints a local report from saved sessions", async () => {
   assert.doesNotMatch(stdout, /TypeScript/);
 });
 
+test("prints a filtered local report from saved sessions", async () => {
+  const dbPath = join(tmpRoot, "report-filtered.db");
+  const store = openStore(dbPath);
+
+  try {
+    store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      retry_count: 1,
+      estimated_cost_usd: 0.5,
+    });
+    store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "claude-sonnet-4.5",
+      task_type: "feature",
+      final_outcome: "rejected",
+      work_mode: "manual_log",
+      tests_outcome: "failed",
+      retry_count: 2,
+      estimated_cost_usd: 1,
+    });
+    store.createSession({
+      timestamp: "2026-06-11T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "documentation",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      retry_count: 3,
+      estimated_cost_usd: 2,
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "report",
+    "--provider",
+    "OpenAI",
+    "--model-id",
+    "gpt-5",
+    "--task-type",
+    "bug_fix",
+    "--final-outcome",
+    "accepted",
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.match(stdout, /Total sessions: 1/);
+  assert.match(stdout, /OpenAI\/gpt-5: 1/);
+  assert.match(stdout, /bug_fix: 1/);
+  assert.match(stdout, /Accepted or partially accepted: 1/);
+  assert.match(stdout, /Estimated total cost: \$0\.5000/);
+  assert.match(stdout, /Retry burden: 1\.00/);
+  assert.doesNotMatch(stdout, /Anthropic\/claude-sonnet-4\.5/);
+  assert.doesNotMatch(stdout, /documentation: 1/);
+});
+
 test("prints an empty local report as JSON", async () => {
   const dbPath = join(tmpRoot, "empty-report-json.db");
   const { stdout } = await execFileAsync("node", [
@@ -760,6 +831,58 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.retrySummary.retryBurden, 1);
   assert.equal(report.usefulOutcomeRate.rate, 0.5);
   assert.equal(report.verifiedSuccessRate.rate, 0.5);
+});
+
+test("prints a filtered local report as JSON", async () => {
+  const dbPath = join(tmpRoot, "report-filtered-json.db");
+  const store = openStore(dbPath);
+
+  try {
+    store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      retry_count: 1,
+      estimated_cost_usd: 0.5,
+    });
+    store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "claude-sonnet-4.5",
+      task_type: "bug_fix",
+      final_outcome: "rejected",
+      work_mode: "manual_log",
+      tests_outcome: "failed",
+      retry_count: 2,
+      estimated_cost_usd: 1,
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "report",
+    "--json",
+    "--provider",
+    "OpenAI",
+    "--task-type",
+    "bug_fix",
+    "--db-path",
+    dbPath,
+  ]);
+  const report = JSON.parse(stdout);
+
+  assert.equal(report.totalSessions, 1);
+  assert.deepEqual(report.sessionsByModel, { "OpenAI/gpt-5": 1 });
+  assert.deepEqual(report.sessionsByTaskType, { bug_fix: 1 });
+  assert.equal(report.estimatedTotalCostUsd, 0.5);
+  assert.equal(report.usefulOutcomeRate.rate, 1);
+  assert.equal(report.verifiedSuccessRate.rate, 1);
 });
 
 test("prints inspect help", async () => {

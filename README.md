@@ -192,6 +192,16 @@ Limit the list to the newest sessions:
 node ./dist/index.js sessions --limit 10
 ```
 
+Filter the list by safe metadata fields:
+
+```bash
+node ./dist/index.js sessions \
+  --provider OpenAI \
+  --model-id gpt-5 \
+  --task-type bug_fix \
+  --final-outcome accepted
+```
+
 The list output shows:
 
 - session ID,
@@ -285,7 +295,6 @@ The MVP does not include:
 - team dashboard,
 - automatic imports from AI coding tools,
 - editing existing sessions,
-- filtering sessions,
 - report pagination,
 - contribution submission.
 

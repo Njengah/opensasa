@@ -138,6 +138,51 @@ test("limits listed sessions after newest-first sorting", () => {
   }
 });
 
+test("filters listed sessions by safe metadata fields", () => {
+  const store = openStore(join(tmpRoot, "list-filters.db"));
+
+  try {
+    const matching = store.createSession({
+      ...baseSession,
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+    });
+    store.createSession({
+      ...baseSession,
+      timestamp: "2026-06-11T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "documentation",
+      final_outcome: "accepted",
+    });
+    store.createSession({
+      ...baseSession,
+      timestamp: "2026-06-12T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "claude-sonnet-4.5",
+      task_type: "bug_fix",
+      final_outcome: "rejected",
+    });
+
+    assert.deepEqual(
+      store
+        .listSessions({
+          provider: "OpenAI",
+          modelId: "gpt-5",
+          taskType: "bug_fix",
+          finalOutcome: "accepted",
+        })
+        .map((session) => session.session_id),
+      [matching.session_id],
+    );
+  } finally {
+    store.close();
+  }
+});
+
 test("rejects invalid sessions before writing", () => {
   const store = openStore(join(tmpRoot, "invalid.db"));
 

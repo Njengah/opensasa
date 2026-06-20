@@ -44,6 +44,7 @@ type LogOptions = {
   typecheckOutcome?: string;
   manualReviewOutcome?: string;
   dbPath?: string;
+  json?: boolean;
 };
 
 type StoreOptions = {
@@ -116,6 +117,7 @@ program
   .option("--typecheck-outcome <outcome>", "typecheck verification outcome")
   .option("--manual-review-outcome <outcome>", "manual review outcome")
   .option("--db-path <path>", "override local database path")
+  .option("--json", "output the logged session as JSON")
   .action((options: LogOptions) => {
     let store;
     try {
@@ -150,6 +152,11 @@ program
         typecheck_outcome: options.typecheckOutcome,
         manual_review_outcome: options.manualReviewOutcome,
       });
+
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify({ status: "logged", session }, null, 2)}\n`);
+        return;
+      }
 
       console.log(`Logged session ${session.session_id}`);
     } catch (error) {

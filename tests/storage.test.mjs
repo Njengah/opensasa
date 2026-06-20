@@ -105,6 +105,39 @@ test("lists sessions by newest timestamp first", () => {
   }
 });
 
+test("limits listed sessions after newest-first sorting", () => {
+  const store = openStore(join(tmpRoot, "list-limit.db"));
+
+  try {
+    const oldest = store.createSession({
+      ...baseSession,
+      timestamp: "2026-06-08T12:00:00.000Z",
+      model_id: "oldest-model",
+    });
+    const middle = store.createSession({
+      ...baseSession,
+      timestamp: "2026-06-09T12:00:00.000Z",
+      model_id: "middle-model",
+    });
+    const newest = store.createSession({
+      ...baseSession,
+      timestamp: "2026-06-10T12:00:00.000Z",
+      model_id: "newest-model",
+    });
+
+    assert.deepEqual(
+      store.listSessions({ limit: 2 }).map((session) => session.session_id),
+      [newest.session_id, middle.session_id],
+    );
+    assert.equal(
+      store.listSessions({ limit: 2 }).some((session) => session.session_id === oldest.session_id),
+      false,
+    );
+  } finally {
+    store.close();
+  }
+});
+
 test("rejects invalid sessions before writing", () => {
   const store = openStore(join(tmpRoot, "invalid.db"));
 

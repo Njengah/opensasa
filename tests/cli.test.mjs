@@ -217,6 +217,7 @@ test("prints sessions help", async () => {
 
   assert.match(stdout, /List local AI coding sessions/);
   assert.match(stdout, /--db-path/);
+  assert.match(stdout, /--limit/);
   assert.match(stdout, /--json/);
 });
 
@@ -230,6 +231,25 @@ test("prints a clear sessions empty state", async () => {
   ]);
 
   assert.equal(stdout.trim(), "No local sessions found.");
+});
+
+test("rejects a non-positive sessions limit", async () => {
+  const dbPath = join(tmpRoot, "invalid-sessions-limit.db");
+
+  await assert.rejects(
+    execFileAsync("node", [
+      "./dist/index.js",
+      "sessions",
+      "--limit",
+      "0",
+      "--db-path",
+      dbPath,
+    ]),
+    (error) => {
+      assert.match(error.stderr, /Expected a positive integer/);
+      return true;
+    },
+  );
 });
 
 test("lists saved sessions with safe summary fields sorted newest first", async () => {
@@ -290,6 +310,56 @@ test("lists saved sessions with safe summary fields sorted newest first", async 
   assert.ok(olderIndex > -1);
   assert.ok(newerIndex < olderIndex);
   assert.doesNotMatch(stdout, /TypeScript/);
+});
+
+test("limits saved sessions in text output", async () => {
+  const dbPath = join(tmpRoot, "limit-sessions.db");
+  const store = openStore(dbPath);
+  let oldest;
+  let middle;
+  let newest;
+
+  try {
+    oldest = store.createSession({
+      timestamp: "2026-06-08T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "oldest-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+    middle = store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "middle-model",
+      task_type: "feature",
+      final_outcome: "unknown",
+      work_mode: "manual_log",
+    });
+    newest = store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "Google",
+      model_id: "newest-model",
+      task_type: "documentation",
+      final_outcome: "rejected",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "sessions",
+    "--limit",
+    "2",
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.match(stdout, new RegExp(newest.session_id));
+  assert.match(stdout, new RegExp(middle.session_id));
+  assert.doesNotMatch(stdout, new RegExp(oldest.session_id));
 });
 
 test("prints empty sessions as JSON", async () => {
@@ -364,6 +434,47 @@ test("lists saved sessions as safe JSON summaries sorted newest first", async ()
   assert.equal(sessions[1].verified, "yes");
   assert.equal(sessions[1].cost, "$0.2500");
   assert.equal(Object.hasOwn(sessions[1], "language"), false);
+});
+
+test("limits saved sessions in JSON output", async () => {
+  const dbPath = join(tmpRoot, "limit-sessions-json.db");
+  const store = openStore(dbPath);
+  let newest;
+
+  try {
+    store.createSession({
+      timestamp: "2026-06-08T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "oldest-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+    newest = store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "newest-model",
+      task_type: "feature",
+      final_outcome: "unknown",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "sessions",
+    "--json",
+    "--limit",
+    "1",
+    "--db-path",
+    dbPath,
+  ]);
+  const sessions = JSON.parse(stdout);
+
+  assert.equal(sessions.length, 1);
+  assert.equal(sessions[0].id, newest.session_id);
 });
 
 test("prints report help", async () => {

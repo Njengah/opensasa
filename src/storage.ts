@@ -52,6 +52,9 @@ const sessionColumns = [
 
 type SessionColumn = (typeof sessionColumns)[number];
 type SessionRow = Record<SessionColumn, unknown>;
+type ListSessionsOptions = {
+  limit?: number;
+};
 
 export function getDefaultDatabasePath(): string {
   return join(homedir(), ".opensasa", "opensasa.db");
@@ -100,10 +103,15 @@ export class OpenSasaStore {
     return row ? parseSessionRow(row) : null;
   }
 
-  listSessions(): LocalSession[] {
-    const rows = this.database
-      .prepare("SELECT * FROM sessions ORDER BY timestamp DESC, session_id DESC")
-      .all() as SessionRow[];
+  listSessions(options: ListSessionsOptions = {}): LocalSession[] {
+    const rows =
+      options.limit === undefined
+        ? (this.database
+            .prepare("SELECT * FROM sessions ORDER BY timestamp DESC, session_id DESC")
+            .all() as SessionRow[])
+        : (this.database
+            .prepare("SELECT * FROM sessions ORDER BY timestamp DESC, session_id DESC LIMIT ?")
+            .all(options.limit) as SessionRow[]);
 
     return rows.map(parseSessionRow);
   }

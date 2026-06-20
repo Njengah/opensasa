@@ -186,6 +186,12 @@ Use JSON output for scripting:
 node ./dist/index.js sessions --json
 ```
 
+Limit the list to the newest sessions:
+
+```bash
+node ./dist/index.js sessions --limit 10
+```
+
 The list output shows:
 
 - session ID,
@@ -279,7 +285,8 @@ The MVP does not include:
 - team dashboard,
 - automatic imports from AI coding tools,
 - editing existing sessions,
-- filtering or pagination,
+- filtering sessions,
+- report pagination,
 - contribution submission.
 
 Bucket thresholds and report formatting are early implementation defaults and

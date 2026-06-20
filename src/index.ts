@@ -53,6 +53,7 @@ type StoreOptions = {
 
 type SessionsOptions = StoreOptions & {
   json?: boolean;
+  limit?: number;
 };
 
 type ReportOptions = StoreOptions & {
@@ -171,12 +172,13 @@ program
   .command("sessions")
   .description("List local AI coding sessions.")
   .option("--db-path <path>", "override local database path")
+  .option("--limit <count>", "maximum number of sessions to list", parsePositiveInteger)
   .option("--json", "output sessions as JSON")
   .action((options: SessionsOptions) => {
     let store;
     try {
       store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
-      const sessions = store.listSessions();
+      const sessions = store.listSessions({ limit: options.limit });
 
       if (options.json) {
         process.stdout.write(`${JSON.stringify(sessions.map(sessionSummary), null, 2)}\n`);
@@ -270,6 +272,14 @@ function parseNonNegativeNumber(value: string): number {
   }
 
   return parsed;
+}
+
+function parsePositiveInteger(value: string): number {
+  if (!/^[1-9]\d*$/.test(value)) {
+    throw new Error("Expected a positive integer.");
+  }
+
+  return Number(value);
 }
 
 function formatCliError(error: unknown): string {

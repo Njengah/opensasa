@@ -62,6 +62,7 @@ type SessionsOptions = StoreOptions & {
 
 type ReportOptions = StoreOptions & {
   json?: boolean;
+  limit?: number;
   provider?: string;
   modelId?: string;
   taskType?: string;
@@ -221,6 +222,7 @@ program
   .command("report")
   .description("Generate a local personal report.")
   .option("--db-path <path>", "override local database path")
+  .option("--limit <count>", "calculate the report from the newest matching sessions", parsePositiveInteger)
   .option("--provider <provider>", "filter report by provider")
   .option("--model-id <model-id>", "filter report by model ID")
   .option("--task-type <task-type>", "filter report by task type")
@@ -231,6 +233,7 @@ program
     try {
       store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
       const sessions = store.listSessions({
+        limit: options.limit,
         provider: options.provider,
         modelId: options.modelId,
         taskType: options.taskType,

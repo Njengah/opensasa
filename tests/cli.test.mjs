@@ -624,6 +624,7 @@ test("prints report help", async () => {
 
   assert.match(stdout, /Generate a local personal report/);
   assert.match(stdout, /--db-path/);
+  assert.match(stdout, /--limit/);
   assert.match(stdout, /--provider/);
   assert.match(stdout, /--model-id/);
   assert.match(stdout, /--task-type/);
@@ -767,6 +768,64 @@ test("prints a filtered local report from saved sessions", async () => {
   assert.doesNotMatch(stdout, /documentation: 1/);
 });
 
+test("prints a limited local report from newest sessions", async () => {
+  const dbPath = join(tmpRoot, "report-limited.db");
+  const store = openStore(dbPath);
+
+  try {
+    store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "oldest-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      retry_count: 1,
+      estimated_cost_usd: 0.5,
+    });
+    store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "middle-model",
+      task_type: "feature",
+      final_outcome: "rejected",
+      work_mode: "manual_log",
+      tests_outcome: "failed",
+      retry_count: 2,
+      estimated_cost_usd: 1,
+    });
+    store.createSession({
+      timestamp: "2026-06-11T12:00:00.000Z",
+      provider: "Google",
+      model_id: "newest-model",
+      task_type: "documentation",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      retry_count: 3,
+      estimated_cost_usd: 2,
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "report",
+    "--limit",
+    "2",
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.match(stdout, /Total sessions: 2/);
+  assert.match(stdout, /Google\/newest-model: 1/);
+  assert.match(stdout, /Anthropic\/middle-model: 1/);
+  assert.match(stdout, /Estimated total cost: \$3\.0000/);
+  assert.doesNotMatch(stdout, /OpenAI\/oldest-model/);
+});
+
 test("prints an empty local report as JSON", async () => {
   const dbPath = join(tmpRoot, "empty-report-json.db");
   const { stdout } = await execFileAsync("node", [
@@ -883,6 +942,82 @@ test("prints a filtered local report as JSON", async () => {
   assert.equal(report.estimatedTotalCostUsd, 0.5);
   assert.equal(report.usefulOutcomeRate.rate, 1);
   assert.equal(report.verifiedSuccessRate.rate, 1);
+});
+
+test("prints a limited filtered local report as JSON", async () => {
+  const dbPath = join(tmpRoot, "report-limited-filtered-json.db");
+  const store = openStore(dbPath);
+
+  try {
+    store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "oldest-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      retry_count: 1,
+      estimated_cost_usd: 0.5,
+    });
+    store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "middle-model",
+      task_type: "bug_fix",
+      final_outcome: "rejected",
+      work_mode: "manual_log",
+      tests_outcome: "failed",
+      retry_count: 2,
+      estimated_cost_usd: 1,
+    });
+    store.createSession({
+      timestamp: "2026-06-11T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "newest-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      retry_count: 3,
+      estimated_cost_usd: 2,
+    });
+    store.createSession({
+      timestamp: "2026-06-12T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "excluded-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      retry_count: 4,
+      estimated_cost_usd: 4,
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "report",
+    "--json",
+    "--provider",
+    "OpenAI",
+    "--limit",
+    "2",
+    "--db-path",
+    dbPath,
+  ]);
+  const report = JSON.parse(stdout);
+
+  assert.equal(report.totalSessions, 2);
+  assert.deepEqual(report.sessionsByModel, {
+    "OpenAI/newest-model": 1,
+    "OpenAI/middle-model": 1,
+  });
+  assert.equal(report.estimatedTotalCostUsd, 3);
+  assert.equal(Object.hasOwn(report.sessionsByModel, "OpenAI/oldest-model"), false);
+  assert.equal(Object.hasOwn(report.sessionsByModel, "Anthropic/excluded-model"), false);
 });
 
 test("prints inspect help", async () => {

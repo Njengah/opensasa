@@ -225,6 +225,12 @@ Use JSON output for scripting:
 node ./dist/index.js report --json
 ```
 
+Limit the report to the newest sessions:
+
+```bash
+node ./dist/index.js report --limit 10
+```
+
 Filter the report by safe metadata fields:
 
 ```bash
@@ -305,7 +311,6 @@ The MVP does not include:
 - team dashboard,
 - automatic imports from AI coding tools,
 - editing existing sessions,
-- report pagination,
 - contribution submission.
 
 Bucket thresholds and report formatting are early implementation defaults and

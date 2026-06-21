@@ -19,6 +19,7 @@ test("prints help with planned MVP commands", async () => {
 
   assert.match(stdout, /opensasa/);
   assert.match(stdout, /log/);
+  assert.match(stdout, /update/);
   assert.match(stdout, /sessions/);
   assert.match(stdout, /report/);
   assert.match(stdout, /inspect/);
@@ -210,6 +211,163 @@ test("rejects invalid manual session metadata before writing", async () => {
   } finally {
     store.close();
   }
+});
+
+test("prints update help with safe session options", async () => {
+  const { stdout } = await execFileAsync("node", ["./dist/index.js", "update", "--help"]);
+
+  assert.match(stdout, /Update safe metadata/);
+  assert.match(stdout, /--provider/);
+  assert.match(stdout, /--model-id/);
+  assert.match(stdout, /--task-type/);
+  assert.match(stdout, /--final-outcome/);
+  assert.match(stdout, /--tests-outcome/);
+  assert.match(stdout, /--json/);
+  assert.doesNotMatch(stdout, /prompt/i);
+  assert.doesNotMatch(stdout, /source-code/i);
+});
+
+test("updates a local session with safe metadata", async () => {
+  const dbPath = join(tmpRoot, "update-session.db");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "unknown",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "update",
+    session.session_id,
+    "--db-path",
+    dbPath,
+    "--final-outcome",
+    "accepted",
+    "--tests-outcome",
+    "passed",
+    "--retry-count",
+    "2",
+    "--estimated-cost-usd",
+    "0.75",
+  ]);
+  const readStore = openStore(dbPath);
+
+  try {
+    const updated = readStore.getSession(session.session_id);
+
+    assert.equal(stdout.trim(), `Updated session ${session.session_id}`);
+    assert.equal(updated.session_id, session.session_id);
+    assert.equal(updated.provider, "OpenAI");
+    assert.equal(updated.final_outcome, "accepted");
+    assert.equal(updated.tests_outcome, "passed");
+    assert.equal(updated.retry_count, 2);
+    assert.equal(updated.estimated_cost_usd, 0.75);
+  } finally {
+    readStore.close();
+  }
+});
+
+test("updates a local session as JSON", async () => {
+  const dbPath = join(tmpRoot, "update-session-json.db");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "unknown",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "update",
+    session.session_id,
+    "--json",
+    "--db-path",
+    dbPath,
+    "--final-outcome",
+    "accepted",
+    "--tests-outcome",
+    "passed",
+  ]);
+  const payload = JSON.parse(stdout);
+
+  assert.equal(payload.status, "updated");
+  assert.equal(payload.session.session_id, session.session_id);
+  assert.equal(payload.session.final_outcome, "accepted");
+  assert.equal(payload.session.tests_outcome, "passed");
+  assert.equal(Object.hasOwn(payload.session, "prompt"), false);
+  assert.equal(Object.hasOwn(payload.session, "source_code"), false);
+});
+
+test("rejects an update with no fields", async () => {
+  const dbPath = join(tmpRoot, "update-session-no-fields.db");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "unknown",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  await assert.rejects(
+    execFileAsync("node", [
+      "./dist/index.js",
+      "update",
+      session.session_id,
+      "--db-path",
+      dbPath,
+    ]),
+    (error) => {
+      assert.match(error.stderr, /No update fields provided/);
+      return true;
+    },
+  );
+});
+
+test("returns an error when updating a missing session", async () => {
+  const dbPath = join(tmpRoot, "update-session-missing.db");
+
+  await assert.rejects(
+    execFileAsync("node", [
+      "./dist/index.js",
+      "update",
+      "missing-session",
+      "--final-outcome",
+      "accepted",
+      "--db-path",
+      dbPath,
+    ]),
+    (error) => {
+      assert.match(error.stderr, /Session not found: missing-session/);
+      return true;
+    },
+  );
 });
 
 test("prints sessions help", async () => {

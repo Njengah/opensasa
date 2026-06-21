@@ -81,6 +81,56 @@ test("persists sessions across store reopen", () => {
   }
 });
 
+test("updates a validated session while preserving its ID", () => {
+  const store = openStore(join(tmpRoot, "update.db"));
+
+  try {
+    const created = store.createSession(baseSession);
+    const updated = store.updateSession(created.session_id, {
+      final_outcome: "partially_accepted",
+      tests_outcome: "passed",
+      retry_count: 2,
+      estimated_cost_usd: 0.75,
+    });
+
+    assert.equal(updated.session_id, created.session_id);
+    assert.equal(updated.provider, "OpenAI");
+    assert.equal(updated.final_outcome, "partially_accepted");
+    assert.equal(updated.tests_outcome, "passed");
+    assert.equal(updated.retry_count, 2);
+    assert.equal(updated.estimated_cost_usd, 0.75);
+    assert.deepEqual(store.getSession(created.session_id), updated);
+  } finally {
+    store.close();
+  }
+});
+
+test("returns null when updating a missing session", () => {
+  const store = openStore(join(tmpRoot, "update-missing.db"));
+
+  try {
+    assert.equal(store.updateSession("missing-session", { final_outcome: "accepted" }), null);
+  } finally {
+    store.close();
+  }
+});
+
+test("rejects invalid session updates before writing", () => {
+  const store = openStore(join(tmpRoot, "update-invalid.db"));
+
+  try {
+    const created = store.createSession(baseSession);
+
+    assert.throws(
+      () => store.updateSession(created.session_id, { final_outcome: "private_source_dump" }),
+      /Invalid option/,
+    );
+    assert.equal(store.getSession(created.session_id).final_outcome, "accepted");
+  } finally {
+    store.close();
+  }
+});
+
 test("lists sessions by newest timestamp first", () => {
   const store = openStore(join(tmpRoot, "list.db"));
 

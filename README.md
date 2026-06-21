@@ -68,14 +68,16 @@ tracking.
 Implemented local commands:
 
 - `opensasa log`
+- `opensasa update`
 - `opensasa sessions`
 - `opensasa report`
 - `opensasa inspect`
 
 The current product is intentionally local-only. It can log safe AI coding
-session metadata, store records in a local SQLite database, list previous
-sessions, generate a personal report, and preview a sanitized contribution
-payload. It does not upload data or publish rankings.
+session metadata, store records in a local SQLite database, update safe
+metadata fields, list previous sessions, generate a personal report, and
+preview a sanitized contribution payload. It does not upload data or publish
+rankings.
 
 The public development and versioning approach is described in
 [Development Cycle](./docs/DEVELOPMENT_CYCLE.md). The MVP workflow is described
@@ -173,6 +175,27 @@ node ./dist/index.js log \
   --task-type feature \
   --final-outcome partially_accepted
 ```
+
+### Update A Session
+
+```bash
+node ./dist/index.js update <session-id> \
+  --final-outcome accepted \
+  --tests-outcome passed \
+  --retry-count 2
+```
+
+Use JSON output for scripting:
+
+```bash
+node ./dist/index.js update <session-id> \
+  --json \
+  --final-outcome accepted
+```
+
+The update command accepts the same safe metadata fields as `log`. It validates
+the full session before writing and does not add prompts, source code, model
+responses, exact paths, secrets, or terminal output.
 
 ### List Sessions
 
@@ -310,7 +333,6 @@ The MVP does not include:
 - web dashboard,
 - team dashboard,
 - automatic imports from AI coding tools,
-- editing existing sessions,
 - contribution submission.
 
 Bucket thresholds and report formatting are early implementation defaults and

@@ -107,6 +107,39 @@ export class OpenSasaStore {
     return row ? parseSessionRow(row) : null;
   }
 
+  updateSession(sessionId: string, input: unknown): LocalSession | null {
+    const existing = this.getSession(sessionId);
+
+    if (!existing) {
+      return null;
+    }
+
+    const record =
+      input && typeof input === "object" && !Array.isArray(input)
+        ? (input as Record<string, unknown>)
+        : {};
+    const updated = localSessionSchema.parse({
+      ...existing,
+      ...record,
+      schema_version: existing.schema_version,
+      session_id: existing.session_id,
+    });
+    const values = Object.fromEntries(
+      sessionColumns.map((column) => [column, updated[column] ?? null]),
+    );
+    const updateColumns = sessionColumns.filter((column) => column !== "session_id");
+
+    this.database
+      .prepare(
+        `UPDATE sessions
+         SET ${updateColumns.map((column) => `${column} = @${column}`).join(", ")}
+         WHERE session_id = @session_id`,
+      )
+      .run(values);
+
+    return updated;
+  }
+
   listSessions(options: ListSessionsOptions = {}): LocalSession[] {
     const filters: string[] = [];
     const parameters: Record<string, string | number> = {};

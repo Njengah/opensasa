@@ -16,6 +16,7 @@ All notable changes to OpenSasa will be documented in this file.
 - `opensasa report` filters for provider, model ID, task type, and final outcome.
 - `opensasa report --limit <count>` for calculating reports from the newest
   matching local sessions.
+- `opensasa update <session-id>` for editing safe local session metadata.
 - CLI scaffold with `opensasa --help` and `opensasa --version`.
 - Local session metadata validation with Zod schemas and MVP enum values.
 - Local SQLite storage at `~/.opensasa/opensasa.db` with migration support.
@@ -41,7 +42,6 @@ All notable changes to OpenSasa will be documented in this file.
 
 ### Known Limitations
 
-- Sessions cannot be edited after logging.
 - Contribution upload is not implemented.
 - Bucket thresholds are early implementation defaults and may change as the
   methodology matures.

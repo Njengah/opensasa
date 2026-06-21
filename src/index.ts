@@ -47,6 +47,14 @@ type LogOptions = {
   json?: boolean;
 };
 
+type UpdateOptions = Partial<Omit<LogOptions, "provider" | "modelId" | "taskType" | "finalOutcome">> &
+  StoreOptions & {
+    provider?: string;
+    modelId?: string;
+    taskType?: string;
+    finalOutcome?: string;
+  };
+
 type StoreOptions = {
   dbPath?: string;
 };
@@ -169,6 +177,86 @@ program
       }
 
       console.log(`Logged session ${session.session_id}`);
+    } catch (error) {
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    } finally {
+      store?.close();
+    }
+  });
+
+program
+  .command("update")
+  .description("Update safe metadata for a local AI coding session.")
+  .argument("<session-id>", "local session ID to update")
+  .option("--timestamp <timestamp>", "ISO timestamp for the session")
+  .option("--work-mode <work-mode>", "work mode enum value")
+  .option("--provider <provider>", "model provider, such as OpenAI or Anthropic")
+  .option("--model-id <model-id>", "provider model identifier")
+  .option("--model-version <model-version>", "model version or release label")
+  .option("--tool <tool>", "AI coding tool or agent")
+  .option("--task-type <task-type>", "task type enum value")
+  .option("--final-outcome <final-outcome>", "accepted, partially_accepted, rejected, or unknown")
+  .option("--language <language>", "primary language, if known")
+  .option("--framework <framework>", "primary framework, if known")
+  .option("--duration-seconds <seconds>", "duration in seconds", parseNonNegativeInteger)
+  .option("--retry-count <count>", "retry or follow-up count", parseNonNegativeInteger)
+  .option("--error-count <count>", "workflow error count", parseNonNegativeInteger)
+  .option(
+    "--input-tokens-estimate <tokens>",
+    "estimated input token count",
+    parseNonNegativeInteger,
+  )
+  .option(
+    "--output-tokens-estimate <tokens>",
+    "estimated output token count",
+    parseNonNegativeInteger,
+  )
+  .option(
+    "--cached-tokens-estimate <tokens>",
+    "estimated cached token count",
+    parseNonNegativeInteger,
+  )
+  .option("--estimated-cost-usd <cost>", "estimated session cost in USD", parseNonNegativeNumber)
+  .option("--cost-source <cost-source>", "cost source enum value")
+  .option("--repo-size-bucket <bucket>", "coarse repository size bucket")
+  .option("--file-count-bucket <bucket>", "coarse file count bucket")
+  .option("--changed-file-count-bucket <bucket>", "coarse changed file count bucket")
+  .option("--lines-added-bucket <bucket>", "coarse lines added bucket")
+  .option("--lines-removed-bucket <bucket>", "coarse lines removed bucket")
+  .option("--tests-outcome <outcome>", "test verification outcome")
+  .option("--build-outcome <outcome>", "build verification outcome")
+  .option("--lint-outcome <outcome>", "lint verification outcome")
+  .option("--typecheck-outcome <outcome>", "typecheck verification outcome")
+  .option("--manual-review-outcome <outcome>", "manual review outcome")
+  .option("--db-path <path>", "override local database path")
+  .option("--json", "output the updated session as JSON")
+  .action((sessionId: string, options: UpdateOptions) => {
+    let store;
+    try {
+      const updates = sessionInputFromOptions(options);
+
+      if (Object.keys(updates).length === 0) {
+        process.exitCode = 1;
+        console.error("No update fields provided.");
+        return;
+      }
+
+      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      const session = store.updateSession(sessionId, updates);
+
+      if (!session) {
+        process.exitCode = 1;
+        console.error(`Session not found: ${sessionId}`);
+        return;
+      }
+
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify({ status: "updated", session }, null, 2)}\n`);
+        return;
+      }
+
+      console.log(`Updated session ${session.session_id}`);
     } catch (error) {
       process.exitCode = 1;
       console.error(formatCliError(error));
@@ -311,6 +399,43 @@ function parsePositiveInteger(value: string): number {
   }
 
   return Number(value);
+}
+
+function sessionInputFromOptions(options: UpdateOptions): Record<string, unknown> {
+  return removeUndefinedValues({
+    timestamp: options.timestamp,
+    provider: options.provider,
+    model_id: options.modelId,
+    model_version: options.modelVersion,
+    tool: options.tool,
+    task_type: options.taskType,
+    final_outcome: options.finalOutcome,
+    work_mode: options.workMode,
+    language: options.language,
+    framework: options.framework,
+    duration_seconds: options.durationSeconds,
+    retry_count: options.retryCount,
+    error_count: options.errorCount,
+    input_tokens_estimate: options.inputTokensEstimate,
+    output_tokens_estimate: options.outputTokensEstimate,
+    cached_tokens_estimate: options.cachedTokensEstimate,
+    estimated_cost_usd: options.estimatedCostUsd,
+    cost_source: options.costSource,
+    repo_size_bucket: options.repoSizeBucket,
+    file_count_bucket: options.fileCountBucket,
+    changed_file_count_bucket: options.changedFileCountBucket,
+    lines_added_bucket: options.linesAddedBucket,
+    lines_removed_bucket: options.linesRemovedBucket,
+    tests_outcome: options.testsOutcome,
+    build_outcome: options.buildOutcome,
+    lint_outcome: options.lintOutcome,
+    typecheck_outcome: options.typecheckOutcome,
+    manual_review_outcome: options.manualReviewOutcome,
+  });
+}
+
+function removeUndefinedValues(input: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(input).filter(([, value]) => value !== undefined));
 }
 
 function formatCliError(error: unknown): string {

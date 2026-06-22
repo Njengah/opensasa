@@ -140,6 +140,14 @@ export class OpenSasaStore {
     return updated;
   }
 
+  deleteSession(sessionId: string): boolean {
+    const result = this.database
+      .prepare("DELETE FROM sessions WHERE session_id = ?")
+      .run(sessionId);
+
+    return result.changes > 0;
+  }
+
   listSessions(options: ListSessionsOptions = {}): LocalSession[] {
     const filters: string[] = [];
     const parameters: Record<string, string | number> = {};

@@ -82,6 +82,11 @@ type InspectOptions = StoreOptions & {
   json?: boolean;
 };
 
+type DeleteOptions = StoreOptions & {
+  yes?: boolean;
+  json?: boolean;
+};
+
 program
   .name("opensasa")
   .description("Local-first AI coding workflow metadata tracker.")
@@ -257,6 +262,41 @@ program
       }
 
       console.log(`Updated session ${session.session_id}`);
+    } catch (error) {
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    } finally {
+      store?.close();
+    }
+  });
+
+program
+  .command("delete")
+  .description("Delete a local AI coding session.")
+  .argument("<session-id>", "local session ID to delete")
+  .requiredOption("--yes", "confirm deletion of the local session")
+  .option("--db-path <path>", "override local database path")
+  .option("--json", "output the deletion result as JSON")
+  .action((sessionId: string, options: DeleteOptions) => {
+    let store;
+    try {
+      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      const deleted = store.deleteSession(sessionId);
+
+      if (!deleted) {
+        process.exitCode = 1;
+        console.error(`Session not found: ${sessionId}`);
+        return;
+      }
+
+      if (options.json) {
+        process.stdout.write(
+          `${JSON.stringify({ status: "deleted", session_id: sessionId }, null, 2)}\n`,
+        );
+        return;
+      }
+
+      console.log(`Deleted session ${sessionId}`);
     } catch (error) {
       process.exitCode = 1;
       console.error(formatCliError(error));

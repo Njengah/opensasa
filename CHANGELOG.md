@@ -17,6 +17,7 @@ All notable changes to OpenSasa will be documented in this file.
 - `opensasa report --limit <count>` for calculating reports from the newest
   matching local sessions.
 - `opensasa update <session-id>` for editing safe local session metadata.
+- `opensasa delete <session-id> --yes` for explicitly deleting a local session.
 - CLI scaffold with `opensasa --help` and `opensasa --version`.
 - Local session metadata validation with Zod schemas and MVP enum values.
 - Local SQLite storage at `~/.opensasa/opensasa.db` with migration support.

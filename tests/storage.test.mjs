@@ -131,6 +131,30 @@ test("rejects invalid session updates before writing", () => {
   }
 });
 
+test("deletes an existing session", () => {
+  const store = openStore(join(tmpRoot, "delete.db"));
+
+  try {
+    const created = store.createSession(baseSession);
+
+    assert.equal(store.deleteSession(created.session_id), true);
+    assert.equal(store.getSession(created.session_id), null);
+    assert.deepEqual(store.listSessions(), []);
+  } finally {
+    store.close();
+  }
+});
+
+test("returns false when deleting a missing session", () => {
+  const store = openStore(join(tmpRoot, "delete-missing.db"));
+
+  try {
+    assert.equal(store.deleteSession("missing-session"), false);
+  } finally {
+    store.close();
+  }
+});
+
 test("lists sessions by newest timestamp first", () => {
   const store = openStore(join(tmpRoot, "list.db"));
 

@@ -20,6 +20,7 @@ test("prints help with planned MVP commands", async () => {
   assert.match(stdout, /opensasa/);
   assert.match(stdout, /log/);
   assert.match(stdout, /update/);
+  assert.match(stdout, /delete/);
   assert.match(stdout, /sessions/);
   assert.match(stdout, /report/);
   assert.match(stdout, /inspect/);
@@ -360,6 +361,141 @@ test("returns an error when updating a missing session", async () => {
       "missing-session",
       "--final-outcome",
       "accepted",
+      "--db-path",
+      dbPath,
+    ]),
+    (error) => {
+      assert.match(error.stderr, /Session not found: missing-session/);
+      return true;
+    },
+  );
+});
+
+test("prints delete help with explicit confirmation", async () => {
+  const { stdout } = await execFileAsync("node", ["./dist/index.js", "delete", "--help"]);
+
+  assert.match(stdout, /Delete a local AI coding session/);
+  assert.match(stdout, /--yes/);
+  assert.match(stdout, /--json/);
+});
+
+test("requires confirmation before deleting a local session", async () => {
+  const dbPath = join(tmpRoot, "delete-session-requires-yes.db");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  await assert.rejects(
+    execFileAsync("node", [
+      "./dist/index.js",
+      "delete",
+      session.session_id,
+      "--db-path",
+      dbPath,
+    ]),
+    (error) => {
+      assert.match(error.stderr, /required option '--yes'/);
+      return true;
+    },
+  );
+
+  const readStore = openStore(dbPath);
+  try {
+    assert.notEqual(readStore.getSession(session.session_id), null);
+  } finally {
+    readStore.close();
+  }
+});
+
+test("deletes a local session after confirmation", async () => {
+  const dbPath = join(tmpRoot, "delete-session.db");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "delete",
+    session.session_id,
+    "--yes",
+    "--db-path",
+    dbPath,
+  ]);
+  const readStore = openStore(dbPath);
+
+  try {
+    assert.equal(stdout.trim(), `Deleted session ${session.session_id}`);
+    assert.equal(readStore.getSession(session.session_id), null);
+  } finally {
+    readStore.close();
+  }
+});
+
+test("deletes a local session as JSON", async () => {
+  const dbPath = join(tmpRoot, "delete-session-json.db");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "delete",
+    session.session_id,
+    "--yes",
+    "--json",
+    "--db-path",
+    dbPath,
+  ]);
+  const payload = JSON.parse(stdout);
+
+  assert.deepEqual(payload, { status: "deleted", session_id: session.session_id });
+});
+
+test("returns an error when deleting a missing session", async () => {
+  const dbPath = join(tmpRoot, "delete-session-missing.db");
+
+  await assert.rejects(
+    execFileAsync("node", [
+      "./dist/index.js",
+      "delete",
+      "missing-session",
+      "--yes",
       "--db-path",
       dbPath,
     ]),

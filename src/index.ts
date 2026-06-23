@@ -66,6 +66,8 @@ type SessionsOptions = StoreOptions & {
   modelId?: string;
   taskType?: string;
   finalOutcome?: string;
+  since?: string;
+  until?: string;
 };
 
 type ReportOptions = StoreOptions & {
@@ -314,6 +316,8 @@ program
   .option("--model-id <model-id>", "filter sessions by model ID")
   .option("--task-type <task-type>", "filter sessions by task type")
   .option("--final-outcome <final-outcome>", "filter sessions by final outcome")
+  .option("--since <timestamp>", "filter sessions at or after an ISO timestamp", parseIsoTimestamp)
+  .option("--until <timestamp>", "filter sessions at or before an ISO timestamp", parseIsoTimestamp)
   .option("--json", "output sessions as JSON")
   .action((options: SessionsOptions) => {
     let store;
@@ -325,6 +329,8 @@ program
         modelId: options.modelId,
         taskType: options.taskType,
         finalOutcome: options.finalOutcome,
+        since: options.since,
+        until: options.until,
       });
 
       if (options.json) {
@@ -439,6 +445,14 @@ function parsePositiveInteger(value: string): number {
   }
 
   return Number(value);
+}
+
+function parseIsoTimestamp(value: string): string {
+  if (Number.isNaN(Date.parse(value))) {
+    throw new Error("Expected an ISO timestamp.");
+  }
+
+  return value;
 }
 
 function sessionInputFromOptions(options: UpdateOptions): Record<string, unknown> {

@@ -240,6 +240,14 @@ node ./dist/index.js sessions \
   --final-outcome accepted
 ```
 
+Filter the list by timestamp range:
+
+```bash
+node ./dist/index.js sessions \
+  --since 2026-06-01T00:00:00.000Z \
+  --until 2026-06-30T23:59:59.999Z
+```
+
 The list output shows:
 
 - session ID,

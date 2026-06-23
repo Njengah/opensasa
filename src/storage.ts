@@ -58,6 +58,8 @@ type ListSessionsOptions = {
   modelId?: string;
   taskType?: string;
   finalOutcome?: string;
+  since?: string;
+  until?: string;
 };
 
 export function getDefaultDatabasePath(): string {
@@ -170,6 +172,16 @@ export class OpenSasaStore {
     if (options.finalOutcome !== undefined) {
       filters.push("final_outcome = @finalOutcome");
       parameters.finalOutcome = options.finalOutcome;
+    }
+
+    if (options.since !== undefined) {
+      filters.push("timestamp >= @since");
+      parameters.since = options.since;
+    }
+
+    if (options.until !== undefined) {
+      filters.push("timestamp <= @until");
+      parameters.until = options.until;
     }
 
     if (options.limit !== undefined) {

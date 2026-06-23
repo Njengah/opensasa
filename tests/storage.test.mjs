@@ -257,6 +257,52 @@ test("filters listed sessions by safe metadata fields", () => {
   }
 });
 
+test("filters listed sessions by inclusive timestamp range", () => {
+  const store = openStore(join(tmpRoot, "list-date-filters.db"));
+
+  try {
+    const oldest = store.createSession({
+      ...baseSession,
+      timestamp: "2026-06-08T12:00:00.000Z",
+      model_id: "oldest-model",
+    });
+    const middle = store.createSession({
+      ...baseSession,
+      timestamp: "2026-06-09T12:00:00.000Z",
+      model_id: "middle-model",
+    });
+    const newest = store.createSession({
+      ...baseSession,
+      timestamp: "2026-06-10T12:00:00.000Z",
+      model_id: "newest-model",
+    });
+
+    assert.deepEqual(
+      store
+        .listSessions({
+          since: "2026-06-09T00:00:00.000Z",
+          until: "2026-06-10T00:00:00.000Z",
+        })
+        .map((session) => session.session_id),
+      [middle.session_id],
+    );
+    assert.equal(
+      store
+        .listSessions({ since: "2026-06-08T12:00:00.000Z" })
+        .some((session) => session.session_id === oldest.session_id),
+      true,
+    );
+    assert.equal(
+      store
+        .listSessions({ until: "2026-06-10T12:00:00.000Z" })
+        .some((session) => session.session_id === newest.session_id),
+      true,
+    );
+  } finally {
+    store.close();
+  }
+});
+
 test("rejects invalid sessions before writing", () => {
   const store = openStore(join(tmpRoot, "invalid.db"));
 

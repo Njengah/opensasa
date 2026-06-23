@@ -516,6 +516,8 @@ test("prints sessions help", async () => {
   assert.match(stdout, /--model-id/);
   assert.match(stdout, /--task-type/);
   assert.match(stdout, /--final-outcome/);
+  assert.match(stdout, /--since/);
+  assert.match(stdout, /--until/);
   assert.match(stdout, /--json/);
 });
 
@@ -545,6 +547,25 @@ test("rejects a non-positive sessions limit", async () => {
     ]),
     (error) => {
       assert.match(error.stderr, /Expected a positive integer/);
+      return true;
+    },
+  );
+});
+
+test("rejects an invalid sessions date filter", async () => {
+  const dbPath = join(tmpRoot, "invalid-sessions-date-filter.db");
+
+  await assert.rejects(
+    execFileAsync("node", [
+      "./dist/index.js",
+      "sessions",
+      "--since",
+      "not-a-date",
+      "--db-path",
+      dbPath,
+    ]),
+    (error) => {
+      assert.match(error.stderr, /Expected an ISO timestamp/);
       return true;
     },
   );
@@ -714,6 +735,58 @@ test("filters saved sessions in text output", async () => {
   assert.match(stdout, new RegExp(matching.session_id));
   assert.doesNotMatch(stdout, new RegExp(differentProvider.session_id));
   assert.doesNotMatch(stdout, new RegExp(differentTask.session_id));
+});
+
+test("filters saved sessions by date range in text output", async () => {
+  const dbPath = join(tmpRoot, "filter-sessions-date.db");
+  const store = openStore(dbPath);
+  let oldest;
+  let middle;
+  let newest;
+
+  try {
+    oldest = store.createSession({
+      timestamp: "2026-06-08T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "oldest-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+    middle = store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "middle-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+    newest = store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "newest-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "sessions",
+    "--since",
+    "2026-06-09T00:00:00.000Z",
+    "--until",
+    "2026-06-10T00:00:00.000Z",
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.match(stdout, new RegExp(middle.session_id));
+  assert.doesNotMatch(stdout, new RegExp(oldest.session_id));
+  assert.doesNotMatch(stdout, new RegExp(newest.session_id));
 });
 
 test("prints the sessions empty state when filters match nothing", async () => {
@@ -911,6 +984,58 @@ test("filters saved sessions in JSON output", async () => {
   assert.equal(sessions[0].id, matching.session_id);
   assert.equal(sessions[0].provider, "OpenAI");
   assert.equal(sessions[0].task, "bug_fix");
+});
+
+test("filters saved sessions by date range in JSON output", async () => {
+  const dbPath = join(tmpRoot, "filter-sessions-date-json.db");
+  const store = openStore(dbPath);
+  let middle;
+
+  try {
+    store.createSession({
+      timestamp: "2026-06-08T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "oldest-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+    middle = store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "middle-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+    store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "newest-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "sessions",
+    "--json",
+    "--since",
+    "2026-06-09T00:00:00.000Z",
+    "--until",
+    "2026-06-10T00:00:00.000Z",
+    "--db-path",
+    dbPath,
+  ]);
+  const sessions = JSON.parse(stdout);
+
+  assert.equal(sessions.length, 1);
+  assert.equal(sessions[0].id, middle.session_id);
+  assert.equal(sessions[0].timestamp, "2026-06-09T12:00:00.000Z");
 });
 
 test("prints report help", async () => {

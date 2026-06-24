@@ -1048,6 +1048,8 @@ test("prints report help", async () => {
   assert.match(stdout, /--model-id/);
   assert.match(stdout, /--task-type/);
   assert.match(stdout, /--final-outcome/);
+  assert.match(stdout, /--since/);
+  assert.match(stdout, /--until/);
   assert.match(stdout, /--json/);
 });
 
@@ -1065,6 +1067,25 @@ test("prints an empty local report with unknown rates", async () => {
   assert.match(stdout, /Estimated total cost: unknown/);
   assert.match(stdout, /Useful outcome rate: unknown \(0\/0\)/);
   assert.match(stdout, /Verified success rate: unknown \(0\/0\)/);
+});
+
+test("rejects an invalid report date filter", async () => {
+  const dbPath = join(tmpRoot, "invalid-report-date-filter.db");
+
+  await assert.rejects(
+    execFileAsync("node", [
+      "./dist/index.js",
+      "report",
+      "--until",
+      "not-a-date",
+      "--db-path",
+      dbPath,
+    ]),
+    (error) => {
+      assert.match(error.stderr, /Expected an ISO timestamp/);
+      return true;
+    },
+  );
 });
 
 test("prints a local report from saved sessions", async () => {
@@ -1185,6 +1206,68 @@ test("prints a filtered local report from saved sessions", async () => {
   assert.match(stdout, /Retry burden: 1\.00/);
   assert.doesNotMatch(stdout, /Anthropic\/claude-sonnet-4\.5/);
   assert.doesNotMatch(stdout, /documentation: 1/);
+});
+
+test("prints a date-filtered local report from saved sessions", async () => {
+  const dbPath = join(tmpRoot, "report-date-filtered.db");
+  const store = openStore(dbPath);
+
+  try {
+    store.createSession({
+      timestamp: "2026-06-08T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "oldest-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      retry_count: 1,
+      estimated_cost_usd: 0.5,
+    });
+    store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "middle-model",
+      task_type: "feature",
+      final_outcome: "rejected",
+      work_mode: "manual_log",
+      tests_outcome: "failed",
+      retry_count: 2,
+      estimated_cost_usd: 1,
+    });
+    store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "Google",
+      model_id: "newest-model",
+      task_type: "documentation",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      retry_count: 3,
+      estimated_cost_usd: 2,
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "report",
+    "--since",
+    "2026-06-09T00:00:00.000Z",
+    "--until",
+    "2026-06-10T00:00:00.000Z",
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.match(stdout, /Total sessions: 1/);
+  assert.match(stdout, /Anthropic\/middle-model: 1/);
+  assert.match(stdout, /feature: 1/);
+  assert.match(stdout, /Rejected: 1/);
+  assert.match(stdout, /Estimated total cost: \$1\.0000/);
+  assert.doesNotMatch(stdout, /OpenAI\/oldest-model/);
+  assert.doesNotMatch(stdout, /Google\/newest-model/);
 });
 
 test("prints a limited local report from newest sessions", async () => {
@@ -1361,6 +1444,68 @@ test("prints a filtered local report as JSON", async () => {
   assert.equal(report.estimatedTotalCostUsd, 0.5);
   assert.equal(report.usefulOutcomeRate.rate, 1);
   assert.equal(report.verifiedSuccessRate.rate, 1);
+});
+
+test("prints a date-filtered local report as JSON", async () => {
+  const dbPath = join(tmpRoot, "report-date-filtered-json.db");
+  const store = openStore(dbPath);
+
+  try {
+    store.createSession({
+      timestamp: "2026-06-08T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "oldest-model",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      retry_count: 1,
+      estimated_cost_usd: 0.5,
+    });
+    store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "Anthropic",
+      model_id: "middle-model",
+      task_type: "feature",
+      final_outcome: "rejected",
+      work_mode: "manual_log",
+      tests_outcome: "failed",
+      retry_count: 2,
+      estimated_cost_usd: 1,
+    });
+    store.createSession({
+      timestamp: "2026-06-10T12:00:00.000Z",
+      provider: "Google",
+      model_id: "newest-model",
+      task_type: "documentation",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      retry_count: 3,
+      estimated_cost_usd: 2,
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "report",
+    "--json",
+    "--since",
+    "2026-06-09T00:00:00.000Z",
+    "--until",
+    "2026-06-10T00:00:00.000Z",
+    "--db-path",
+    dbPath,
+  ]);
+  const report = JSON.parse(stdout);
+
+  assert.equal(report.totalSessions, 1);
+  assert.deepEqual(report.sessionsByModel, { "Anthropic/middle-model": 1 });
+  assert.deepEqual(report.sessionsByTaskType, { feature: 1 });
+  assert.equal(report.estimatedTotalCostUsd, 1);
+  assert.equal(report.rejectedCount, 1);
 });
 
 test("prints a limited filtered local report as JSON", async () => {

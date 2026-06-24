@@ -15,6 +15,7 @@ All notable changes to OpenSasa will be documented in this file.
 - `opensasa sessions` filters for provider, model ID, task type, and final outcome.
 - `opensasa sessions` timestamp range filters with `--since` and `--until`.
 - `opensasa report` filters for provider, model ID, task type, and final outcome.
+- `opensasa report` timestamp range filters with `--since` and `--until`.
 - `opensasa report --limit <count>` for calculating reports from the newest
   matching local sessions.
 - `opensasa update <session-id>` for editing safe local session metadata.

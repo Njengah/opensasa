@@ -77,6 +77,8 @@ type ReportOptions = StoreOptions & {
   modelId?: string;
   taskType?: string;
   finalOutcome?: string;
+  since?: string;
+  until?: string;
 };
 
 type InspectOptions = StoreOptions & {
@@ -361,6 +363,8 @@ program
   .option("--model-id <model-id>", "filter report by model ID")
   .option("--task-type <task-type>", "filter report by task type")
   .option("--final-outcome <final-outcome>", "filter report by final outcome")
+  .option("--since <timestamp>", "filter report sessions at or after an ISO timestamp", parseIsoTimestamp)
+  .option("--until <timestamp>", "filter report sessions at or before an ISO timestamp", parseIsoTimestamp)
   .option("--json", "output the report as JSON")
   .action((options: ReportOptions) => {
     let store;
@@ -372,6 +376,8 @@ program
         modelId: options.modelId,
         taskType: options.taskType,
         finalOutcome: options.finalOutcome,
+        since: options.since,
+        until: options.until,
       });
       const report = calculateLocalReport(sessions);
       process.stdout.write(options.json ? formatLocalReportJson(report) : `${formatLocalReport(report)}\n`);

@@ -287,6 +287,14 @@ node ./dist/index.js report \
   --final-outcome accepted
 ```
 
+Filter the report by timestamp range:
+
+```bash
+node ./dist/index.js report \
+  --since 2026-06-01T00:00:00.000Z \
+  --until 2026-06-30T23:59:59.999Z
+```
+
 The report is generated from local data only. It includes:
 
 - total sessions,

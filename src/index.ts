@@ -9,7 +9,7 @@ import {
   formatLocalInspectionJson,
 } from "./inspect.js";
 import { calculateLocalReport, formatLocalReport, formatLocalReportJson } from "./report.js";
-import { deriveVerifiedSuccess, type LocalSession } from "./schema.js";
+import { deriveVerifiedSuccess, isoTimestampSchema, type LocalSession } from "./schema.js";
 import { openStore } from "./storage.js";
 
 const program = new Command();
@@ -454,7 +454,7 @@ function parsePositiveInteger(value: string): number {
 }
 
 function parseIsoTimestamp(value: string): string {
-  if (Number.isNaN(Date.parse(value))) {
+  if (!isoTimestampSchema.safeParse(value).success) {
     throw new Error("Expected an ISO timestamp.");
   }
 

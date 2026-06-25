@@ -175,12 +175,12 @@ export class OpenSasaStore {
     }
 
     if (options.since !== undefined) {
-      filters.push("timestamp >= @since");
+      filters.push("datetime(timestamp) >= datetime(@since)");
       parameters.since = options.since;
     }
 
     if (options.until !== undefined) {
-      filters.push("timestamp <= @until");
+      filters.push("datetime(timestamp) <= datetime(@until)");
       parameters.until = options.until;
     }
 
@@ -192,7 +192,7 @@ export class OpenSasaStore {
     const limitClause = options.limit === undefined ? "" : " LIMIT @limit";
     const rows = this.database
       .prepare(
-        `SELECT * FROM sessions${whereClause} ORDER BY timestamp DESC, session_id DESC${limitClause}`,
+        `SELECT * FROM sessions${whereClause} ORDER BY datetime(timestamp) DESC, session_id DESC${limitClause}`,
       )
       .all(parameters) as SessionRow[];
 

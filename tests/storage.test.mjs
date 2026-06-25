@@ -179,6 +179,30 @@ test("lists sessions by newest timestamp first", () => {
   }
 });
 
+test("lists sessions by newest instant when timestamps use offsets", () => {
+  const store = openStore(join(tmpRoot, "list-offset-order.db"));
+
+  try {
+    const olderInstant = store.createSession({
+      ...baseSession,
+      timestamp: "2026-06-09T00:30:00.000+03:00",
+      model_id: "older-instant-model",
+    });
+    const newerInstant = store.createSession({
+      ...baseSession,
+      timestamp: "2026-06-08T23:30:00.000Z",
+      model_id: "newer-instant-model",
+    });
+
+    assert.deepEqual(
+      store.listSessions().map((session) => session.session_id),
+      [newerInstant.session_id, olderInstant.session_id],
+    );
+  } finally {
+    store.close();
+  }
+});
+
 test("limits listed sessions after newest-first sorting", () => {
   const store = openStore(join(tmpRoot, "list-limit.db"));
 
@@ -297,6 +321,39 @@ test("filters listed sessions by inclusive timestamp range", () => {
         .listSessions({ until: "2026-06-10T12:00:00.000Z" })
         .some((session) => session.session_id === newest.session_id),
       true,
+    );
+  } finally {
+    store.close();
+  }
+});
+
+test("filters listed sessions by timestamp instants when offsets differ", () => {
+  const store = openStore(join(tmpRoot, "list-date-offset-filters.db"));
+
+  try {
+    const beforeBoundary = store.createSession({
+      ...baseSession,
+      timestamp: "2026-06-09T00:30:00.000+03:00",
+      model_id: "before-boundary-model",
+    });
+    const matching = store.createSession({
+      ...baseSession,
+      timestamp: "2026-06-09T00:30:00.000Z",
+      model_id: "matching-model",
+    });
+
+    const sessions = store.listSessions({
+      since: "2026-06-09T00:00:00.000Z",
+      until: "2026-06-09T01:00:00.000Z",
+    });
+
+    assert.deepEqual(
+      sessions.map((session) => session.session_id),
+      [matching.session_id],
+    );
+    assert.equal(
+      sessions.some((session) => session.session_id === beforeBoundary.session_id),
+      false,
     );
   } finally {
     store.close();

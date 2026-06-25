@@ -1165,6 +1165,8 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /Accepted or partially accepted: 1/);
   assert.match(stdout, /Rejected: 1/);
   assert.match(stdout, /Estimated total cost: \$1\.5000/);
+  assert.match(stdout, /Cost per useful task: \$1\.5000/);
+  assert.match(stdout, /Failure cost: \$1\.0000/);
   assert.match(stdout, /Retry burden: 1\.00/);
   assert.match(stdout, /Useful outcome rate: 50\.0% \(1\/2\)/);
   assert.match(stdout, /Verified success rate: 50\.0% \(1\/2\)/);
@@ -1233,6 +1235,8 @@ test("prints a filtered local report from saved sessions", async () => {
   assert.match(stdout, /bug_fix: 1/);
   assert.match(stdout, /Accepted or partially accepted: 1/);
   assert.match(stdout, /Estimated total cost: \$0\.5000/);
+  assert.match(stdout, /Cost per useful task: \$0\.5000/);
+  assert.match(stdout, /Failure cost: \$0\.0000/);
   assert.match(stdout, /Retry burden: 1\.00/);
   assert.doesNotMatch(stdout, /Anthropic\/claude-sonnet-4\.5/);
   assert.doesNotMatch(stdout, /documentation: 1/);
@@ -1296,6 +1300,8 @@ test("prints a date-filtered local report from saved sessions", async () => {
   assert.match(stdout, /feature: 1/);
   assert.match(stdout, /Rejected: 1/);
   assert.match(stdout, /Estimated total cost: \$1\.0000/);
+  assert.match(stdout, /Cost per useful task: unknown/);
+  assert.match(stdout, /Failure cost: \$1\.0000/);
   assert.doesNotMatch(stdout, /OpenAI\/oldest-model/);
   assert.doesNotMatch(stdout, /Google\/newest-model/);
 });
@@ -1419,6 +1425,8 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.sessionsByModel["OpenAI/gpt-5"], 1);
   assert.equal(report.sessionsByModel["Anthropic/claude-sonnet-4.5"], 1);
   assert.equal(report.estimatedTotalCostUsd, 1.5);
+  assert.equal(report.costPerUsefulTaskUsd, 1.5);
+  assert.equal(report.failureCostUsd, 1);
   assert.equal(report.retrySummary.retryBurden, 1);
   assert.equal(report.usefulOutcomeRate.rate, 0.5);
   assert.equal(report.verifiedSuccessRate.rate, 0.5);
@@ -1472,6 +1480,8 @@ test("prints a filtered local report as JSON", async () => {
   assert.deepEqual(report.sessionsByModel, { "OpenAI/gpt-5": 1 });
   assert.deepEqual(report.sessionsByTaskType, { bug_fix: 1 });
   assert.equal(report.estimatedTotalCostUsd, 0.5);
+  assert.equal(report.costPerUsefulTaskUsd, 0.5);
+  assert.equal(report.failureCostUsd, 0);
   assert.equal(report.usefulOutcomeRate.rate, 1);
   assert.equal(report.verifiedSuccessRate.rate, 1);
 });
@@ -1535,6 +1545,8 @@ test("prints a date-filtered local report as JSON", async () => {
   assert.deepEqual(report.sessionsByModel, { "Anthropic/middle-model": 1 });
   assert.deepEqual(report.sessionsByTaskType, { feature: 1 });
   assert.equal(report.estimatedTotalCostUsd, 1);
+  assert.equal(report.costPerUsefulTaskUsd, null);
+  assert.equal(report.failureCostUsd, 1);
   assert.equal(report.rejectedCount, 1);
 });
 
@@ -1610,6 +1622,8 @@ test("prints a limited filtered local report as JSON", async () => {
     "OpenAI/middle-model": 1,
   });
   assert.equal(report.estimatedTotalCostUsd, 3);
+  assert.equal(report.costPerUsefulTaskUsd, 3);
+  assert.equal(report.failureCostUsd, 1);
   assert.equal(Object.hasOwn(report.sessionsByModel, "OpenAI/oldest-model"), false);
   assert.equal(Object.hasOwn(report.sessionsByModel, "Anthropic/excluded-model"), false);
 });

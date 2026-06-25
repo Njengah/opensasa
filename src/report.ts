@@ -23,6 +23,8 @@ export type LocalReport = {
   unknownOutcomeCount: number;
   estimatedTotalCostUsd: number | null;
   costByModelUsd: Record<string, number>;
+  costPerUsefulTaskUsd: number | null;
+  failureCostUsd: number | null;
   retrySummary: RetrySummary;
   verificationOutcomeSummary: Record<string, CountMap>;
   usefulOutcomeRate: RateMetric;
@@ -47,6 +49,16 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     estimatedCostSessions.length === 0
       ? null
       : sum(estimatedCostSessions.map((session) => session.estimated_cost_usd ?? 0));
+  const rejectedSessions = sessions.filter((session) => session.final_outcome === "rejected");
+  const rejectedCostSessions = estimatedCostSessions.filter(
+    (session) => session.final_outcome === "rejected",
+  );
+  const failureCostUsd =
+    rejectedSessions.length === 0
+      ? 0
+      : rejectedCostSessions.length === 0
+        ? null
+        : sum(rejectedCostSessions.map((session) => session.estimated_cost_usd ?? 0));
   const verifiedSuccessCount = sessions.filter(deriveVerifiedSuccess).length;
 
   return {
@@ -54,10 +66,13 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     sessionsByModel: countBy(sessions, modelKey),
     sessionsByTaskType: countBy(sessions, (session) => session.task_type),
     acceptedOrPartiallyAcceptedCount: usefulSessions.length,
-    rejectedCount: sessions.filter((session) => session.final_outcome === "rejected").length,
+    rejectedCount: rejectedSessions.length,
     unknownOutcomeCount: sessions.filter((session) => session.final_outcome === "unknown").length,
     estimatedTotalCostUsd,
     costByModelUsd: sumByModel(estimatedCostSessions),
+    costPerUsefulTaskUsd:
+      estimatedTotalCostUsd === null ? null : calculateRate(estimatedTotalCostUsd, usefulSessions.length),
+    failureCostUsd,
     retrySummary: calculateRetrySummary(usefulSessions),
     verificationOutcomeSummary: calculateVerificationOutcomeSummary(sessions),
     usefulOutcomeRate: {
@@ -92,6 +107,8 @@ export function formatLocalReport(report: LocalReport): string {
     "",
     "Cost summary:",
     `Estimated total cost: ${formatCurrencyOrUnknown(report.estimatedTotalCostUsd)}`,
+    `Cost per useful task: ${formatCurrencyOrUnknown(report.costPerUsefulTaskUsd)}`,
+    `Failure cost: ${formatCurrencyOrUnknown(report.failureCostUsd)}`,
     ...formatCostByModel(report.costByModelUsd),
     "",
     "Retry summary:",

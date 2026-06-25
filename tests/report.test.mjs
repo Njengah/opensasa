@@ -79,6 +79,8 @@ test("calculates local report metrics from safe session metadata", () => {
     "Anthropic/claude-sonnet-4.5": 1.25,
     "OpenAI/gpt-5": 1.25,
   });
+  assert.equal(report.costPerUsefulTaskUsd, 1.25);
+  assert.equal(report.failureCostUsd, 0.75);
   assert.deepEqual(report.retrySummary, {
     totalRetries: 3,
     usefulSessionCount: 2,
@@ -111,6 +113,8 @@ test("labels missing cost and unknown outcome rates clearly", () => {
 
   assert.equal(report.estimatedTotalCostUsd, null);
   assert.deepEqual(report.costByModelUsd, {});
+  assert.equal(report.costPerUsefulTaskUsd, null);
+  assert.equal(report.failureCostUsd, 0);
   assert.deepEqual(report.usefulOutcomeRate, {
     numerator: 0,
     denominator: 0,
@@ -138,6 +142,8 @@ test("formats a readable local report", () => {
   assert.match(output, /Total sessions: 1/);
   assert.match(output, /OpenAI\/gpt-5: 1/);
   assert.match(output, /Estimated total cost: \$0\.5000/);
+  assert.match(output, /Cost per useful task: \$0\.5000/);
+  assert.match(output, /Failure cost: \$0\.0000/);
   assert.match(output, /Useful outcome rate: 100\.0% \(1\/1\)/);
   assert.match(output, /Verified success rate: 100\.0% \(1\/1\)/);
 });
@@ -154,6 +160,8 @@ test("formats a local report as JSON", () => {
 
   assert.equal(parsed.totalSessions, 1);
   assert.equal(parsed.estimatedTotalCostUsd, 0.5);
+  assert.equal(parsed.costPerUsefulTaskUsd, 0.5);
+  assert.equal(parsed.failureCostUsd, 0);
   assert.equal(parsed.usefulOutcomeRate.rate, 1);
   assert.equal(parsed.verifiedSuccessRate.rate, 1);
 });

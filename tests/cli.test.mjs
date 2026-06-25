@@ -569,6 +569,21 @@ test("rejects an invalid sessions date filter", async () => {
       return true;
     },
   );
+
+  await assert.rejects(
+    execFileAsync("node", [
+      "./dist/index.js",
+      "sessions",
+      "--until",
+      "2026-06-09",
+      "--db-path",
+      dbPath,
+    ]),
+    (error) => {
+      assert.match(error.stderr, /Expected an ISO timestamp/);
+      return true;
+    },
+  );
 });
 
 test("lists saved sessions with safe summary fields sorted newest first", async () => {
@@ -1078,6 +1093,21 @@ test("rejects an invalid report date filter", async () => {
       "report",
       "--until",
       "not-a-date",
+      "--db-path",
+      dbPath,
+    ]),
+    (error) => {
+      assert.match(error.stderr, /Expected an ISO timestamp/);
+      return true;
+    },
+  );
+
+  await assert.rejects(
+    execFileAsync("node", [
+      "./dist/index.js",
+      "report",
+      "--since",
+      "2026-06-09",
       "--db-path",
       dbPath,
     ]),

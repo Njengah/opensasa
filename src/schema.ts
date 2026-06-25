@@ -63,6 +63,8 @@ const nonEmptyString = z.string().trim().min(1);
 const nonNegativeInteger = z.number().int().min(0);
 const nonNegativeNumber = z.number().min(0);
 
+export const isoTimestampSchema = z.string().datetime({ offset: true });
+
 const optionalVerificationOutcome = z
   .enum(verificationOutcomes)
   .optional()
@@ -72,7 +74,7 @@ export const localSessionSchema = z
   .object({
     schema_version: z.literal(schemaVersion).default(schemaVersion),
     session_id: nonEmptyString.optional(),
-    timestamp: z.string().datetime({ offset: true }),
+    timestamp: isoTimestampSchema,
     provider: nonEmptyString,
     model_id: nonEmptyString,
     model_version: nonEmptyString.optional(),

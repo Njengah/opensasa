@@ -30,6 +30,11 @@ All notable changes to OpenSasa will be documented in this file.
 - `opensasa inspect <session-id> --contribution` for a no-upload contribution preview.
 - README documentation for the implemented local CLI workflow.
 
+### Fixed
+
+- Timestamp range filters now compare timestamp instants instead of raw strings,
+  so valid timezone offsets are handled consistently.
+
 ### Privacy
 
 - No uploads, telemetry, hosted backend, or public contribution behavior is included.

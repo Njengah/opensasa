@@ -304,6 +304,8 @@ The report is generated from local data only. It includes:
 - rejected count,
 - unknown outcome count,
 - estimated total cost,
+- cost per useful task,
+- failure cost,
 - cost by model,
 - retry summary,
 - verification outcome summary,

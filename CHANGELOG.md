@@ -18,6 +18,7 @@ All notable changes to OpenSasa will be documented in this file.
 - `opensasa report` timestamp range filters with `--since` and `--until`.
 - `opensasa report --limit <count>` for calculating reports from the newest
   matching local sessions.
+- Cost per useful task and failure cost metrics in local reports.
 - `opensasa update <session-id>` for editing safe local session metadata.
 - `opensasa delete <session-id> --yes` for explicitly deleting a local session.
 - CLI scaffold with `opensasa --help` and `opensasa --version`.

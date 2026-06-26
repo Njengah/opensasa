@@ -1131,6 +1131,7 @@ test("prints a local report from saved sessions", async () => {
       final_outcome: "accepted",
       work_mode: "manual_log",
       tests_outcome: "passed",
+      duration_seconds: 300,
       retry_count: 1,
       estimated_cost_usd: 0.5,
       language: "TypeScript",
@@ -1167,6 +1168,7 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /Estimated total cost: \$1\.5000/);
   assert.match(stdout, /Cost per useful task: \$1\.5000/);
   assert.match(stdout, /Failure cost: \$1\.0000/);
+  assert.match(stdout, /Speed to useful output: 300\.0s/);
   assert.match(stdout, /Retry burden: 1\.00/);
   assert.match(stdout, /Useful outcome rate: 50\.0% \(1\/2\)/);
   assert.match(stdout, /Verified success rate: 50\.0% \(1\/2\)/);
@@ -1186,6 +1188,7 @@ test("prints a filtered local report from saved sessions", async () => {
       final_outcome: "accepted",
       work_mode: "manual_log",
       tests_outcome: "passed",
+      duration_seconds: 300,
       retry_count: 1,
       estimated_cost_usd: 0.5,
     });
@@ -1237,6 +1240,7 @@ test("prints a filtered local report from saved sessions", async () => {
   assert.match(stdout, /Estimated total cost: \$0\.5000/);
   assert.match(stdout, /Cost per useful task: \$0\.5000/);
   assert.match(stdout, /Failure cost: \$0\.0000/);
+  assert.match(stdout, /Speed to useful output: 300\.0s/);
   assert.match(stdout, /Retry burden: 1\.00/);
   assert.doesNotMatch(stdout, /Anthropic\/claude-sonnet-4\.5/);
   assert.doesNotMatch(stdout, /documentation: 1/);
@@ -1255,6 +1259,7 @@ test("prints a date-filtered local report from saved sessions", async () => {
       final_outcome: "accepted",
       work_mode: "manual_log",
       tests_outcome: "passed",
+      duration_seconds: 300,
       retry_count: 1,
       estimated_cost_usd: 0.5,
     });
@@ -1266,6 +1271,7 @@ test("prints a date-filtered local report from saved sessions", async () => {
       final_outcome: "rejected",
       work_mode: "manual_log",
       tests_outcome: "failed",
+      duration_seconds: 200,
       retry_count: 2,
       estimated_cost_usd: 1,
     });
@@ -1302,6 +1308,7 @@ test("prints a date-filtered local report from saved sessions", async () => {
   assert.match(stdout, /Estimated total cost: \$1\.0000/);
   assert.match(stdout, /Cost per useful task: unknown/);
   assert.match(stdout, /Failure cost: \$1\.0000/);
+  assert.match(stdout, /Speed to useful output: unknown/);
   assert.doesNotMatch(stdout, /OpenAI\/oldest-model/);
   assert.doesNotMatch(stdout, /Google\/newest-model/);
 });
@@ -1319,6 +1326,7 @@ test("prints a limited local report from newest sessions", async () => {
       final_outcome: "accepted",
       work_mode: "manual_log",
       tests_outcome: "passed",
+      duration_seconds: 300,
       retry_count: 1,
       estimated_cost_usd: 0.5,
     });
@@ -1394,6 +1402,7 @@ test("prints a local report from saved sessions as JSON", async () => {
       final_outcome: "accepted",
       work_mode: "manual_log",
       tests_outcome: "passed",
+      duration_seconds: 300,
       retry_count: 1,
       estimated_cost_usd: 0.5,
     });
@@ -1427,6 +1436,7 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.estimatedTotalCostUsd, 1.5);
   assert.equal(report.costPerUsefulTaskUsd, 1.5);
   assert.equal(report.failureCostUsd, 1);
+  assert.equal(report.speedToUsefulOutputSeconds, 300);
   assert.equal(report.retrySummary.retryBurden, 1);
   assert.equal(report.usefulOutcomeRate.rate, 0.5);
   assert.equal(report.verifiedSuccessRate.rate, 0.5);
@@ -1445,6 +1455,7 @@ test("prints a filtered local report as JSON", async () => {
       final_outcome: "accepted",
       work_mode: "manual_log",
       tests_outcome: "passed",
+      duration_seconds: 300,
       retry_count: 1,
       estimated_cost_usd: 0.5,
     });
@@ -1482,6 +1493,7 @@ test("prints a filtered local report as JSON", async () => {
   assert.equal(report.estimatedTotalCostUsd, 0.5);
   assert.equal(report.costPerUsefulTaskUsd, 0.5);
   assert.equal(report.failureCostUsd, 0);
+  assert.equal(report.speedToUsefulOutputSeconds, 300);
   assert.equal(report.usefulOutcomeRate.rate, 1);
   assert.equal(report.verifiedSuccessRate.rate, 1);
 });
@@ -1547,6 +1559,7 @@ test("prints a date-filtered local report as JSON", async () => {
   assert.equal(report.estimatedTotalCostUsd, 1);
   assert.equal(report.costPerUsefulTaskUsd, null);
   assert.equal(report.failureCostUsd, 1);
+  assert.equal(report.speedToUsefulOutputSeconds, null);
   assert.equal(report.rejectedCount, 1);
 });
 
@@ -1585,6 +1598,7 @@ test("prints a limited filtered local report as JSON", async () => {
       final_outcome: "accepted",
       work_mode: "manual_log",
       tests_outcome: "passed",
+      duration_seconds: 120,
       retry_count: 3,
       estimated_cost_usd: 2,
     });
@@ -1624,6 +1638,7 @@ test("prints a limited filtered local report as JSON", async () => {
   assert.equal(report.estimatedTotalCostUsd, 3);
   assert.equal(report.costPerUsefulTaskUsd, 3);
   assert.equal(report.failureCostUsd, 1);
+  assert.equal(report.speedToUsefulOutputSeconds, 120);
   assert.equal(Object.hasOwn(report.sessionsByModel, "OpenAI/oldest-model"), false);
   assert.equal(Object.hasOwn(report.sessionsByModel, "Anthropic/excluded-model"), false);
 });

@@ -31,6 +31,7 @@ test("calculates local report metrics from safe session metadata", () => {
       task_type: "bug_fix",
       final_outcome: "accepted",
       retry_count: 1,
+      duration_seconds: 600,
       tests_outcome: "passed",
       estimated_cost_usd: 0.5,
     }),
@@ -40,6 +41,7 @@ test("calculates local report metrics from safe session metadata", () => {
       task_type: "feature",
       final_outcome: "partially_accepted",
       retry_count: 2,
+      duration_seconds: 120,
       manual_review_outcome: "accepted",
       estimated_cost_usd: 1.25,
     }),
@@ -81,6 +83,7 @@ test("calculates local report metrics from safe session metadata", () => {
   });
   assert.equal(report.costPerUsefulTaskUsd, 1.25);
   assert.equal(report.failureCostUsd, 0.75);
+  assert.equal(report.speedToUsefulOutputSeconds, 360);
   assert.deepEqual(report.retrySummary, {
     totalRetries: 3,
     usefulSessionCount: 2,
@@ -115,6 +118,7 @@ test("labels missing cost and unknown outcome rates clearly", () => {
   assert.deepEqual(report.costByModelUsd, {});
   assert.equal(report.costPerUsefulTaskUsd, null);
   assert.equal(report.failureCostUsd, 0);
+  assert.equal(report.speedToUsefulOutputSeconds, null);
   assert.deepEqual(report.usefulOutcomeRate, {
     numerator: 0,
     denominator: 0,
@@ -133,6 +137,7 @@ test("formats a readable local report", () => {
     session({
       final_outcome: "accepted",
       tests_outcome: "passed",
+      duration_seconds: 300,
       estimated_cost_usd: 0.5,
     }),
   ]);
@@ -144,6 +149,7 @@ test("formats a readable local report", () => {
   assert.match(output, /Estimated total cost: \$0\.5000/);
   assert.match(output, /Cost per useful task: \$0\.5000/);
   assert.match(output, /Failure cost: \$0\.0000/);
+  assert.match(output, /Speed to useful output: 300\.0s/);
   assert.match(output, /Useful outcome rate: 100\.0% \(1\/1\)/);
   assert.match(output, /Verified success rate: 100\.0% \(1\/1\)/);
 });
@@ -153,6 +159,7 @@ test("formats a local report as JSON", () => {
     session({
       final_outcome: "accepted",
       tests_outcome: "passed",
+      duration_seconds: 300,
       estimated_cost_usd: 0.5,
     }),
   ]);
@@ -162,6 +169,7 @@ test("formats a local report as JSON", () => {
   assert.equal(parsed.estimatedTotalCostUsd, 0.5);
   assert.equal(parsed.costPerUsefulTaskUsd, 0.5);
   assert.equal(parsed.failureCostUsd, 0);
+  assert.equal(parsed.speedToUsefulOutputSeconds, 300);
   assert.equal(parsed.usefulOutcomeRate.rate, 1);
   assert.equal(parsed.verifiedSuccessRate.rate, 1);
 });

@@ -307,6 +307,7 @@ The report is generated from local data only. It includes:
 - cost per useful task,
 - failure cost,
 - cost by model,
+- speed to useful output,
 - retry summary,
 - verification outcome summary,
 - useful outcome rate,

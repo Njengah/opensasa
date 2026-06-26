@@ -25,6 +25,7 @@ export type LocalReport = {
   costByModelUsd: Record<string, number>;
   costPerUsefulTaskUsd: number | null;
   failureCostUsd: number | null;
+  speedToUsefulOutputSeconds: number | null;
   retrySummary: RetrySummary;
   verificationOutcomeSummary: Record<string, CountMap>;
   usefulOutcomeRate: RateMetric;
@@ -73,6 +74,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     costPerUsefulTaskUsd:
       estimatedTotalCostUsd === null ? null : calculateRate(estimatedTotalCostUsd, usefulSessions.length),
     failureCostUsd,
+    speedToUsefulOutputSeconds: calculateMedianDuration(usefulSessions),
     retrySummary: calculateRetrySummary(usefulSessions),
     verificationOutcomeSummary: calculateVerificationOutcomeSummary(sessions),
     usefulOutcomeRate: {
@@ -110,6 +112,9 @@ export function formatLocalReport(report: LocalReport): string {
     `Cost per useful task: ${formatCurrencyOrUnknown(report.costPerUsefulTaskUsd)}`,
     `Failure cost: ${formatCurrencyOrUnknown(report.failureCostUsd)}`,
     ...formatCostByModel(report.costByModelUsd),
+    "",
+    "Speed summary:",
+    `Speed to useful output: ${formatSecondsOrUnknown(report.speedToUsefulOutputSeconds)}`,
     "",
     "Retry summary:",
     `Total retries on useful sessions: ${report.retrySummary.totalRetries}`,
@@ -158,6 +163,23 @@ function calculateVerificationOutcomeSummary(
       }, {}),
     ]),
   );
+}
+
+function calculateMedianDuration(usefulSessions: LocalSession[]): number | null {
+  const durations = usefulSessions
+    .map((session) => session.duration_seconds)
+    .filter((duration): duration is number => duration !== undefined)
+    .sort((left, right) => left - right);
+
+  if (durations.length === 0) {
+    return null;
+  }
+
+  const middle = Math.floor(durations.length / 2);
+
+  return durations.length % 2 === 1
+    ? durations[middle]
+    : (durations[middle - 1] + durations[middle]) / 2;
 }
 
 function sumByModel(sessions: LocalSession[]): Record<string, number> {
@@ -217,4 +239,8 @@ function formatCurrency(value: number): string {
 
 function formatNumberOrUnknown(value: number | null): string {
   return value === null ? "unknown" : value.toFixed(2);
+}
+
+function formatSecondsOrUnknown(value: number | null): string {
+  return value === null ? "unknown" : `${value.toFixed(1)}s`;
 }

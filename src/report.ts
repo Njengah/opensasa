@@ -8,6 +8,12 @@ export type RetrySummary = {
   retryBurden: number | null;
 };
 
+export type FailureRetrySummary = {
+  totalRetries: number;
+  rejectedSessionCount: number;
+  failureRetryBurden: number | null;
+};
+
 export type RateMetric = {
   numerator: number;
   denominator: number;
@@ -27,6 +33,7 @@ export type LocalReport = {
   failureCostUsd: number | null;
   speedToUsefulOutputSeconds: number | null;
   retrySummary: RetrySummary;
+  failureRetrySummary: FailureRetrySummary;
   verificationOutcomeSummary: Record<string, CountMap>;
   usefulOutcomeRate: RateMetric;
   unknownOutcomeRate: RateMetric;
@@ -78,6 +85,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     failureCostUsd,
     speedToUsefulOutputSeconds: calculateMedianDuration(usefulSessions),
     retrySummary: calculateRetrySummary(usefulSessions),
+    failureRetrySummary: calculateFailureRetrySummary(rejectedSessions),
     verificationOutcomeSummary: calculateVerificationOutcomeSummary(sessions),
     usefulOutcomeRate: {
       numerator: usefulSessions.length,
@@ -126,6 +134,8 @@ export function formatLocalReport(report: LocalReport): string {
     "Retry summary:",
     `Total retries on useful sessions: ${report.retrySummary.totalRetries}`,
     `Retry burden: ${formatNumberOrUnknown(report.retrySummary.retryBurden)}`,
+    `Total retries on rejected sessions: ${report.failureRetrySummary.totalRetries}`,
+    `Failure retry burden: ${formatNumberOrUnknown(report.failureRetrySummary.failureRetryBurden)}`,
     "",
     "Verification outcome summary:",
     ...formatVerificationSummary(report.verificationOutcomeSummary),
@@ -155,6 +165,15 @@ function calculateRetrySummary(usefulSessions: LocalSession[]): RetrySummary {
     totalRetries,
     usefulSessionCount: usefulSessions.length,
     retryBurden: calculateRate(totalRetries, usefulSessions.length),
+  };
+}
+
+function calculateFailureRetrySummary(rejectedSessions: LocalSession[]): FailureRetrySummary {
+  const totalRetries = sum(rejectedSessions.map((session) => session.retry_count ?? 0));
+  return {
+    totalRetries,
+    rejectedSessionCount: rejectedSessions.length,
+    failureRetryBurden: calculateRate(totalRetries, rejectedSessions.length),
   };
 }
 

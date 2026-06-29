@@ -89,6 +89,11 @@ test("calculates local report metrics from safe session metadata", () => {
     usefulSessionCount: 2,
     retryBurden: 1.5,
   });
+  assert.deepEqual(report.failureRetrySummary, {
+    totalRetries: 3,
+    rejectedSessionCount: 1,
+    failureRetryBurden: 3,
+  });
   assert.equal(report.verificationOutcomeSummary.tests_outcome.passed, 1);
   assert.equal(report.verificationOutcomeSummary.tests_outcome.failed, 1);
   assert.equal(report.verificationOutcomeSummary.tests_outcome.unknown, 2);
@@ -140,6 +145,11 @@ test("labels missing cost and unknown outcome rates clearly", () => {
     rate: null,
   });
   assert.equal(report.retrySummary.retryBurden, null);
+  assert.deepEqual(report.failureRetrySummary, {
+    totalRetries: 0,
+    rejectedSessionCount: 0,
+    failureRetryBurden: null,
+  });
 });
 
 test("formats a readable local report", () => {
@@ -160,6 +170,8 @@ test("formats a readable local report", () => {
   assert.match(output, /Cost per useful task: \$0\.5000/);
   assert.match(output, /Failure cost: \$0\.0000/);
   assert.match(output, /Speed to useful output: 300\.0s/);
+  assert.match(output, /Total retries on rejected sessions: 0/);
+  assert.match(output, /Failure retry burden: unknown/);
   assert.match(output, /Useful outcome rate: 100\.0% \(1\/1\)/);
   assert.match(output, /Unknown outcome rate: 0\.0% \(0\/1\)/);
   assert.match(output, /Verified success rate: 100\.0% \(1\/1\)/);
@@ -181,6 +193,9 @@ test("formats a local report as JSON", () => {
   assert.equal(parsed.costPerUsefulTaskUsd, 0.5);
   assert.equal(parsed.failureCostUsd, 0);
   assert.equal(parsed.speedToUsefulOutputSeconds, 300);
+  assert.equal(parsed.failureRetrySummary.totalRetries, 0);
+  assert.equal(parsed.failureRetrySummary.rejectedSessionCount, 0);
+  assert.equal(parsed.failureRetrySummary.failureRetryBurden, null);
   assert.equal(parsed.usefulOutcomeRate.rate, 1);
   assert.equal(parsed.unknownOutcomeRate.rate, 0);
   assert.equal(parsed.verifiedSuccessRate.rate, 1);

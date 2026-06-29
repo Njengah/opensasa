@@ -309,6 +309,7 @@ The report is generated from local data only. It includes:
 - cost by model,
 - speed to useful output,
 - retry summary,
+- failure retry burden,
 - verification outcome summary,
 - useful outcome rate,
 - unknown outcome rate,

@@ -1170,6 +1170,8 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /Failure cost: \$1\.0000/);
   assert.match(stdout, /Speed to useful output: 300\.0s/);
   assert.match(stdout, /Retry burden: 1\.00/);
+  assert.match(stdout, /Total retries on rejected sessions: 2/);
+  assert.match(stdout, /Failure retry burden: 2\.00/);
   assert.match(stdout, /Useful outcome rate: 50\.0% \(1\/2\)/);
   assert.match(stdout, /Unknown outcome rate: 0\.0% \(0\/2\)/);
   assert.match(stdout, /Verified success rate: 50\.0% \(1\/2\)/);
@@ -1243,6 +1245,8 @@ test("prints a filtered local report from saved sessions", async () => {
   assert.match(stdout, /Failure cost: \$0\.0000/);
   assert.match(stdout, /Speed to useful output: 300\.0s/);
   assert.match(stdout, /Retry burden: 1\.00/);
+  assert.match(stdout, /Total retries on rejected sessions: 0/);
+  assert.match(stdout, /Failure retry burden: unknown/);
   assert.match(stdout, /Unknown outcome rate: 0\.0% \(0\/1\)/);
   assert.doesNotMatch(stdout, /Anthropic\/claude-sonnet-4\.5/);
   assert.doesNotMatch(stdout, /documentation: 1/);
@@ -1311,6 +1315,8 @@ test("prints a date-filtered local report from saved sessions", async () => {
   assert.match(stdout, /Cost per useful task: unknown/);
   assert.match(stdout, /Failure cost: \$1\.0000/);
   assert.match(stdout, /Speed to useful output: unknown/);
+  assert.match(stdout, /Total retries on rejected sessions: 2/);
+  assert.match(stdout, /Failure retry burden: 2\.00/);
   assert.match(stdout, /Unknown outcome rate: 0\.0% \(0\/1\)/);
   assert.doesNotMatch(stdout, /OpenAI\/oldest-model/);
   assert.doesNotMatch(stdout, /Google\/newest-model/);
@@ -1441,6 +1447,9 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.failureCostUsd, 1);
   assert.equal(report.speedToUsefulOutputSeconds, 300);
   assert.equal(report.retrySummary.retryBurden, 1);
+  assert.equal(report.failureRetrySummary.totalRetries, 2);
+  assert.equal(report.failureRetrySummary.rejectedSessionCount, 1);
+  assert.equal(report.failureRetrySummary.failureRetryBurden, 2);
   assert.equal(report.usefulOutcomeRate.rate, 0.5);
   assert.equal(report.unknownOutcomeRate.rate, 0);
   assert.equal(report.verifiedSuccessRate.rate, 0.5);
@@ -1498,6 +1507,9 @@ test("prints a filtered local report as JSON", async () => {
   assert.equal(report.costPerUsefulTaskUsd, 0.5);
   assert.equal(report.failureCostUsd, 0);
   assert.equal(report.speedToUsefulOutputSeconds, 300);
+  assert.equal(report.failureRetrySummary.totalRetries, 0);
+  assert.equal(report.failureRetrySummary.rejectedSessionCount, 0);
+  assert.equal(report.failureRetrySummary.failureRetryBurden, null);
   assert.equal(report.usefulOutcomeRate.rate, 1);
   assert.equal(report.unknownOutcomeRate.rate, 0);
   assert.equal(report.verifiedSuccessRate.rate, 1);
@@ -1565,6 +1577,8 @@ test("prints a date-filtered local report as JSON", async () => {
   assert.equal(report.costPerUsefulTaskUsd, null);
   assert.equal(report.failureCostUsd, 1);
   assert.equal(report.speedToUsefulOutputSeconds, null);
+  assert.equal(report.failureRetrySummary.totalRetries, 2);
+  assert.equal(report.failureRetrySummary.failureRetryBurden, 2);
   assert.equal(report.unknownOutcomeRate.rate, 0);
   assert.equal(report.rejectedCount, 1);
 });
@@ -1645,6 +1659,8 @@ test("prints a limited filtered local report as JSON", async () => {
   assert.equal(report.costPerUsefulTaskUsd, 3);
   assert.equal(report.failureCostUsd, 1);
   assert.equal(report.speedToUsefulOutputSeconds, 120);
+  assert.equal(report.failureRetrySummary.totalRetries, 2);
+  assert.equal(report.failureRetrySummary.failureRetryBurden, 2);
   assert.equal(report.unknownOutcomeRate.rate, 0);
   assert.equal(Object.hasOwn(report.sessionsByModel, "OpenAI/oldest-model"), false);
   assert.equal(Object.hasOwn(report.sessionsByModel, "Anthropic/excluded-model"), false);

@@ -29,6 +29,7 @@ export type LocalReport = {
   retrySummary: RetrySummary;
   verificationOutcomeSummary: Record<string, CountMap>;
   usefulOutcomeRate: RateMetric;
+  unknownOutcomeRate: RateMetric;
   verifiedSuccessRate: RateMetric;
 };
 
@@ -50,6 +51,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     estimatedCostSessions.length === 0
       ? null
       : sum(estimatedCostSessions.map((session) => session.estimated_cost_usd ?? 0));
+  const unknownOutcomeSessions = sessions.filter((session) => session.final_outcome === "unknown");
   const rejectedSessions = sessions.filter((session) => session.final_outcome === "rejected");
   const rejectedCostSessions = estimatedCostSessions.filter(
     (session) => session.final_outcome === "rejected",
@@ -68,7 +70,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     sessionsByTaskType: countBy(sessions, (session) => session.task_type),
     acceptedOrPartiallyAcceptedCount: usefulSessions.length,
     rejectedCount: rejectedSessions.length,
-    unknownOutcomeCount: sessions.filter((session) => session.final_outcome === "unknown").length,
+    unknownOutcomeCount: unknownOutcomeSessions.length,
     estimatedTotalCostUsd,
     costByModelUsd: sumByModel(estimatedCostSessions),
     costPerUsefulTaskUsd:
@@ -81,6 +83,11 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
       numerator: usefulSessions.length,
       denominator: knownOutcomeSessions.length,
       rate: calculateRate(usefulSessions.length, knownOutcomeSessions.length),
+    },
+    unknownOutcomeRate: {
+      numerator: unknownOutcomeSessions.length,
+      denominator: sessions.length,
+      rate: calculateRate(unknownOutcomeSessions.length, sessions.length),
     },
     verifiedSuccessRate: {
       numerator: verifiedSuccessCount,
@@ -125,6 +132,7 @@ export function formatLocalReport(report: LocalReport): string {
     "",
     "Rates:",
     `Useful outcome rate: ${formatRate(report.usefulOutcomeRate)}`,
+    `Unknown outcome rate: ${formatRate(report.unknownOutcomeRate)}`,
     `Verified success rate: ${formatRate(report.verifiedSuccessRate)}`,
   ].join("\n");
 }

@@ -311,6 +311,7 @@ The report is generated from local data only. It includes:
 - retry summary,
 - verification outcome summary,
 - useful outcome rate,
+- unknown outcome rate,
 - verified success rate.
 
 Unknown or missing data is labeled directly.

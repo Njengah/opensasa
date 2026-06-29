@@ -20,6 +20,7 @@ All notable changes to OpenSasa will be documented in this file.
   matching local sessions.
 - Cost per useful task and failure cost metrics in local reports.
 - Speed to useful output metric in local reports.
+- Unknown outcome rate metric in local reports.
 - `opensasa update <session-id>` for editing safe local session metadata.
 - `opensasa delete <session-id> --yes` for explicitly deleting a local session.
 - CLI scaffold with `opensasa --help` and `opensasa --version`.

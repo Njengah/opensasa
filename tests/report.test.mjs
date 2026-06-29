@@ -97,6 +97,11 @@ test("calculates local report metrics from safe session metadata", () => {
     denominator: 3,
     rate: 2 / 3,
   });
+  assert.deepEqual(report.unknownOutcomeRate, {
+    numerator: 1,
+    denominator: 4,
+    rate: 0.25,
+  });
   assert.deepEqual(report.verifiedSuccessRate, {
     numerator: 2,
     denominator: 3,
@@ -123,6 +128,11 @@ test("labels missing cost and unknown outcome rates clearly", () => {
     numerator: 0,
     denominator: 0,
     rate: null,
+  });
+  assert.deepEqual(report.unknownOutcomeRate, {
+    numerator: 2,
+    denominator: 2,
+    rate: 1,
   });
   assert.deepEqual(report.verifiedSuccessRate, {
     numerator: 0,
@@ -151,6 +161,7 @@ test("formats a readable local report", () => {
   assert.match(output, /Failure cost: \$0\.0000/);
   assert.match(output, /Speed to useful output: 300\.0s/);
   assert.match(output, /Useful outcome rate: 100\.0% \(1\/1\)/);
+  assert.match(output, /Unknown outcome rate: 0\.0% \(0\/1\)/);
   assert.match(output, /Verified success rate: 100\.0% \(1\/1\)/);
 });
 
@@ -171,5 +182,6 @@ test("formats a local report as JSON", () => {
   assert.equal(parsed.failureCostUsd, 0);
   assert.equal(parsed.speedToUsefulOutputSeconds, 300);
   assert.equal(parsed.usefulOutcomeRate.rate, 1);
+  assert.equal(parsed.unknownOutcomeRate.rate, 0);
   assert.equal(parsed.verifiedSuccessRate.rate, 1);
 });

@@ -82,6 +82,8 @@ a sanitized contribution payload. It does not upload data or publish rankings.
 The public development and versioning approach is described in
 [Development Cycle](./docs/DEVELOPMENT_CYCLE.md). The MVP workflow is described
 in [MVP Workflow](./docs/MVP_WORKFLOW.md).
+Seed-only methodology examples are available in
+[Methodology Examples](./docs/METHODOLOGY_EXAMPLES.md).
 
 For a quick reminder of what currently runs and where development stopped, see
 [Project Snapshot](./docs/PROJECT_SNAPSHOT.md).

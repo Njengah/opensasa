@@ -349,7 +349,8 @@ node ./dist/index.js inspect <session-id> --contribution --json
 
 This generates a local preview of what a future contribution payload could
 include. The preview shows included fields, excluded fields, bucketed values,
-schema version, data source, consent status, and no-upload status.
+schema version, data source, consent status, validation status, and no-upload
+status.
 
 Uploads are not enabled in the MVP.
 

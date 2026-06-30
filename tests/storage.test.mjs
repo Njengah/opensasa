@@ -62,6 +62,30 @@ test("creates and reads a validated session with a generated ID", () => {
     assert.deepEqual(read, created);
     assert.equal(read.tests_outcome, "passed");
     assert.equal(read.estimated_cost_usd, 0.25);
+    assert.equal(read.contribution_consent, "not_granted");
+  } finally {
+    store.close();
+  }
+});
+
+test("creates and updates local contribution consent state", () => {
+  const store = openStore(join(tmpRoot, "contribution-consent.db"));
+
+  try {
+    const created = store.createSession({
+      ...baseSession,
+      contribution_consent: "granted",
+    });
+    const updated = store.updateSession(created.session_id, {
+      contribution_consent: "revoked",
+    });
+
+    assert.equal(created.contribution_consent, "granted");
+    assert.equal(updated.contribution_consent, "revoked");
+    assert.equal(
+      store.getSession(created.session_id).contribution_consent,
+      "revoked",
+    );
   } finally {
     store.close();
   }
@@ -126,6 +150,24 @@ test("rejects invalid session updates before writing", () => {
       /Invalid option/,
     );
     assert.equal(store.getSession(created.session_id).final_outcome, "accepted");
+  } finally {
+    store.close();
+  }
+});
+
+test("rejects invalid local contribution consent state", () => {
+  const store = openStore(join(tmpRoot, "invalid-contribution-consent.db"));
+
+  try {
+    assert.throws(
+      () =>
+        store.createSession({
+          ...baseSession,
+          contribution_consent: "silent_upload",
+        }),
+      /Invalid option/,
+    );
+    assert.deepEqual(store.listSessions(), []);
   } finally {
     store.close();
   }
@@ -480,6 +522,96 @@ test("SQLite constraints reject invalid direct writes", () => {
     );
   } finally {
     database.close();
+  }
+});
+
+test("migrates existing databases with default contribution consent", () => {
+  const dbPath = join(tmpRoot, "migrate-contribution-consent.db");
+  const database = new Database(dbPath);
+
+  try {
+    database.exec(`
+      CREATE TABLE schema_migrations (
+        name TEXT PRIMARY KEY,
+        applied_at TEXT NOT NULL
+      );
+      CREATE TABLE sessions (
+        session_id TEXT PRIMARY KEY CHECK (length(trim(session_id)) > 0),
+        schema_version TEXT NOT NULL CHECK (schema_version = 'opensasa.metadata.v0'),
+        timestamp TEXT NOT NULL CHECK (length(trim(timestamp)) > 0),
+        provider TEXT NOT NULL CHECK (length(trim(provider)) > 0),
+        model_id TEXT NOT NULL CHECK (length(trim(model_id)) > 0),
+        model_version TEXT,
+        tool TEXT,
+        task_type TEXT NOT NULL,
+        final_outcome TEXT NOT NULL,
+        work_mode TEXT NOT NULL,
+        language TEXT,
+        framework TEXT,
+        duration_seconds INTEGER,
+        retry_count INTEGER,
+        error_count INTEGER,
+        input_tokens_estimate INTEGER,
+        output_tokens_estimate INTEGER,
+        cached_tokens_estimate INTEGER,
+        estimated_cost_usd REAL,
+        cost_source TEXT,
+        repo_size_bucket TEXT,
+        file_count_bucket TEXT,
+        changed_file_count_bucket TEXT,
+        lines_added_bucket TEXT,
+        lines_removed_bucket TEXT,
+        tests_outcome TEXT NOT NULL,
+        build_outcome TEXT NOT NULL,
+        lint_outcome TEXT NOT NULL,
+        typecheck_outcome TEXT NOT NULL,
+        manual_review_outcome TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+      INSERT INTO schema_migrations (name, applied_at)
+      VALUES ('001_create_sessions', '2026-06-09T12:00:00.000Z');
+      INSERT INTO sessions (
+        session_id,
+        schema_version,
+        timestamp,
+        provider,
+        model_id,
+        task_type,
+        final_outcome,
+        work_mode,
+        tests_outcome,
+        build_outcome,
+        lint_outcome,
+        typecheck_outcome,
+        manual_review_outcome
+      ) VALUES (
+        'legacy-session',
+        'opensasa.metadata.v0',
+        '2026-06-09T12:00:00.000Z',
+        'OpenAI',
+        'gpt-5',
+        'bug_fix',
+        'accepted',
+        'manual_log',
+        'unknown',
+        'unknown',
+        'unknown',
+        'unknown',
+        'unknown'
+      );
+    `);
+  } finally {
+    database.close();
+  }
+
+  const store = openStore(dbPath);
+
+  try {
+    const migrated = store.getSession("legacy-session");
+
+    assert.equal(migrated.contribution_consent, "not_granted");
+  } finally {
+    store.close();
   }
 });
 

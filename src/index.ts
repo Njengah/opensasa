@@ -43,6 +43,7 @@ type LogOptions = {
   lintOutcome?: string;
   typecheckOutcome?: string;
   manualReviewOutcome?: string;
+  contributionConsent?: string;
   dbPath?: string;
   json?: boolean;
 };
@@ -143,6 +144,10 @@ program
   .option("--lint-outcome <outcome>", "lint verification outcome")
   .option("--typecheck-outcome <outcome>", "typecheck verification outcome")
   .option("--manual-review-outcome <outcome>", "manual review outcome")
+  .option(
+    "--contribution-consent <state>",
+    "local contribution consent state: not_granted, granted, or revoked",
+  )
   .option("--db-path <path>", "override local database path")
   .option("--json", "output the logged session as JSON")
   .action((options: LogOptions) => {
@@ -178,6 +183,7 @@ program
         lint_outcome: options.lintOutcome,
         typecheck_outcome: options.typecheckOutcome,
         manual_review_outcome: options.manualReviewOutcome,
+        contribution_consent: options.contributionConsent,
       });
 
       if (options.json) {
@@ -238,6 +244,10 @@ program
   .option("--lint-outcome <outcome>", "lint verification outcome")
   .option("--typecheck-outcome <outcome>", "typecheck verification outcome")
   .option("--manual-review-outcome <outcome>", "manual review outcome")
+  .option(
+    "--contribution-consent <state>",
+    "local contribution consent state: not_granted, granted, or revoked",
+  )
   .option("--db-path <path>", "override local database path")
   .option("--json", "output the updated session as JSON")
   .action((sessionId: string, options: UpdateOptions) => {
@@ -491,6 +501,7 @@ function sessionInputFromOptions(options: UpdateOptions): Record<string, unknown
     lint_outcome: options.lintOutcome,
     typecheck_outcome: options.typecheckOutcome,
     manual_review_outcome: options.manualReviewOutcome,
+    contribution_consent: options.contributionConsent,
   });
 }
 

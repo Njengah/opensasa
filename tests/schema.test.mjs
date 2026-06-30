@@ -25,6 +25,7 @@ test("validates a minimal local session", () => {
   assert.equal(parsed.final_outcome, "accepted");
   assert.equal(parsed.tests_outcome, "unknown");
   assert.equal(parsed.manual_review_outcome, "unknown");
+  assert.equal(parsed.contribution_consent, "not_granted");
 });
 
 test("accepts optional MVP metadata fields", () => {
@@ -52,11 +53,13 @@ test("accepts optional MVP metadata fields", () => {
     lint_outcome: "unknown",
     typecheck_outcome: "failed",
     manual_review_outcome: "accepted",
+    contribution_consent: "granted",
   });
 
   assert.equal(parsed.tool, "Codex");
   assert.equal(parsed.tests_outcome, "passed");
   assert.equal(parsed.estimated_cost_usd, 0.42);
+  assert.equal(parsed.contribution_consent, "granted");
 });
 
 test("requires MVP fields", () => {

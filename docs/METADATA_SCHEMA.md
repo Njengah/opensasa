@@ -67,6 +67,7 @@ A session represents one AI-assisted coding workflow.
 | `retry_count` | integer | no | Number of retries or follow-up attempts. |
 | `error_count` | integer | no | Number of tool/model/workflow errors observed. |
 | `final_outcome` | enum | yes | `accepted`, `partially_accepted`, `rejected`, or `unknown`. |
+| `contribution_consent` | enum | no | Local consent state: `not_granted`, `granted`, or `revoked`. |
 | `notes` | string | no | Local-only. Never contributed by default. |
 
 ### Model Usage
@@ -167,6 +168,16 @@ Initial values:
 `not_run` means the developer explicitly did not run that check.
 
 `unknown` means OpenSasa does not know whether that check ran.
+
+### Contribution Consent
+
+Initial local states:
+
+- `not_granted`
+- `granted`
+- `revoked`
+
+Consent state is local metadata in the MVP. It does not imply upload capability.
 
 ### Buckets
 

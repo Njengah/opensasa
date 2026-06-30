@@ -59,6 +59,12 @@ export const costSources = [
   "unknown",
 ] as const;
 
+export const contributionConsentStates = [
+  "not_granted",
+  "granted",
+  "revoked",
+] as const;
+
 const nonEmptyString = z.string().trim().min(1);
 const nonNegativeInteger = z.number().int().min(0);
 const nonNegativeNumber = z.number().min(0);
@@ -102,12 +108,17 @@ export const localSessionSchema = z
     lint_outcome: optionalVerificationOutcome,
     typecheck_outcome: optionalVerificationOutcome,
     manual_review_outcome: z.enum(finalOutcomes).optional().default("unknown"),
+    contribution_consent: z
+      .enum(contributionConsentStates)
+      .optional()
+      .default("not_granted"),
   })
   .strict();
 
 export type LocalSession = z.infer<typeof localSessionSchema>;
 export type FinalOutcome = (typeof finalOutcomes)[number];
 export type VerificationOutcome = (typeof verificationOutcomes)[number];
+export type ContributionConsentState = (typeof contributionConsentStates)[number];
 
 const usefulOutcomes = new Set<FinalOutcome>(["accepted", "partially_accepted"]);
 

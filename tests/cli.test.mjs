@@ -39,6 +39,7 @@ test("prints log help with manual session options", async () => {
   assert.match(stdout, /--model-id/);
   assert.match(stdout, /--task-type/);
   assert.match(stdout, /--final-outcome/);
+  assert.match(stdout, /--contribution-consent/);
   assert.match(stdout, /--json/);
   assert.doesNotMatch(stdout, /prompt/i);
   assert.doesNotMatch(stdout, /source-code/i);
@@ -104,6 +105,8 @@ test("logs a valid manual session as JSON", async () => {
     "passed",
     "--estimated-cost-usd",
     "0.25",
+    "--contribution-consent",
+    "granted",
   ]);
   const payload = JSON.parse(stdout);
   const store = openStore(dbPath);
@@ -120,6 +123,7 @@ test("logs a valid manual session as JSON", async () => {
     assert.equal(payload.session.work_mode, "manual_log");
     assert.equal(payload.session.tests_outcome, "passed");
     assert.equal(payload.session.estimated_cost_usd, 0.25);
+    assert.equal(payload.session.contribution_consent, "granted");
     assert.deepEqual(session, payload.session);
     assert.equal(Object.hasOwn(payload.session, "prompt"), false);
     assert.equal(Object.hasOwn(payload.session, "source_code"), false);
@@ -161,6 +165,8 @@ test("logs supported optional metadata fields", async () => {
     "estimated",
     "--repo-size-bucket",
     "small",
+    "--contribution-consent",
+    "granted",
   ]);
   const sessionId = stdout.trim().replace("Logged session ", "");
   const store = openStore(dbPath);
@@ -176,6 +182,7 @@ test("logs supported optional metadata fields", async () => {
     assert.equal(session.estimated_cost_usd, 0.42);
     assert.equal(session.cost_source, "estimated");
     assert.equal(session.repo_size_bucket, "small");
+    assert.equal(session.contribution_consent, "granted");
   } finally {
     store.close();
   }
@@ -223,6 +230,7 @@ test("prints update help with safe session options", async () => {
   assert.match(stdout, /--task-type/);
   assert.match(stdout, /--final-outcome/);
   assert.match(stdout, /--tests-outcome/);
+  assert.match(stdout, /--contribution-consent/);
   assert.match(stdout, /--json/);
   assert.doesNotMatch(stdout, /prompt/i);
   assert.doesNotMatch(stdout, /source-code/i);
@@ -260,6 +268,8 @@ test("updates a local session with safe metadata", async () => {
     "2",
     "--estimated-cost-usd",
     "0.75",
+    "--contribution-consent",
+    "granted",
   ]);
   const readStore = openStore(dbPath);
 
@@ -273,6 +283,7 @@ test("updates a local session with safe metadata", async () => {
     assert.equal(updated.tests_outcome, "passed");
     assert.equal(updated.retry_count, 2);
     assert.equal(updated.estimated_cost_usd, 0.75);
+    assert.equal(updated.contribution_consent, "granted");
   } finally {
     readStore.close();
   }
@@ -1773,6 +1784,7 @@ test("previews a sanitized contribution payload without upload", async () => {
       tests_outcome: "passed",
       input_tokens_estimate: 1200,
       estimated_cost_usd: 0.5,
+      contribution_consent: "granted",
     });
   } finally {
     store.close();
@@ -1789,7 +1801,7 @@ test("previews a sanitized contribution payload without upload", async () => {
 
   assert.match(stdout, /OpenSasa Contribution Preview/);
   assert.match(stdout, /Status: preview only/);
-  assert.match(stdout, /Consent: not granted/);
+  assert.match(stdout, /Consent: granted/);
   assert.match(stdout, /Upload enabled: no/);
   assert.match(stdout, /No upload will occur in this MVP/);
   assert.match(stdout, /Validation:/);
@@ -1821,6 +1833,7 @@ test("previews a sanitized contribution payload as JSON without upload", async (
       tests_outcome: "passed",
       input_tokens_estimate: 1200,
       estimated_cost_usd: 0.5,
+      contribution_consent: "granted",
     });
   } finally {
     store.close();
@@ -1838,7 +1851,7 @@ test("previews a sanitized contribution payload as JSON without upload", async (
   const preview = JSON.parse(stdout);
 
   assert.equal(preview.status, "preview only");
-  assert.equal(preview.consent, "not granted");
+  assert.equal(preview.consent, "granted");
   assert.equal(preview.upload_enabled, false);
   assert.equal(preview.destination, "none");
   assert.equal(preview.validation.status, "passed");

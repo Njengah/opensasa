@@ -20,6 +20,16 @@ export type RateMetric = {
   rate: number | null;
 };
 
+export type ConfidenceLevel = "insufficient" | "early" | "reasonable";
+
+export type ConfidenceSummary = {
+  level: ConfidenceLevel;
+  knownOutcomeCount: number;
+  verifiedSessionCount: number;
+  verificationShare: RateMetric;
+  note: string;
+};
+
 export type LocalReport = {
   totalSessions: number;
   sessionsByModel: CountMap;
@@ -34,6 +44,7 @@ export type LocalReport = {
   speedToUsefulOutputSeconds: number | null;
   retrySummary: RetrySummary;
   failureRetrySummary: FailureRetrySummary;
+  confidenceSummary: ConfidenceSummary;
   verificationOutcomeSummary: Record<string, CountMap>;
   usefulOutcomeRate: RateMetric;
   unknownOutcomeRate: RateMetric;
@@ -70,6 +81,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
         ? null
         : sum(rejectedCostSessions.map((session) => session.estimated_cost_usd ?? 0));
   const verifiedSuccessCount = sessions.filter(deriveVerifiedSuccess).length;
+  const verifiedSessionCount = sessions.filter(hasAnyVerificationSignal).length;
 
   return {
     totalSessions: sessions.length,
@@ -86,6 +98,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     speedToUsefulOutputSeconds: calculateMedianDuration(usefulSessions),
     retrySummary: calculateRetrySummary(usefulSessions),
     failureRetrySummary: calculateFailureRetrySummary(rejectedSessions),
+    confidenceSummary: calculateConfidenceSummary(knownOutcomeSessions.length, verifiedSessionCount),
     verificationOutcomeSummary: calculateVerificationOutcomeSummary(sessions),
     usefulOutcomeRate: {
       numerator: usefulSessions.length,
@@ -137,6 +150,13 @@ export function formatLocalReport(report: LocalReport): string {
     `Total retries on rejected sessions: ${report.failureRetrySummary.totalRetries}`,
     `Failure retry burden: ${formatNumberOrUnknown(report.failureRetrySummary.failureRetryBurden)}`,
     "",
+    "Confidence summary:",
+    `Confidence level: ${report.confidenceSummary.level}`,
+    `Known outcome sessions: ${report.confidenceSummary.knownOutcomeCount}`,
+    `Verified sessions: ${report.confidenceSummary.verifiedSessionCount}`,
+    `Verification share: ${formatRate(report.confidenceSummary.verificationShare)}`,
+    `Confidence note: ${report.confidenceSummary.note}`,
+    "",
     "Verification outcome summary:",
     ...formatVerificationSummary(report.verificationOutcomeSummary),
     "",
@@ -177,6 +197,53 @@ function calculateFailureRetrySummary(rejectedSessions: LocalSession[]): Failure
   };
 }
 
+function calculateConfidenceSummary(
+  knownOutcomeCount: number,
+  verifiedSessionCount: number,
+): ConfidenceSummary {
+  const verificationShare = {
+    numerator: verifiedSessionCount,
+    denominator: knownOutcomeCount,
+    rate: calculateRate(verifiedSessionCount, knownOutcomeCount),
+  };
+  const level = confidenceLevel(knownOutcomeCount, verificationShare.rate);
+
+  return {
+    level,
+    knownOutcomeCount,
+    verifiedSessionCount,
+    verificationShare,
+    note: confidenceNote(level),
+  };
+}
+
+function confidenceLevel(
+  knownOutcomeCount: number,
+  verificationShare: number | null,
+): ConfidenceLevel {
+  if (knownOutcomeCount < 5 || verificationShare === null || verificationShare < 0.25) {
+    return "insufficient";
+  }
+
+  if (knownOutcomeCount < 20 || verificationShare < 0.5) {
+    return "early";
+  }
+
+  return "reasonable";
+}
+
+function confidenceNote(level: ConfidenceLevel): string {
+  if (level === "reasonable") {
+    return "Enough known and verified local sessions for a more stable personal signal.";
+  }
+
+  if (level === "early") {
+    return "Useful for personal tracking, but sample size or verification depth is still limited.";
+  }
+
+  return "Not enough known and verified local sessions for a reliable signal yet.";
+}
+
 function calculateVerificationOutcomeSummary(
   sessions: LocalSession[],
 ): Record<string, CountMap> {
@@ -189,6 +256,16 @@ function calculateVerificationOutcomeSummary(
         return counts;
       }, {}),
     ]),
+  );
+}
+
+function hasAnyVerificationSignal(session: LocalSession): boolean {
+  return (
+    session.tests_outcome !== "unknown" ||
+    session.build_outcome !== "unknown" ||
+    session.lint_outcome !== "unknown" ||
+    session.typecheck_outcome !== "unknown" ||
+    session.manual_review_outcome !== "unknown"
   );
 }
 

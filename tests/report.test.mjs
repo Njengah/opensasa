@@ -94,6 +94,10 @@ test("calculates local report metrics from safe session metadata", () => {
     rejectedSessionCount: 1,
     failureRetryBurden: 3,
   });
+  assert.equal(report.confidenceSummary.level, "insufficient");
+  assert.equal(report.confidenceSummary.knownOutcomeCount, 3);
+  assert.equal(report.confidenceSummary.verifiedSessionCount, 3);
+  assert.equal(report.confidenceSummary.verificationShare.rate, 1);
   assert.equal(report.verificationOutcomeSummary.tests_outcome.passed, 1);
   assert.equal(report.verificationOutcomeSummary.tests_outcome.failed, 1);
   assert.equal(report.verificationOutcomeSummary.tests_outcome.unknown, 2);
@@ -150,6 +154,9 @@ test("labels missing cost and unknown outcome rates clearly", () => {
     rejectedSessionCount: 0,
     failureRetryBurden: null,
   });
+  assert.equal(report.confidenceSummary.level, "insufficient");
+  assert.equal(report.confidenceSummary.knownOutcomeCount, 0);
+  assert.equal(report.confidenceSummary.verificationShare.rate, null);
 });
 
 test("formats a readable local report", () => {
@@ -172,6 +179,10 @@ test("formats a readable local report", () => {
   assert.match(output, /Speed to useful output: 300\.0s/);
   assert.match(output, /Total retries on rejected sessions: 0/);
   assert.match(output, /Failure retry burden: unknown/);
+  assert.match(output, /Confidence level: insufficient/);
+  assert.match(output, /Known outcome sessions: 1/);
+  assert.match(output, /Verified sessions: 1/);
+  assert.match(output, /Verification share: 100\.0% \(1\/1\)/);
   assert.match(output, /Useful outcome rate: 100\.0% \(1\/1\)/);
   assert.match(output, /Unknown outcome rate: 0\.0% \(0\/1\)/);
   assert.match(output, /Verified success rate: 100\.0% \(1\/1\)/);
@@ -196,7 +207,27 @@ test("formats a local report as JSON", () => {
   assert.equal(parsed.failureRetrySummary.totalRetries, 0);
   assert.equal(parsed.failureRetrySummary.rejectedSessionCount, 0);
   assert.equal(parsed.failureRetrySummary.failureRetryBurden, null);
+  assert.equal(parsed.confidenceSummary.level, "insufficient");
+  assert.equal(parsed.confidenceSummary.knownOutcomeCount, 1);
+  assert.equal(parsed.confidenceSummary.verifiedSessionCount, 1);
+  assert.equal(parsed.confidenceSummary.verificationShare.rate, 1);
   assert.equal(parsed.usefulOutcomeRate.rate, 1);
   assert.equal(parsed.unknownOutcomeRate.rate, 0);
   assert.equal(parsed.verifiedSuccessRate.rate, 1);
+});
+
+test("labels reasonable confidence for larger verified local samples", () => {
+  const sessions = Array.from({ length: 20 }, (_, index) =>
+    session({
+      session_id: `session-${index}`,
+      final_outcome: index < 16 ? "accepted" : "rejected",
+      tests_outcome: index < 16 ? "passed" : "failed",
+    }),
+  );
+  const report = calculateLocalReport(sessions);
+
+  assert.equal(report.confidenceSummary.level, "reasonable");
+  assert.equal(report.confidenceSummary.knownOutcomeCount, 20);
+  assert.equal(report.confidenceSummary.verifiedSessionCount, 20);
+  assert.equal(report.confidenceSummary.verificationShare.rate, 1);
 });

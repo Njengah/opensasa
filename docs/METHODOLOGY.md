@@ -6,6 +6,9 @@ OpenSasa should help developers understand which AI coding models work in real s
 
 This is not a final scoring contract. It is the foundation for future implementation, public review, and iteration.
 
+Seed-only examples for interpreting these metrics are available in
+[`METHODOLOGY_EXAMPLES.md`](./METHODOLOGY_EXAMPLES.md).
+
 ## Methodology Principles
 
 OpenSasa should measure practical usefulness, not raw model popularity.

@@ -110,7 +110,8 @@ Recent PRs focused on hardening the local CLI workflow:
 - session/report filters and limits,
 - timestamp range filters and instant-aware timestamp comparisons,
 - expanded report methodology metrics,
-- local inspection and no-upload contribution preview.
+- local inspection and no-upload contribution preview,
+- local contribution consent state.
 
 ## Where We Are In The Roadmap
 
@@ -142,6 +143,5 @@ The next useful work should stay local-first and privacy-safe. Good candidates:
 
 - refine report clarity and methodology labels,
 - add more local report filters or grouping,
-- prepare methodology examples before any public index work,
 - or add import/wrapper experiments only if they do not collect private content.
 

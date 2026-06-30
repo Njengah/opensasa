@@ -25,6 +25,7 @@ All notable changes to OpenSasa will be documented in this file.
 - Confidence summary labels in local reports.
 - Contribution preview validation status for forbidden raw fields.
 - Local contribution consent state on sessions.
+- Seed-only methodology examples for interpreting local report metrics.
 - `opensasa update <session-id>` for editing safe local session metadata.
 - `opensasa delete <session-id> --yes` for explicitly deleting a local session.
 - CLI scaffold with `opensasa --help` and `opensasa --version`.

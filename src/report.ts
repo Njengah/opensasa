@@ -32,12 +32,14 @@ export type ConfidenceSummary = {
 
 export type LocalReport = {
   totalSessions: number;
+  sessionsByProvider: CountMap;
   sessionsByModel: CountMap;
   sessionsByTaskType: CountMap;
   acceptedOrPartiallyAcceptedCount: number;
   rejectedCount: number;
   unknownOutcomeCount: number;
   estimatedTotalCostUsd: number | null;
+  costByProviderUsd: Record<string, number>;
   costByModelUsd: Record<string, number>;
   costPerUsefulTaskUsd: number | null;
   failureCostUsd: number | null;
@@ -85,12 +87,14 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
 
   return {
     totalSessions: sessions.length,
+    sessionsByProvider: countBy(sessions, (session) => session.provider),
     sessionsByModel: countBy(sessions, modelKey),
     sessionsByTaskType: countBy(sessions, (session) => session.task_type),
     acceptedOrPartiallyAcceptedCount: usefulSessions.length,
     rejectedCount: rejectedSessions.length,
     unknownOutcomeCount: unknownOutcomeSessions.length,
     estimatedTotalCostUsd,
+    costByProviderUsd: sumBy(estimatedCostSessions, (session) => session.provider),
     costByModelUsd: sumByModel(estimatedCostSessions),
     costPerUsefulTaskUsd:
       estimatedTotalCostUsd === null ? null : calculateRate(estimatedTotalCostUsd, usefulSessions.length),
@@ -124,6 +128,9 @@ export function formatLocalReport(report: LocalReport): string {
     "",
     `Total sessions: ${report.totalSessions}`,
     "",
+    "Sessions by provider:",
+    ...formatCountMap(report.sessionsByProvider),
+    "",
     "Sessions by model:",
     ...formatCountMap(report.sessionsByModel),
     "",
@@ -139,6 +146,7 @@ export function formatLocalReport(report: LocalReport): string {
     `Estimated total cost: ${formatCurrencyOrUnknown(report.estimatedTotalCostUsd)}`,
     `Cost per useful task: ${formatCurrencyOrUnknown(report.costPerUsefulTaskUsd)}`,
     `Failure cost: ${formatCurrencyOrUnknown(report.failureCostUsd)}`,
+    ...formatCostMap("Cost by provider", report.costByProviderUsd),
     ...formatCostByModel(report.costByModelUsd),
     "",
     "Speed summary:",
@@ -287,8 +295,15 @@ function calculateMedianDuration(usefulSessions: LocalSession[]): number | null 
 }
 
 function sumByModel(sessions: LocalSession[]): Record<string, number> {
+  return sumBy(sessions, modelKey);
+}
+
+function sumBy(
+  sessions: LocalSession[],
+  getKey: (session: LocalSession) => string,
+): Record<string, number> {
   return sessions.reduce<Record<string, number>>((costs, session) => {
-    const key = modelKey(session);
+    const key = getKey(session);
     costs[key] = (costs[key] ?? 0) + (session.estimated_cost_usd ?? 0);
     return costs;
   }, {});
@@ -314,10 +329,14 @@ function formatCountMap(counts: CountMap): string[] {
 }
 
 function formatCostByModel(costs: Record<string, number>): string[] {
+  return formatCostMap("Cost by model", costs);
+}
+
+function formatCostMap(label: string, costs: Record<string, number>): string[] {
   const entries = Object.entries(costs).sort(([left], [right]) => left.localeCompare(right));
   return entries.length === 0
-    ? ["Cost by model: unknown"]
-    : ["Cost by model:", ...entries.map(([key, cost]) => `- ${key}: ${formatCurrency(cost)}`)];
+    ? [`${label}: unknown`]
+    : [`${label}:`, ...entries.map(([key, cost]) => `- ${key}: ${formatCurrency(cost)}`)];
 }
 
 function formatVerificationSummary(summary: Record<string, CountMap>): string[] {

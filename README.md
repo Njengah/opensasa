@@ -305,6 +305,7 @@ node ./dist/index.js report \
 The report is generated from local data only. It includes:
 
 - total sessions,
+- sessions by provider,
 - sessions by model,
 - sessions by task type,
 - accepted and partially accepted count,
@@ -313,6 +314,7 @@ The report is generated from local data only. It includes:
 - estimated total cost,
 - cost per useful task,
 - failure cost,
+- cost by provider,
 - cost by model,
 - speed to useful output,
 - retry summary,

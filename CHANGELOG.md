@@ -18,6 +18,7 @@ All notable changes to OpenSasa will be documented in this file.
 - `opensasa report` timestamp range filters with `--since` and `--until`.
 - `opensasa report --limit <count>` for calculating reports from the newest
   matching local sessions.
+- Provider grouping and provider cost totals in local reports.
 - Cost per useful task and failure cost metrics in local reports.
 - Speed to useful output metric in local reports.
 - Unknown outcome rate metric in local reports.

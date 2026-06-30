@@ -124,6 +124,7 @@ Completed:
 - local reports,
 - local inspection,
 - no-upload contribution preview,
+- local contribution consent state,
 - README workflow documentation.
 
 Still out of scope:
@@ -141,8 +142,6 @@ The next useful work should stay local-first and privacy-safe. Good candidates:
 
 - refine report clarity and methodology labels,
 - add more local report filters or grouping,
-- add explicit local contribution consent state without upload,
-- improve contribution preview validation against excluded fields,
 - prepare methodology examples before any public index work,
 - or add import/wrapper experiments only if they do not collect private content.
 

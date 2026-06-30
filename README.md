@@ -167,6 +167,7 @@ Useful optional fields include:
 - `--lint-outcome`
 - `--typecheck-outcome`
 - `--manual-review-outcome`
+- `--contribution-consent`
 
 For tests or temporary runs, override the database path:
 
@@ -185,7 +186,8 @@ node ./dist/index.js log \
 node ./dist/index.js update <session-id> \
   --final-outcome accepted \
   --tests-outcome passed \
-  --retry-count 2
+  --retry-count 2 \
+  --contribution-consent granted
 ```
 
 Use JSON output for scripting:
@@ -351,6 +353,9 @@ This generates a local preview of what a future contribution payload could
 include. The preview shows included fields, excluded fields, bucketed values,
 schema version, data source, consent status, validation status, and no-upload
 status.
+
+Contribution consent is stored locally as `not_granted`, `granted`, or
+`revoked`. Setting it does not enable uploads in the MVP.
 
 Uploads are not enabled in the MVP.
 

@@ -5,6 +5,7 @@ import { dirname, join } from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   bucketValues,
+  contributionConsentStates,
   costSources,
   finalOutcomes,
   localSessionSchema,
@@ -15,7 +16,8 @@ import {
   type LocalSession,
 } from "./schema.js";
 
-const migrationName = "001_create_sessions";
+const createSessionsMigration = "001_create_sessions";
+const contributionConsentMigration = "002_add_contribution_consent";
 
 const sessionColumns = [
   "schema_version",
@@ -48,6 +50,7 @@ const sessionColumns = [
   "lint_outcome",
   "typecheck_outcome",
   "manual_review_outcome",
+  "contribution_consent",
 ] as const;
 
 type SessionColumn = (typeof sessionColumns)[number];
@@ -211,6 +214,7 @@ function runMigrations(database: Database.Database): void {
   const workModeValues = sqlStringList(workModes);
   const bucketValueValues = sqlStringList(bucketValues);
   const costSourceValues = sqlStringList(costSources);
+  const contributionConsentValues = sqlStringList(contributionConsentStates);
 
   database.exec(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -221,55 +225,74 @@ function runMigrations(database: Database.Database): void {
 
   const migration = database
     .prepare("SELECT name FROM schema_migrations WHERE name = ?")
-    .get(migrationName);
+    .get(createSessionsMigration);
 
-  if (migration) {
+  if (!migration) {
+    const applyMigration = database.transaction(() => {
+      database.exec(`
+        CREATE TABLE sessions (
+          session_id TEXT PRIMARY KEY CHECK (length(trim(session_id)) > 0),
+          schema_version TEXT NOT NULL CHECK (schema_version = '${schemaVersion}'),
+          timestamp TEXT NOT NULL CHECK (length(trim(timestamp)) > 0),
+          provider TEXT NOT NULL CHECK (length(trim(provider)) > 0),
+          model_id TEXT NOT NULL CHECK (length(trim(model_id)) > 0),
+          model_version TEXT,
+          tool TEXT,
+          task_type TEXT NOT NULL CHECK (task_type IN (${taskTypeValues})),
+          final_outcome TEXT NOT NULL CHECK (final_outcome IN (${finalOutcomeValues})),
+          work_mode TEXT NOT NULL CHECK (work_mode IN (${workModeValues})),
+          language TEXT,
+          framework TEXT,
+          duration_seconds INTEGER CHECK (duration_seconds IS NULL OR (duration_seconds >= 0 AND typeof(duration_seconds) = 'integer')),
+          retry_count INTEGER CHECK (retry_count IS NULL OR (retry_count >= 0 AND typeof(retry_count) = 'integer')),
+          error_count INTEGER CHECK (error_count IS NULL OR (error_count >= 0 AND typeof(error_count) = 'integer')),
+          input_tokens_estimate INTEGER CHECK (input_tokens_estimate IS NULL OR (input_tokens_estimate >= 0 AND typeof(input_tokens_estimate) = 'integer')),
+          output_tokens_estimate INTEGER CHECK (output_tokens_estimate IS NULL OR (output_tokens_estimate >= 0 AND typeof(output_tokens_estimate) = 'integer')),
+          cached_tokens_estimate INTEGER CHECK (cached_tokens_estimate IS NULL OR (cached_tokens_estimate >= 0 AND typeof(cached_tokens_estimate) = 'integer')),
+          estimated_cost_usd REAL CHECK (estimated_cost_usd IS NULL OR estimated_cost_usd >= 0),
+          cost_source TEXT CHECK (cost_source IS NULL OR cost_source IN (${costSourceValues})),
+          repo_size_bucket TEXT CHECK (repo_size_bucket IS NULL OR repo_size_bucket IN (${bucketValueValues})),
+          file_count_bucket TEXT CHECK (file_count_bucket IS NULL OR file_count_bucket IN (${bucketValueValues})),
+          changed_file_count_bucket TEXT CHECK (changed_file_count_bucket IS NULL OR changed_file_count_bucket IN (${bucketValueValues})),
+          lines_added_bucket TEXT CHECK (lines_added_bucket IS NULL OR lines_added_bucket IN (${bucketValueValues})),
+          lines_removed_bucket TEXT CHECK (lines_removed_bucket IS NULL OR lines_removed_bucket IN (${bucketValueValues})),
+          tests_outcome TEXT NOT NULL CHECK (tests_outcome IN (${verificationOutcomeValues})),
+          build_outcome TEXT NOT NULL CHECK (build_outcome IN (${verificationOutcomeValues})),
+          lint_outcome TEXT NOT NULL CHECK (lint_outcome IN (${verificationOutcomeValues})),
+          typecheck_outcome TEXT NOT NULL CHECK (typecheck_outcome IN (${verificationOutcomeValues})),
+          manual_review_outcome TEXT NOT NULL CHECK (manual_review_outcome IN (${finalOutcomeValues})),
+          created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      database
+        .prepare("INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)")
+        .run(createSessionsMigration, new Date().toISOString());
+    });
+
+    applyMigration();
+  }
+
+  const consentMigration = database
+    .prepare("SELECT name FROM schema_migrations WHERE name = ?")
+    .get(contributionConsentMigration);
+
+  if (consentMigration) {
     return;
   }
 
-  const applyMigration = database.transaction(() => {
+  const applyConsentMigration = database.transaction(() => {
     database.exec(`
-      CREATE TABLE sessions (
-        session_id TEXT PRIMARY KEY CHECK (length(trim(session_id)) > 0),
-        schema_version TEXT NOT NULL CHECK (schema_version = '${schemaVersion}'),
-        timestamp TEXT NOT NULL CHECK (length(trim(timestamp)) > 0),
-        provider TEXT NOT NULL CHECK (length(trim(provider)) > 0),
-        model_id TEXT NOT NULL CHECK (length(trim(model_id)) > 0),
-        model_version TEXT,
-        tool TEXT,
-        task_type TEXT NOT NULL CHECK (task_type IN (${taskTypeValues})),
-        final_outcome TEXT NOT NULL CHECK (final_outcome IN (${finalOutcomeValues})),
-        work_mode TEXT NOT NULL CHECK (work_mode IN (${workModeValues})),
-        language TEXT,
-        framework TEXT,
-        duration_seconds INTEGER CHECK (duration_seconds IS NULL OR (duration_seconds >= 0 AND typeof(duration_seconds) = 'integer')),
-        retry_count INTEGER CHECK (retry_count IS NULL OR (retry_count >= 0 AND typeof(retry_count) = 'integer')),
-        error_count INTEGER CHECK (error_count IS NULL OR (error_count >= 0 AND typeof(error_count) = 'integer')),
-        input_tokens_estimate INTEGER CHECK (input_tokens_estimate IS NULL OR (input_tokens_estimate >= 0 AND typeof(input_tokens_estimate) = 'integer')),
-        output_tokens_estimate INTEGER CHECK (output_tokens_estimate IS NULL OR (output_tokens_estimate >= 0 AND typeof(output_tokens_estimate) = 'integer')),
-        cached_tokens_estimate INTEGER CHECK (cached_tokens_estimate IS NULL OR (cached_tokens_estimate >= 0 AND typeof(cached_tokens_estimate) = 'integer')),
-        estimated_cost_usd REAL CHECK (estimated_cost_usd IS NULL OR estimated_cost_usd >= 0),
-        cost_source TEXT CHECK (cost_source IS NULL OR cost_source IN (${costSourceValues})),
-        repo_size_bucket TEXT CHECK (repo_size_bucket IS NULL OR repo_size_bucket IN (${bucketValueValues})),
-        file_count_bucket TEXT CHECK (file_count_bucket IS NULL OR file_count_bucket IN (${bucketValueValues})),
-        changed_file_count_bucket TEXT CHECK (changed_file_count_bucket IS NULL OR changed_file_count_bucket IN (${bucketValueValues})),
-        lines_added_bucket TEXT CHECK (lines_added_bucket IS NULL OR lines_added_bucket IN (${bucketValueValues})),
-        lines_removed_bucket TEXT CHECK (lines_removed_bucket IS NULL OR lines_removed_bucket IN (${bucketValueValues})),
-        tests_outcome TEXT NOT NULL CHECK (tests_outcome IN (${verificationOutcomeValues})),
-        build_outcome TEXT NOT NULL CHECK (build_outcome IN (${verificationOutcomeValues})),
-        lint_outcome TEXT NOT NULL CHECK (lint_outcome IN (${verificationOutcomeValues})),
-        typecheck_outcome TEXT NOT NULL CHECK (typecheck_outcome IN (${verificationOutcomeValues})),
-        manual_review_outcome TEXT NOT NULL CHECK (manual_review_outcome IN (${finalOutcomeValues})),
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-      );
+      ALTER TABLE sessions ADD COLUMN contribution_consent TEXT NOT NULL DEFAULT 'not_granted'
+        CHECK (contribution_consent IN (${contributionConsentValues}));
     `);
 
     database
       .prepare("INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)")
-      .run(migrationName, new Date().toISOString());
+      .run(contributionConsentMigration, new Date().toISOString());
   });
 
-  applyMigration();
+  applyConsentMigration();
 }
 
 function parseSessionWithGeneratedId(input: unknown): LocalSession {

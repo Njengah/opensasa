@@ -38,6 +38,7 @@ const baseSession = localSessionSchema.parse({
   lines_added_bucket: "small",
   lines_removed_bucket: "tiny",
   tests_outcome: "passed",
+  contribution_consent: "granted",
 });
 
 test("builds a sanitized contribution preview", () => {
@@ -113,7 +114,7 @@ test("formats contribution preview with no-upload status and excluded fields", (
 
   assert.match(output, /OpenSasa Contribution Preview/);
   assert.match(output, /Status: preview only/);
-  assert.match(output, /Consent: not granted/);
+  assert.match(output, /Consent: granted/);
   assert.match(output, /Upload enabled: no/);
   assert.match(output, /No upload will occur in this MVP/);
   assert.match(output, /Validation:/);
@@ -133,7 +134,7 @@ test("builds and formats contribution preview as JSON", () => {
   const parsed = JSON.parse(formatContributionPreviewJson(baseSession));
 
   assert.equal(inspection.status, "preview only");
-  assert.equal(inspection.consent, "not granted");
+  assert.equal(inspection.consent, "granted");
   assert.equal(inspection.upload_enabled, false);
   assert.equal(inspection.destination, "none");
   assert.equal(inspection.validation.status, "passed");

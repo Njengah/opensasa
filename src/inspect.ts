@@ -4,6 +4,7 @@ import {
   deriveVerifiedSuccess,
   schemaVersion,
   type LocalSession,
+  type ContributionConsentState,
 } from "./schema.js";
 
 const excludedContributionFields = [
@@ -91,7 +92,7 @@ type ContributionValidation = {
 
 type ContributionPreviewInspection = {
   status: "preview only";
-  consent: "not granted";
+  consent: ContributionConsentState;
   upload_enabled: false;
   destination: "none";
   no_upload_notice: string;
@@ -171,10 +172,10 @@ export function buildContributionPreviewInspection(
 
   return {
     status: "preview only",
-    consent: "not granted",
     upload_enabled: false,
     destination: "none",
     no_upload_notice: "No upload will occur in this MVP.",
+    consent: session.contribution_consent,
     validation: validateContributionPreview(includedFields),
     included_fields: includedFields,
     excluded_fields: [...excludedContributionFields],
@@ -262,6 +263,7 @@ function localInspectionFields(session: LocalSession): Record<string, unknown> {
     lint_outcome: session.lint_outcome,
     typecheck_outcome: session.typecheck_outcome,
     manual_review_outcome: session.manual_review_outcome,
+    contribution_consent: session.contribution_consent,
     verified_success: deriveVerifiedSuccess(session),
   };
 }

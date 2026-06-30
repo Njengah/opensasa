@@ -95,6 +95,7 @@ Local reports currently include:
 - speed to useful output,
 - retry burden for useful sessions,
 - failure retry burden for rejected sessions,
+- confidence summary labels,
 - verification outcome summary,
 - useful outcome rate,
 - unknown outcome rate,

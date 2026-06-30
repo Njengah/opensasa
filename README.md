@@ -313,6 +313,7 @@ The report is generated from local data only. It includes:
 - speed to useful output,
 - retry summary,
 - failure retry burden,
+- confidence summary,
 - verification outcome summary,
 - useful outcome rate,
 - unknown outcome rate,

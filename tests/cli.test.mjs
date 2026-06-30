@@ -1172,6 +1172,10 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /Retry burden: 1\.00/);
   assert.match(stdout, /Total retries on rejected sessions: 2/);
   assert.match(stdout, /Failure retry burden: 2\.00/);
+  assert.match(stdout, /Confidence level: insufficient/);
+  assert.match(stdout, /Known outcome sessions: 2/);
+  assert.match(stdout, /Verified sessions: 2/);
+  assert.match(stdout, /Verification share: 100\.0% \(2\/2\)/);
   assert.match(stdout, /Useful outcome rate: 50\.0% \(1\/2\)/);
   assert.match(stdout, /Unknown outcome rate: 0\.0% \(0\/2\)/);
   assert.match(stdout, /Verified success rate: 50\.0% \(1\/2\)/);
@@ -1450,6 +1454,10 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.failureRetrySummary.totalRetries, 2);
   assert.equal(report.failureRetrySummary.rejectedSessionCount, 1);
   assert.equal(report.failureRetrySummary.failureRetryBurden, 2);
+  assert.equal(report.confidenceSummary.level, "insufficient");
+  assert.equal(report.confidenceSummary.knownOutcomeCount, 2);
+  assert.equal(report.confidenceSummary.verifiedSessionCount, 2);
+  assert.equal(report.confidenceSummary.verificationShare.rate, 1);
   assert.equal(report.usefulOutcomeRate.rate, 0.5);
   assert.equal(report.unknownOutcomeRate.rate, 0);
   assert.equal(report.verifiedSuccessRate.rate, 0.5);

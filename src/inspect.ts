@@ -22,6 +22,30 @@ const excludedContributionFields = [
   "personally identifying information",
 ] as const;
 
+const forbiddenContributionKeys = [
+  "session_id",
+  "timestamp",
+  "estimated_cost_usd",
+  "duration_seconds",
+  "retry_count",
+  "error_count",
+  "input_tokens_estimate",
+  "output_tokens_estimate",
+  "cached_tokens_estimate",
+  "prompt",
+  "source_code",
+  "model_response",
+  "terminal_output",
+  "file_path",
+  "repository_name",
+  "organization_name",
+  "company_name",
+  "customer_name",
+  "secret",
+  "api_key",
+  "private_notes",
+] as const;
+
 type LocalInspection = {
   local_record: Record<string, unknown>;
   privacy_boundary: string[];
@@ -59,12 +83,19 @@ type ContributionPreview = {
   data_source: string;
 };
 
+type ContributionValidation = {
+  status: "passed" | "failed";
+  checked_fields: string[];
+  forbidden_fields_present: string[];
+};
+
 type ContributionPreviewInspection = {
   status: "preview only";
   consent: "not granted";
   upload_enabled: false;
   destination: "none";
   no_upload_notice: string;
+  validation: ContributionValidation;
   included_fields: ContributionPreview;
   excluded_fields: string[];
 };
@@ -94,6 +125,15 @@ export function formatContributionPreview(session: LocalSession): string {
     `Upload enabled: ${preview.upload_enabled ? "yes" : "no"}`,
     `Destination: ${preview.destination}`,
     preview.no_upload_notice,
+    "",
+    "Validation:",
+    `- status: ${preview.validation.status}`,
+    `- checked_fields: ${preview.validation.checked_fields.length}`,
+    `- forbidden_fields_present: ${
+      preview.validation.forbidden_fields_present.length === 0
+        ? "none"
+        : preview.validation.forbidden_fields_present.join(", ")
+    }`,
     "",
     "Included fields:",
     ...formatObject(preview.included_fields),
@@ -127,14 +167,32 @@ export function buildLocalInspection(session: LocalSession): LocalInspection {
 export function buildContributionPreviewInspection(
   session: LocalSession,
 ): ContributionPreviewInspection {
+  const includedFields = buildContributionPreview(session);
+
   return {
     status: "preview only",
     consent: "not granted",
     upload_enabled: false,
     destination: "none",
     no_upload_notice: "No upload will occur in this MVP.",
-    included_fields: buildContributionPreview(session),
+    validation: validateContributionPreview(includedFields),
+    included_fields: includedFields,
     excluded_fields: [...excludedContributionFields],
+  };
+}
+
+export function validateContributionPreview(
+  preview: Record<string, unknown>,
+): ContributionValidation {
+  const checkedFields = Object.keys(preview);
+  const forbiddenFieldsPresent = checkedFields.filter((field) =>
+    (forbiddenContributionKeys as readonly string[]).includes(field),
+  );
+
+  return {
+    status: forbiddenFieldsPresent.length === 0 ? "passed" : "failed",
+    checked_fields: checkedFields,
+    forbidden_fields_present: forbiddenFieldsPresent,
   };
 }
 

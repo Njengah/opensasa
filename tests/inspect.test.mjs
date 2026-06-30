@@ -8,6 +8,7 @@ import {
   formatContributionPreviewJson,
   formatLocalInspection,
   formatLocalInspectionJson,
+  validateContributionPreview,
 } from "../dist/inspect.js";
 import { localSessionSchema } from "../dist/schema.js";
 
@@ -62,6 +63,29 @@ test("builds a sanitized contribution preview", () => {
   assert.equal(Object.hasOwn(preview, "estimated_cost_usd"), false);
 });
 
+test("validates contribution preview fields", () => {
+  const preview = buildContributionPreview(baseSession);
+  const validation = validateContributionPreview(preview);
+
+  assert.equal(validation.status, "passed");
+  assert.equal(validation.checked_fields.includes("timestamp_bucket"), true);
+  assert.deepEqual(validation.forbidden_fields_present, []);
+});
+
+test("flags forbidden contribution preview fields", () => {
+  const validation = validateContributionPreview({
+    schema_version: "opensasa.metadata.v0",
+    session_id: "session-123",
+    timestamp: "2026-06-09T12:34:56.000Z",
+  });
+
+  assert.equal(validation.status, "failed");
+  assert.deepEqual(validation.forbidden_fields_present, [
+    "session_id",
+    "timestamp",
+  ]);
+});
+
 test("formats local inspection with local record and privacy boundary", () => {
   const output = formatLocalInspection(baseSession);
 
@@ -92,6 +116,9 @@ test("formats contribution preview with no-upload status and excluded fields", (
   assert.match(output, /Consent: not granted/);
   assert.match(output, /Upload enabled: no/);
   assert.match(output, /No upload will occur in this MVP/);
+  assert.match(output, /Validation:/);
+  assert.match(output, /status: passed/);
+  assert.match(output, /forbidden_fields_present: none/);
   assert.match(output, /timestamp_bucket: 2026-06-09/);
   assert.match(output, /estimated_cost_bucket: under_1_usd/);
   assert.match(output, /source code/);
@@ -109,6 +136,8 @@ test("builds and formats contribution preview as JSON", () => {
   assert.equal(inspection.consent, "not granted");
   assert.equal(inspection.upload_enabled, false);
   assert.equal(inspection.destination, "none");
+  assert.equal(inspection.validation.status, "passed");
+  assert.deepEqual(inspection.validation.forbidden_fields_present, []);
   assert.equal(inspection.included_fields.timestamp_bucket, "2026-06-09");
   assert.equal(inspection.included_fields.estimated_cost_bucket, "under_1_usd");
   assert.equal(inspection.included_fields.verified_success, true);

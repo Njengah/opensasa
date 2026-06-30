@@ -23,6 +23,7 @@ All notable changes to OpenSasa will be documented in this file.
 - Unknown outcome rate metric in local reports.
 - Failure retry burden metric in local reports.
 - Confidence summary labels in local reports.
+- Contribution preview validation status for forbidden raw fields.
 - `opensasa update <session-id>` for editing safe local session metadata.
 - `opensasa delete <session-id> --yes` for explicitly deleting a local session.
 - CLI scaffold with `opensasa --help` and `opensasa --version`.
@@ -46,6 +47,7 @@ All notable changes to OpenSasa will be documented in this file.
 - The CLI does not request or store source code, private prompts, model responses,
   exact file paths, repository names, secrets, or raw terminal output.
 - Contribution previews are local-only and label consent as not granted.
+- Contribution previews validate that forbidden raw fields are not present.
 
 ### Methodology
 

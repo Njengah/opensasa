@@ -1792,6 +1792,9 @@ test("previews a sanitized contribution payload without upload", async () => {
   assert.match(stdout, /Consent: not granted/);
   assert.match(stdout, /Upload enabled: no/);
   assert.match(stdout, /No upload will occur in this MVP/);
+  assert.match(stdout, /Validation:/);
+  assert.match(stdout, /status: passed/);
+  assert.match(stdout, /forbidden_fields_present: none/);
   assert.match(stdout, /timestamp_bucket: 2026-06-09/);
   assert.match(stdout, /input_tokens_bucket: large/);
   assert.match(stdout, /estimated_cost_bucket: under_1_usd/);
@@ -1838,6 +1841,8 @@ test("previews a sanitized contribution payload as JSON without upload", async (
   assert.equal(preview.consent, "not granted");
   assert.equal(preview.upload_enabled, false);
   assert.equal(preview.destination, "none");
+  assert.equal(preview.validation.status, "passed");
+  assert.deepEqual(preview.validation.forbidden_fields_present, []);
   assert.equal(preview.included_fields.timestamp_bucket, "2026-06-09");
   assert.equal(preview.included_fields.input_tokens_bucket, "large");
   assert.equal(preview.included_fields.estimated_cost_bucket, "under_1_usd");

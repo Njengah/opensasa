@@ -83,12 +83,14 @@ node ./dist/index.js inspect <session-id> --contribution --db-path ./opensasa-de
 Local reports currently include:
 
 - total sessions,
+- sessions by provider,
 - sessions by model,
 - sessions by task type,
 - accepted or partially accepted count,
 - rejected count,
 - unknown outcome count,
 - estimated total cost,
+- cost by provider,
 - cost by model,
 - cost per useful task,
 - failure cost,
@@ -111,7 +113,8 @@ Recent PRs focused on hardening the local CLI workflow:
 - timestamp range filters and instant-aware timestamp comparisons,
 - expanded report methodology metrics,
 - local inspection and no-upload contribution preview,
-- local contribution consent state.
+- local contribution consent state,
+- seed methodology examples.
 
 ## Where We Are In The Roadmap
 

@@ -1170,6 +1170,9 @@ test("prints a local report from saved sessions", async () => {
   ]);
 
   assert.match(stdout, /Total sessions: 2/);
+  assert.match(stdout, /Sessions by provider:/);
+  assert.match(stdout, /OpenAI: 1/);
+  assert.match(stdout, /Anthropic: 1/);
   assert.match(stdout, /OpenAI\/gpt-5: 1/);
   assert.match(stdout, /Anthropic\/claude-sonnet-4\.5: 1/);
   assert.match(stdout, /bug_fix: 1/);
@@ -1179,6 +1182,9 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /Estimated total cost: \$1\.5000/);
   assert.match(stdout, /Cost per useful task: \$1\.5000/);
   assert.match(stdout, /Failure cost: \$1\.0000/);
+  assert.match(stdout, /Cost by provider:/);
+  assert.match(stdout, /OpenAI: \$0\.5000/);
+  assert.match(stdout, /Anthropic: \$1\.0000/);
   assert.match(stdout, /Speed to useful output: 300\.0s/);
   assert.match(stdout, /Retry burden: 1\.00/);
   assert.match(stdout, /Total retries on rejected sessions: 2/);
@@ -1455,9 +1461,13 @@ test("prints a local report from saved sessions as JSON", async () => {
   const report = JSON.parse(stdout);
 
   assert.equal(report.totalSessions, 2);
+  assert.equal(report.sessionsByProvider.OpenAI, 1);
+  assert.equal(report.sessionsByProvider.Anthropic, 1);
   assert.equal(report.sessionsByModel["OpenAI/gpt-5"], 1);
   assert.equal(report.sessionsByModel["Anthropic/claude-sonnet-4.5"], 1);
   assert.equal(report.estimatedTotalCostUsd, 1.5);
+  assert.equal(report.costByProviderUsd.OpenAI, 0.5);
+  assert.equal(report.costByProviderUsd.Anthropic, 1);
   assert.equal(report.costPerUsefulTaskUsd, 1.5);
   assert.equal(report.failureCostUsd, 1);
   assert.equal(report.speedToUsefulOutputSeconds, 300);

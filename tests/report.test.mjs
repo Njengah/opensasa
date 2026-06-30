@@ -63,6 +63,11 @@ test("calculates local report metrics from safe session metadata", () => {
   ]);
 
   assert.equal(report.totalSessions, 4);
+  assert.deepEqual(report.sessionsByProvider, {
+    Anthropic: 1,
+    Google: 1,
+    OpenAI: 2,
+  });
   assert.deepEqual(report.sessionsByModel, {
     "Anthropic/claude-sonnet-4.5": 1,
     "Google/gemini-cli": 1,
@@ -77,6 +82,10 @@ test("calculates local report metrics from safe session metadata", () => {
   assert.equal(report.rejectedCount, 1);
   assert.equal(report.unknownOutcomeCount, 1);
   assert.equal(report.estimatedTotalCostUsd, 2.5);
+  assert.deepEqual(report.costByProviderUsd, {
+    Anthropic: 1.25,
+    OpenAI: 1.25,
+  });
   assert.deepEqual(report.costByModelUsd, {
     "Anthropic/claude-sonnet-4.5": 1.25,
     "OpenAI/gpt-5": 1.25,
@@ -129,6 +138,7 @@ test("labels missing cost and unknown outcome rates clearly", () => {
   ]);
 
   assert.equal(report.estimatedTotalCostUsd, null);
+  assert.deepEqual(report.costByProviderUsd, {});
   assert.deepEqual(report.costByModelUsd, {});
   assert.equal(report.costPerUsefulTaskUsd, null);
   assert.equal(report.failureCostUsd, 0);
@@ -172,10 +182,12 @@ test("formats a readable local report", () => {
 
   assert.match(output, /OpenSasa Local Report/);
   assert.match(output, /Total sessions: 1/);
+  assert.match(output, /Sessions by provider:\n- OpenAI: 1/);
   assert.match(output, /OpenAI\/gpt-5: 1/);
   assert.match(output, /Estimated total cost: \$0\.5000/);
   assert.match(output, /Cost per useful task: \$0\.5000/);
   assert.match(output, /Failure cost: \$0\.0000/);
+  assert.match(output, /Cost by provider:\n- OpenAI: \$0\.5000/);
   assert.match(output, /Speed to useful output: 300\.0s/);
   assert.match(output, /Total retries on rejected sessions: 0/);
   assert.match(output, /Failure retry burden: unknown/);
@@ -200,7 +212,9 @@ test("formats a local report as JSON", () => {
   const parsed = JSON.parse(formatLocalReportJson(report));
 
   assert.equal(parsed.totalSessions, 1);
+  assert.equal(parsed.sessionsByProvider.OpenAI, 1);
   assert.equal(parsed.estimatedTotalCostUsd, 0.5);
+  assert.equal(parsed.costByProviderUsd.OpenAI, 0.5);
   assert.equal(parsed.costPerUsefulTaskUsd, 0.5);
   assert.equal(parsed.failureCostUsd, 0);
   assert.equal(parsed.speedToUsefulOutputSeconds, 300);

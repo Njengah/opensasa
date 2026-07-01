@@ -1180,6 +1180,9 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /Sessions by tool:/);
   assert.match(stdout, /Codex: 1/);
   assert.match(stdout, /Claude Code: 1/);
+  assert.match(stdout, /Sessions by language:/);
+  assert.match(stdout, /TypeScript: 1/);
+  assert.match(stdout, /unknown: 1/);
   assert.match(stdout, /bug_fix: 1/);
   assert.match(stdout, /feature: 1/);
   assert.match(stdout, /Accepted or partially accepted: 1/);
@@ -1193,6 +1196,9 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /Cost by tool:/);
   assert.match(stdout, /Codex: \$0\.5000/);
   assert.match(stdout, /Claude Code: \$1\.0000/);
+  assert.match(stdout, /Cost by language:/);
+  assert.match(stdout, /TypeScript: \$0\.5000/);
+  assert.match(stdout, /unknown: \$1\.0000/);
   assert.match(stdout, /Speed to useful output: 300\.0s/);
   assert.match(stdout, /Retry burden: 1\.00/);
   assert.match(stdout, /Total retries on rejected sessions: 2/);
@@ -1204,7 +1210,6 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /Useful outcome rate: 50\.0% \(1\/2\)/);
   assert.match(stdout, /Unknown outcome rate: 0\.0% \(0\/2\)/);
   assert.match(stdout, /Verified success rate: 50\.0% \(1\/2\)/);
-  assert.doesNotMatch(stdout, /TypeScript/);
 });
 
 test("prints a filtered local report from saved sessions", async () => {
@@ -1224,6 +1229,7 @@ test("prints a filtered local report from saved sessions", async () => {
       duration_seconds: 300,
       retry_count: 1,
       estimated_cost_usd: 0.5,
+      language: "TypeScript",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1299,6 +1305,7 @@ test("prints a date-filtered local report from saved sessions", async () => {
       duration_seconds: 300,
       retry_count: 1,
       estimated_cost_usd: 0.5,
+      language: "TypeScript",
     });
     store.createSession({
       timestamp: "2026-06-09T12:00:00.000Z",
@@ -1446,6 +1453,7 @@ test("prints a local report from saved sessions as JSON", async () => {
       duration_seconds: 300,
       retry_count: 1,
       estimated_cost_usd: 0.5,
+      language: "TypeScript",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1479,11 +1487,15 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.sessionsByModel["Anthropic/claude-sonnet-4.5"], 1);
   assert.equal(report.sessionsByTool.Codex, 1);
   assert.equal(report.sessionsByTool["Claude Code"], 1);
+  assert.equal(report.sessionsByLanguage.TypeScript, 1);
+  assert.equal(report.sessionsByLanguage.unknown, 1);
   assert.equal(report.estimatedTotalCostUsd, 1.5);
   assert.equal(report.costByProviderUsd.OpenAI, 0.5);
   assert.equal(report.costByProviderUsd.Anthropic, 1);
   assert.equal(report.costByToolUsd.Codex, 0.5);
   assert.equal(report.costByToolUsd["Claude Code"], 1);
+  assert.equal(report.costByLanguageUsd.TypeScript, 0.5);
+  assert.equal(report.costByLanguageUsd.unknown, 1);
   assert.equal(report.costPerUsefulTaskUsd, 1.5);
   assert.equal(report.failureCostUsd, 1);
   assert.equal(report.speedToUsefulOutputSeconds, 300);

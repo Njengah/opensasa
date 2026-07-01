@@ -85,6 +85,7 @@ Local reports currently include:
 - total sessions,
 - sessions by provider,
 - sessions by model,
+- sessions by tool,
 - sessions by task type,
 - accepted or partially accepted count,
 - rejected count,
@@ -92,6 +93,7 @@ Local reports currently include:
 - estimated total cost,
 - cost by provider,
 - cost by model,
+- cost by tool,
 - cost per useful task,
 - failure cost,
 - speed to useful output,
@@ -114,7 +116,8 @@ Recent PRs focused on hardening the local CLI workflow:
 - expanded report methodology metrics,
 - local inspection and no-upload contribution preview,
 - local contribution consent state,
-- seed methodology examples.
+- seed methodology examples,
+- provider and tool grouping in local reports.
 
 ## Where We Are In The Roadmap
 

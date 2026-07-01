@@ -35,6 +35,7 @@ export type LocalReport = {
   sessionsByProvider: CountMap;
   sessionsByModel: CountMap;
   sessionsByTool: CountMap;
+  sessionsByLanguage: CountMap;
   sessionsByTaskType: CountMap;
   acceptedOrPartiallyAcceptedCount: number;
   rejectedCount: number;
@@ -43,6 +44,7 @@ export type LocalReport = {
   costByProviderUsd: Record<string, number>;
   costByModelUsd: Record<string, number>;
   costByToolUsd: Record<string, number>;
+  costByLanguageUsd: Record<string, number>;
   costPerUsefulTaskUsd: number | null;
   failureCostUsd: number | null;
   speedToUsefulOutputSeconds: number | null;
@@ -92,6 +94,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     sessionsByProvider: countBy(sessions, (session) => session.provider),
     sessionsByModel: countBy(sessions, modelKey),
     sessionsByTool: countBy(sessions, toolKey),
+    sessionsByLanguage: countBy(sessions, languageKey),
     sessionsByTaskType: countBy(sessions, (session) => session.task_type),
     acceptedOrPartiallyAcceptedCount: usefulSessions.length,
     rejectedCount: rejectedSessions.length,
@@ -100,6 +103,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     costByProviderUsd: sumBy(estimatedCostSessions, (session) => session.provider),
     costByModelUsd: sumByModel(estimatedCostSessions),
     costByToolUsd: sumBy(estimatedCostSessions, toolKey),
+    costByLanguageUsd: sumBy(estimatedCostSessions, languageKey),
     costPerUsefulTaskUsd:
       estimatedTotalCostUsd === null ? null : calculateRate(estimatedTotalCostUsd, usefulSessions.length),
     failureCostUsd,
@@ -141,6 +145,9 @@ export function formatLocalReport(report: LocalReport): string {
     "Sessions by tool:",
     ...formatCountMap(report.sessionsByTool),
     "",
+    "Sessions by language:",
+    ...formatCountMap(report.sessionsByLanguage),
+    "",
     "Sessions by task type:",
     ...formatCountMap(report.sessionsByTaskType),
     "",
@@ -156,6 +163,7 @@ export function formatLocalReport(report: LocalReport): string {
     ...formatCostMap("Cost by provider", report.costByProviderUsd),
     ...formatCostByModel(report.costByModelUsd),
     ...formatCostMap("Cost by tool", report.costByToolUsd),
+    ...formatCostMap("Cost by language", report.costByLanguageUsd),
     "",
     "Speed summary:",
     `Speed to useful output: ${formatSecondsOrUnknown(report.speedToUsefulOutputSeconds)}`,
@@ -323,6 +331,10 @@ function modelKey(session: LocalSession): string {
 
 function toolKey(session: LocalSession): string {
   return session.tool ?? "unknown";
+}
+
+function languageKey(session: LocalSession): string {
+  return session.language ?? "unknown";
 }
 
 function calculateRate(numerator: number, denominator: number): number | null {

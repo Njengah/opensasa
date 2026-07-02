@@ -243,6 +243,8 @@ Filter the list by safe metadata fields:
 node ./dist/index.js sessions \
   --provider OpenAI \
   --model-id gpt-5 \
+  --tool Codex \
+  --language TypeScript \
   --task-type bug_fix \
   --final-outcome accepted
 ```
@@ -290,6 +292,8 @@ Filter the report by safe metadata fields:
 node ./dist/index.js report \
   --provider OpenAI \
   --model-id gpt-5 \
+  --tool Codex \
+  --language TypeScript \
   --task-type bug_fix \
   --final-outcome accepted
 ```

@@ -114,6 +114,7 @@ Recent PRs focused on hardening the local CLI workflow:
 - session and report JSON output,
 - session update and delete commands,
 - session/report filters and limits,
+- tool and language filters for sessions and reports,
 - timestamp range filters and instant-aware timestamp comparisons,
 - expanded report methodology metrics,
 - local inspection and no-upload contribution preview,

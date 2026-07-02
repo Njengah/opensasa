@@ -13,10 +13,10 @@ All notable changes to OpenSasa will be documented in this file.
 - `opensasa log --json` for script-friendly local session creation output.
 - `opensasa sessions --limit <count>` for limiting local session history output.
 - `opensasa sessions` filters for provider, model ID, task type, and final outcome.
-- `opensasa sessions` filters for tool and language.
+- `opensasa sessions` filters for tool, language, framework, and work mode.
 - `opensasa sessions` timestamp range filters with `--since` and `--until`.
 - `opensasa report` filters for provider, model ID, task type, and final outcome.
-- `opensasa report` filters for tool and language.
+- `opensasa report` filters for tool, language, framework, and work mode.
 - `opensasa report` timestamp range filters with `--since` and `--until`.
 - `opensasa report --limit <count>` for calculating reports from the newest
   matching local sessions.

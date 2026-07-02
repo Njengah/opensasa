@@ -67,6 +67,8 @@ type SessionsOptions = StoreOptions & {
   modelId?: string;
   tool?: string;
   language?: string;
+  framework?: string;
+  workMode?: string;
   taskType?: string;
   finalOutcome?: string;
   since?: string;
@@ -80,6 +82,8 @@ type ReportOptions = StoreOptions & {
   modelId?: string;
   tool?: string;
   language?: string;
+  framework?: string;
+  workMode?: string;
   taskType?: string;
   finalOutcome?: string;
   since?: string;
@@ -332,6 +336,8 @@ program
   .option("--model-id <model-id>", "filter sessions by model ID")
   .option("--tool <tool>", "filter sessions by AI coding tool or agent")
   .option("--language <language>", "filter sessions by primary language")
+  .option("--framework <framework>", "filter sessions by primary framework")
+  .option("--work-mode <work-mode>", "filter sessions by work mode")
   .option("--task-type <task-type>", "filter sessions by task type")
   .option("--final-outcome <final-outcome>", "filter sessions by final outcome")
   .option("--since <timestamp>", "filter sessions at or after an ISO timestamp", parseIsoTimestamp)
@@ -347,6 +353,8 @@ program
         modelId: options.modelId,
         tool: options.tool,
         language: options.language,
+        framework: options.framework,
+        workMode: options.workMode,
         taskType: options.taskType,
         finalOutcome: options.finalOutcome,
         since: options.since,
@@ -381,6 +389,8 @@ program
   .option("--model-id <model-id>", "filter report by model ID")
   .option("--tool <tool>", "filter report by AI coding tool or agent")
   .option("--language <language>", "filter report by primary language")
+  .option("--framework <framework>", "filter report by primary framework")
+  .option("--work-mode <work-mode>", "filter report by work mode")
   .option("--task-type <task-type>", "filter report by task type")
   .option("--final-outcome <final-outcome>", "filter report by final outcome")
   .option("--since <timestamp>", "filter report sessions at or after an ISO timestamp", parseIsoTimestamp)
@@ -396,6 +406,8 @@ program
         modelId: options.modelId,
         tool: options.tool,
         language: options.language,
+        framework: options.framework,
+        workMode: options.workMode,
         taskType: options.taskType,
         finalOutcome: options.finalOutcome,
         since: options.since,

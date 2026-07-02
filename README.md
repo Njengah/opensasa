@@ -245,6 +245,8 @@ node ./dist/index.js sessions \
   --model-id gpt-5 \
   --tool Codex \
   --language TypeScript \
+  --framework Node.js \
+  --work-mode manual_log \
   --task-type bug_fix \
   --final-outcome accepted
 ```
@@ -294,6 +296,8 @@ node ./dist/index.js report \
   --model-id gpt-5 \
   --tool Codex \
   --language TypeScript \
+  --framework Node.js \
+  --work-mode manual_log \
   --task-type bug_fix \
   --final-outcome accepted
 ```

@@ -39,6 +39,8 @@ test("prints log help with manual session options", async () => {
   assert.match(stdout, /--model-id/);
   assert.match(stdout, /--tool/);
   assert.match(stdout, /--language/);
+  assert.match(stdout, /--framework/);
+  assert.match(stdout, /--work-mode/);
   assert.match(stdout, /--task-type/);
   assert.match(stdout, /--final-outcome/);
   assert.match(stdout, /--contribution-consent/);
@@ -716,6 +718,8 @@ test("filters saved sessions in text output", async () => {
   let differentProvider;
   let differentTool;
   let differentLanguage;
+  let differentFramework;
+  let differentWorkMode;
   let differentTask;
 
   try {
@@ -725,6 +729,7 @@ test("filters saved sessions in text output", async () => {
       model_id: "gpt-5",
       tool: "Codex",
       language: "TypeScript",
+      framework: "Node.js",
       task_type: "bug_fix",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -735,6 +740,7 @@ test("filters saved sessions in text output", async () => {
       model_id: "claude-sonnet-4.5",
       tool: "Codex",
       language: "TypeScript",
+      framework: "Node.js",
       task_type: "bug_fix",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -745,6 +751,7 @@ test("filters saved sessions in text output", async () => {
       model_id: "gpt-5",
       tool: "Claude Code",
       language: "TypeScript",
+      framework: "Node.js",
       task_type: "bug_fix",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -755,9 +762,32 @@ test("filters saved sessions in text output", async () => {
       model_id: "gpt-5",
       tool: "Codex",
       language: "Python",
+      framework: "Node.js",
       task_type: "bug_fix",
       final_outcome: "accepted",
       work_mode: "manual_log",
+    });
+    differentFramework = store.createSession({
+      timestamp: "2026-06-11T13:30:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      tool: "Codex",
+      language: "TypeScript",
+      framework: "Django",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+    differentWorkMode = store.createSession({
+      timestamp: "2026-06-11T14:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      tool: "Codex",
+      language: "TypeScript",
+      framework: "Node.js",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "agent_log",
     });
     differentTask = store.createSession({
       timestamp: "2026-06-12T12:00:00.000Z",
@@ -765,6 +795,7 @@ test("filters saved sessions in text output", async () => {
       model_id: "gpt-5",
       tool: "Codex",
       language: "TypeScript",
+      framework: "Node.js",
       task_type: "documentation",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -784,6 +815,10 @@ test("filters saved sessions in text output", async () => {
     "Codex",
     "--language",
     "TypeScript",
+    "--framework",
+    "Node.js",
+    "--work-mode",
+    "manual_log",
     "--task-type",
     "bug_fix",
     "--final-outcome",
@@ -796,6 +831,8 @@ test("filters saved sessions in text output", async () => {
   assert.doesNotMatch(stdout, new RegExp(differentProvider.session_id));
   assert.doesNotMatch(stdout, new RegExp(differentTool.session_id));
   assert.doesNotMatch(stdout, new RegExp(differentLanguage.session_id));
+  assert.doesNotMatch(stdout, new RegExp(differentFramework.session_id));
+  assert.doesNotMatch(stdout, new RegExp(differentWorkMode.session_id));
   assert.doesNotMatch(stdout, new RegExp(differentTask.session_id));
 });
 
@@ -1007,6 +1044,7 @@ test("filters saved sessions in JSON output", async () => {
       model_id: "gpt-5",
       tool: "Claude Code",
       language: "TypeScript",
+      framework: "Node.js",
       task_type: "feature",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -1017,6 +1055,7 @@ test("filters saved sessions in JSON output", async () => {
       model_id: "gpt-5",
       tool: "Codex",
       language: "TypeScript",
+      framework: "Node.js",
       task_type: "bug_fix",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -1027,6 +1066,7 @@ test("filters saved sessions in JSON output", async () => {
       model_id: "claude-sonnet-4.5",
       tool: "Codex",
       language: "Python",
+      framework: "Django",
       task_type: "bug_fix",
       final_outcome: "rejected",
       work_mode: "manual_log",
@@ -1045,6 +1085,10 @@ test("filters saved sessions in JSON output", async () => {
     "Codex",
     "--language",
     "TypeScript",
+    "--framework",
+    "Node.js",
+    "--work-mode",
+    "manual_log",
     "--task-type",
     "bug_fix",
     "--db-path",
@@ -1120,6 +1164,8 @@ test("prints report help", async () => {
   assert.match(stdout, /--model-id/);
   assert.match(stdout, /--tool/);
   assert.match(stdout, /--language/);
+  assert.match(stdout, /--framework/);
+  assert.match(stdout, /--work-mode/);
   assert.match(stdout, /--task-type/);
   assert.match(stdout, /--final-outcome/);
   assert.match(stdout, /--since/);
@@ -1190,11 +1236,13 @@ test("prints a local report from saved sessions", async () => {
       task_type: "bug_fix",
       final_outcome: "accepted",
       work_mode: "manual_log",
+      framework: "Node.js",
       tests_outcome: "passed",
       duration_seconds: 300,
       retry_count: 1,
       estimated_cost_usd: 0.5,
       language: "TypeScript",
+      framework: "Node.js",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1204,6 +1252,7 @@ test("prints a local report from saved sessions", async () => {
       task_type: "feature",
       final_outcome: "rejected",
       work_mode: "manual_log",
+      framework: "Django",
       tests_outcome: "failed",
       retry_count: 2,
       estimated_cost_usd: 1,
@@ -1278,6 +1327,7 @@ test("prints a filtered local report from saved sessions", async () => {
       retry_count: 1,
       estimated_cost_usd: 0.5,
       language: "TypeScript",
+      framework: "Node.js",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1300,6 +1350,7 @@ test("prints a filtered local report from saved sessions", async () => {
       task_type: "documentation",
       final_outcome: "accepted",
       work_mode: "manual_log",
+      framework: "Node.js",
       tests_outcome: "passed",
       retry_count: 3,
       estimated_cost_usd: 2,
@@ -1319,6 +1370,10 @@ test("prints a filtered local report from saved sessions", async () => {
     "Codex",
     "--language",
     "TypeScript",
+    "--framework",
+    "Node.js",
+    "--work-mode",
+    "manual_log",
     "--task-type",
     "bug_fix",
     "--final-outcome",
@@ -1579,6 +1634,7 @@ test("prints a filtered local report as JSON", async () => {
       model_id: "gpt-5",
       tool: "Codex",
       language: "TypeScript",
+      framework: "Node.js",
       task_type: "bug_fix",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -1593,6 +1649,7 @@ test("prints a filtered local report as JSON", async () => {
       model_id: "claude-sonnet-4.5",
       tool: "Claude Code",
       language: "Python",
+      framework: "Django",
       task_type: "bug_fix",
       final_outcome: "rejected",
       work_mode: "manual_log",
@@ -1614,6 +1671,10 @@ test("prints a filtered local report as JSON", async () => {
     "Codex",
     "--language",
     "TypeScript",
+    "--framework",
+    "Node.js",
+    "--work-mode",
+    "manual_log",
     "--task-type",
     "bug_fix",
     "--db-path",

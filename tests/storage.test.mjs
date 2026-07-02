@@ -289,6 +289,8 @@ test("filters listed sessions by safe metadata fields", () => {
       model_id: "gpt-5",
       tool: "Codex",
       language: "TypeScript",
+      framework: "Node.js",
+      work_mode: "manual_log",
       task_type: "bug_fix",
       final_outcome: "accepted",
     });
@@ -299,6 +301,8 @@ test("filters listed sessions by safe metadata fields", () => {
       model_id: "gpt-5",
       tool: "Claude Code",
       language: "TypeScript",
+      framework: "Node.js",
+      work_mode: "manual_log",
       task_type: "documentation",
       final_outcome: "accepted",
     });
@@ -309,6 +313,8 @@ test("filters listed sessions by safe metadata fields", () => {
       model_id: "claude-sonnet-4.5",
       tool: "Codex",
       language: "Python",
+      framework: "Django",
+      work_mode: "agent_log",
       task_type: "bug_fix",
       final_outcome: "rejected",
     });
@@ -320,6 +326,8 @@ test("filters listed sessions by safe metadata fields", () => {
           modelId: "gpt-5",
           tool: "Codex",
           language: "TypeScript",
+          framework: "Node.js",
+          workMode: "manual_log",
           taskType: "bug_fix",
           finalOutcome: "accepted",
         })

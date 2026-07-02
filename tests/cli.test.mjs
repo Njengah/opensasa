@@ -37,6 +37,8 @@ test("prints log help with manual session options", async () => {
 
   assert.match(stdout, /--provider/);
   assert.match(stdout, /--model-id/);
+  assert.match(stdout, /--tool/);
+  assert.match(stdout, /--language/);
   assert.match(stdout, /--task-type/);
   assert.match(stdout, /--final-outcome/);
   assert.match(stdout, /--contribution-consent/);
@@ -712,6 +714,8 @@ test("filters saved sessions in text output", async () => {
   const store = openStore(dbPath);
   let matching;
   let differentProvider;
+  let differentTool;
+  let differentLanguage;
   let differentTask;
 
   try {
@@ -719,6 +723,8 @@ test("filters saved sessions in text output", async () => {
       timestamp: "2026-06-10T12:00:00.000Z",
       provider: "OpenAI",
       model_id: "gpt-5",
+      tool: "Codex",
+      language: "TypeScript",
       task_type: "bug_fix",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -727,6 +733,28 @@ test("filters saved sessions in text output", async () => {
       timestamp: "2026-06-11T12:00:00.000Z",
       provider: "Anthropic",
       model_id: "claude-sonnet-4.5",
+      tool: "Codex",
+      language: "TypeScript",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+    differentTool = store.createSession({
+      timestamp: "2026-06-11T12:30:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      tool: "Claude Code",
+      language: "TypeScript",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+    });
+    differentLanguage = store.createSession({
+      timestamp: "2026-06-11T13:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      tool: "Codex",
+      language: "Python",
       task_type: "bug_fix",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -735,6 +763,8 @@ test("filters saved sessions in text output", async () => {
       timestamp: "2026-06-12T12:00:00.000Z",
       provider: "OpenAI",
       model_id: "gpt-5",
+      tool: "Codex",
+      language: "TypeScript",
       task_type: "documentation",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -750,6 +780,10 @@ test("filters saved sessions in text output", async () => {
     "OpenAI",
     "--model-id",
     "gpt-5",
+    "--tool",
+    "Codex",
+    "--language",
+    "TypeScript",
     "--task-type",
     "bug_fix",
     "--final-outcome",
@@ -760,6 +794,8 @@ test("filters saved sessions in text output", async () => {
 
   assert.match(stdout, new RegExp(matching.session_id));
   assert.doesNotMatch(stdout, new RegExp(differentProvider.session_id));
+  assert.doesNotMatch(stdout, new RegExp(differentTool.session_id));
+  assert.doesNotMatch(stdout, new RegExp(differentLanguage.session_id));
   assert.doesNotMatch(stdout, new RegExp(differentTask.session_id));
 });
 
@@ -969,6 +1005,8 @@ test("filters saved sessions in JSON output", async () => {
       timestamp: "2026-06-09T12:00:00.000Z",
       provider: "OpenAI",
       model_id: "gpt-5",
+      tool: "Claude Code",
+      language: "TypeScript",
       task_type: "feature",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -977,6 +1015,8 @@ test("filters saved sessions in JSON output", async () => {
       timestamp: "2026-06-10T12:00:00.000Z",
       provider: "OpenAI",
       model_id: "gpt-5",
+      tool: "Codex",
+      language: "TypeScript",
       task_type: "bug_fix",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -985,6 +1025,8 @@ test("filters saved sessions in JSON output", async () => {
       timestamp: "2026-06-11T12:00:00.000Z",
       provider: "Anthropic",
       model_id: "claude-sonnet-4.5",
+      tool: "Codex",
+      language: "Python",
       task_type: "bug_fix",
       final_outcome: "rejected",
       work_mode: "manual_log",
@@ -999,6 +1041,10 @@ test("filters saved sessions in JSON output", async () => {
     "--json",
     "--provider",
     "OpenAI",
+    "--tool",
+    "Codex",
+    "--language",
+    "TypeScript",
     "--task-type",
     "bug_fix",
     "--db-path",
@@ -1072,6 +1118,8 @@ test("prints report help", async () => {
   assert.match(stdout, /--limit/);
   assert.match(stdout, /--provider/);
   assert.match(stdout, /--model-id/);
+  assert.match(stdout, /--tool/);
+  assert.match(stdout, /--language/);
   assert.match(stdout, /--task-type/);
   assert.match(stdout, /--final-outcome/);
   assert.match(stdout, /--since/);
@@ -1247,6 +1295,8 @@ test("prints a filtered local report from saved sessions", async () => {
       timestamp: "2026-06-11T12:00:00.000Z",
       provider: "OpenAI",
       model_id: "gpt-5",
+      tool: "Codex",
+      language: "TypeScript",
       task_type: "documentation",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -1265,6 +1315,10 @@ test("prints a filtered local report from saved sessions", async () => {
     "OpenAI",
     "--model-id",
     "gpt-5",
+    "--tool",
+    "Codex",
+    "--language",
+    "TypeScript",
     "--task-type",
     "bug_fix",
     "--final-outcome",
@@ -1275,6 +1329,8 @@ test("prints a filtered local report from saved sessions", async () => {
 
   assert.match(stdout, /Total sessions: 1/);
   assert.match(stdout, /OpenAI\/gpt-5: 1/);
+  assert.match(stdout, /Codex: 1/);
+  assert.match(stdout, /TypeScript: 1/);
   assert.match(stdout, /bug_fix: 1/);
   assert.match(stdout, /Accepted or partially accepted: 1/);
   assert.match(stdout, /Estimated total cost: \$0\.5000/);
@@ -1521,6 +1577,8 @@ test("prints a filtered local report as JSON", async () => {
       timestamp: "2026-06-09T12:00:00.000Z",
       provider: "OpenAI",
       model_id: "gpt-5",
+      tool: "Codex",
+      language: "TypeScript",
       task_type: "bug_fix",
       final_outcome: "accepted",
       work_mode: "manual_log",
@@ -1533,6 +1591,8 @@ test("prints a filtered local report as JSON", async () => {
       timestamp: "2026-06-10T12:00:00.000Z",
       provider: "Anthropic",
       model_id: "claude-sonnet-4.5",
+      tool: "Claude Code",
+      language: "Python",
       task_type: "bug_fix",
       final_outcome: "rejected",
       work_mode: "manual_log",
@@ -1550,6 +1610,10 @@ test("prints a filtered local report as JSON", async () => {
     "--json",
     "--provider",
     "OpenAI",
+    "--tool",
+    "Codex",
+    "--language",
+    "TypeScript",
     "--task-type",
     "bug_fix",
     "--db-path",
@@ -1559,6 +1623,8 @@ test("prints a filtered local report as JSON", async () => {
 
   assert.equal(report.totalSessions, 1);
   assert.deepEqual(report.sessionsByModel, { "OpenAI/gpt-5": 1 });
+  assert.deepEqual(report.sessionsByTool, { Codex: 1 });
+  assert.deepEqual(report.sessionsByLanguage, { TypeScript: 1 });
   assert.deepEqual(report.sessionsByTaskType, { bug_fix: 1 });
   assert.equal(report.estimatedTotalCostUsd, 0.5);
   assert.equal(report.costPerUsefulTaskUsd, 0.5);

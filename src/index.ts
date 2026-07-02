@@ -65,6 +65,8 @@ type SessionsOptions = StoreOptions & {
   limit?: number;
   provider?: string;
   modelId?: string;
+  tool?: string;
+  language?: string;
   taskType?: string;
   finalOutcome?: string;
   since?: string;
@@ -76,6 +78,8 @@ type ReportOptions = StoreOptions & {
   limit?: number;
   provider?: string;
   modelId?: string;
+  tool?: string;
+  language?: string;
   taskType?: string;
   finalOutcome?: string;
   since?: string;
@@ -326,6 +330,8 @@ program
   .option("--limit <count>", "maximum number of sessions to list", parsePositiveInteger)
   .option("--provider <provider>", "filter sessions by provider")
   .option("--model-id <model-id>", "filter sessions by model ID")
+  .option("--tool <tool>", "filter sessions by AI coding tool or agent")
+  .option("--language <language>", "filter sessions by primary language")
   .option("--task-type <task-type>", "filter sessions by task type")
   .option("--final-outcome <final-outcome>", "filter sessions by final outcome")
   .option("--since <timestamp>", "filter sessions at or after an ISO timestamp", parseIsoTimestamp)
@@ -339,6 +345,8 @@ program
         limit: options.limit,
         provider: options.provider,
         modelId: options.modelId,
+        tool: options.tool,
+        language: options.language,
         taskType: options.taskType,
         finalOutcome: options.finalOutcome,
         since: options.since,
@@ -371,6 +379,8 @@ program
   .option("--limit <count>", "calculate the report from the newest matching sessions", parsePositiveInteger)
   .option("--provider <provider>", "filter report by provider")
   .option("--model-id <model-id>", "filter report by model ID")
+  .option("--tool <tool>", "filter report by AI coding tool or agent")
+  .option("--language <language>", "filter report by primary language")
   .option("--task-type <task-type>", "filter report by task type")
   .option("--final-outcome <final-outcome>", "filter report by final outcome")
   .option("--since <timestamp>", "filter report sessions at or after an ISO timestamp", parseIsoTimestamp)
@@ -384,6 +394,8 @@ program
         limit: options.limit,
         provider: options.provider,
         modelId: options.modelId,
+        tool: options.tool,
+        language: options.language,
         taskType: options.taskType,
         finalOutcome: options.finalOutcome,
         since: options.since,

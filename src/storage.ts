@@ -59,6 +59,8 @@ type ListSessionsOptions = {
   limit?: number;
   provider?: string;
   modelId?: string;
+  tool?: string;
+  language?: string;
   taskType?: string;
   finalOutcome?: string;
   since?: string;
@@ -165,6 +167,16 @@ export class OpenSasaStore {
     if (options.modelId !== undefined) {
       filters.push("model_id = @modelId");
       parameters.modelId = options.modelId;
+    }
+
+    if (options.tool !== undefined) {
+      filters.push("tool = @tool");
+      parameters.tool = options.tool;
+    }
+
+    if (options.language !== undefined) {
+      filters.push("language = @language");
+      parameters.language = options.language;
     }
 
     if (options.taskType !== undefined) {

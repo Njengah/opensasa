@@ -287,6 +287,8 @@ test("filters listed sessions by safe metadata fields", () => {
       timestamp: "2026-06-10T12:00:00.000Z",
       provider: "OpenAI",
       model_id: "gpt-5",
+      tool: "Codex",
+      language: "TypeScript",
       task_type: "bug_fix",
       final_outcome: "accepted",
     });
@@ -295,6 +297,8 @@ test("filters listed sessions by safe metadata fields", () => {
       timestamp: "2026-06-11T12:00:00.000Z",
       provider: "OpenAI",
       model_id: "gpt-5",
+      tool: "Claude Code",
+      language: "TypeScript",
       task_type: "documentation",
       final_outcome: "accepted",
     });
@@ -303,6 +307,8 @@ test("filters listed sessions by safe metadata fields", () => {
       timestamp: "2026-06-12T12:00:00.000Z",
       provider: "Anthropic",
       model_id: "claude-sonnet-4.5",
+      tool: "Codex",
+      language: "Python",
       task_type: "bug_fix",
       final_outcome: "rejected",
     });
@@ -312,6 +318,8 @@ test("filters listed sessions by safe metadata fields", () => {
         .listSessions({
           provider: "OpenAI",
           modelId: "gpt-5",
+          tool: "Codex",
+          language: "TypeScript",
           taskType: "bug_fix",
           finalOutcome: "accepted",
         })

@@ -61,6 +61,8 @@ type ListSessionsOptions = {
   modelId?: string;
   tool?: string;
   language?: string;
+  framework?: string;
+  workMode?: string;
   taskType?: string;
   finalOutcome?: string;
   since?: string;
@@ -177,6 +179,16 @@ export class OpenSasaStore {
     if (options.language !== undefined) {
       filters.push("language = @language");
       parameters.language = options.language;
+    }
+
+    if (options.framework !== undefined) {
+      filters.push("framework = @framework");
+      parameters.framework = options.framework;
+    }
+
+    if (options.workMode !== undefined) {
+      filters.push("work_mode = @workMode");
+      parameters.workMode = options.workMode;
     }
 
     if (options.taskType !== undefined) {

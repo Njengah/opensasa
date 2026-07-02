@@ -32,6 +32,7 @@ test("calculates local report metrics from safe session metadata", () => {
       final_outcome: "accepted",
       tool: "Codex",
       language: "TypeScript",
+      framework: "Node.js",
       retry_count: 1,
       duration_seconds: 600,
       tests_outcome: "passed",
@@ -44,6 +45,7 @@ test("calculates local report metrics from safe session metadata", () => {
       final_outcome: "partially_accepted",
       tool: "Claude Code",
       language: "Python",
+      framework: "Django",
       retry_count: 2,
       duration_seconds: 120,
       manual_review_outcome: "accepted",
@@ -56,6 +58,7 @@ test("calculates local report metrics from safe session metadata", () => {
       final_outcome: "rejected",
       tool: "Codex",
       language: "TypeScript",
+      framework: "Node.js",
       retry_count: 3,
       tests_outcome: "failed",
       estimated_cost_usd: 0.75,
@@ -89,6 +92,14 @@ test("calculates local report metrics from safe session metadata", () => {
     TypeScript: 2,
     unknown: 1,
   });
+  assert.deepEqual(report.sessionsByFramework, {
+    Django: 1,
+    "Node.js": 2,
+    unknown: 1,
+  });
+  assert.deepEqual(report.sessionsByWorkMode, {
+    manual_log: 4,
+  });
   assert.deepEqual(report.sessionsByTaskType, {
     bug_fix: 2,
     documentation: 1,
@@ -113,6 +124,13 @@ test("calculates local report metrics from safe session metadata", () => {
   assert.deepEqual(report.costByLanguageUsd, {
     Python: 1.25,
     TypeScript: 1.25,
+  });
+  assert.deepEqual(report.costByFrameworkUsd, {
+    Django: 1.25,
+    "Node.js": 1.25,
+  });
+  assert.deepEqual(report.costByWorkModeUsd, {
+    manual_log: 2.5,
   });
   assert.equal(report.costPerUsefulTaskUsd, 1.25);
   assert.equal(report.failureCostUsd, 0.75);
@@ -166,6 +184,8 @@ test("labels missing cost and unknown outcome rates clearly", () => {
   assert.deepEqual(report.costByModelUsd, {});
   assert.deepEqual(report.costByToolUsd, {});
   assert.deepEqual(report.costByLanguageUsd, {});
+  assert.deepEqual(report.costByFrameworkUsd, {});
+  assert.deepEqual(report.costByWorkModeUsd, {});
   assert.equal(report.costPerUsefulTaskUsd, null);
   assert.equal(report.failureCostUsd, 0);
   assert.equal(report.speedToUsefulOutputSeconds, null);
@@ -201,6 +221,7 @@ test("formats a readable local report", () => {
       final_outcome: "accepted",
       tool: "Codex",
       language: "TypeScript",
+      framework: "Node.js",
       tests_outcome: "passed",
       duration_seconds: 300,
       estimated_cost_usd: 0.5,
@@ -214,12 +235,16 @@ test("formats a readable local report", () => {
   assert.match(output, /OpenAI\/gpt-5: 1/);
   assert.match(output, /Sessions by tool:\n- Codex: 1/);
   assert.match(output, /Sessions by language:\n- TypeScript: 1/);
+  assert.match(output, /Sessions by framework:\n- Node\.js: 1/);
+  assert.match(output, /Sessions by work mode:\n- manual_log: 1/);
   assert.match(output, /Estimated total cost: \$0\.5000/);
   assert.match(output, /Cost per useful task: \$0\.5000/);
   assert.match(output, /Failure cost: \$0\.0000/);
   assert.match(output, /Cost by provider:\n- OpenAI: \$0\.5000/);
   assert.match(output, /Cost by tool:\n- Codex: \$0\.5000/);
   assert.match(output, /Cost by language:\n- TypeScript: \$0\.5000/);
+  assert.match(output, /Cost by framework:\n- Node\.js: \$0\.5000/);
+  assert.match(output, /Cost by work mode:\n- manual_log: \$0\.5000/);
   assert.match(output, /Speed to useful output: 300\.0s/);
   assert.match(output, /Total retries on rejected sessions: 0/);
   assert.match(output, /Failure retry burden: unknown/);
@@ -238,6 +263,7 @@ test("formats a local report as JSON", () => {
       final_outcome: "accepted",
       tool: "Codex",
       language: "TypeScript",
+      framework: "Node.js",
       tests_outcome: "passed",
       duration_seconds: 300,
       estimated_cost_usd: 0.5,
@@ -249,10 +275,14 @@ test("formats a local report as JSON", () => {
   assert.equal(parsed.sessionsByProvider.OpenAI, 1);
   assert.equal(parsed.sessionsByTool.Codex, 1);
   assert.equal(parsed.sessionsByLanguage.TypeScript, 1);
+  assert.equal(parsed.sessionsByFramework["Node.js"], 1);
+  assert.equal(parsed.sessionsByWorkMode.manual_log, 1);
   assert.equal(parsed.estimatedTotalCostUsd, 0.5);
   assert.equal(parsed.costByProviderUsd.OpenAI, 0.5);
   assert.equal(parsed.costByToolUsd.Codex, 0.5);
   assert.equal(parsed.costByLanguageUsd.TypeScript, 0.5);
+  assert.equal(parsed.costByFrameworkUsd["Node.js"], 0.5);
+  assert.equal(parsed.costByWorkModeUsd.manual_log, 0.5);
   assert.equal(parsed.costPerUsefulTaskUsd, 0.5);
   assert.equal(parsed.failureCostUsd, 0);
   assert.equal(parsed.speedToUsefulOutputSeconds, 300);

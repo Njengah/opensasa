@@ -38,6 +38,7 @@ export type LocalReport = {
   sessionsByLanguage: CountMap;
   sessionsByFramework: CountMap;
   sessionsByWorkMode: CountMap;
+  sessionsByCostSource: CountMap;
   sessionsByTaskType: CountMap;
   acceptedOrPartiallyAcceptedCount: number;
   rejectedCount: number;
@@ -49,6 +50,7 @@ export type LocalReport = {
   costByLanguageUsd: Record<string, number>;
   costByFrameworkUsd: Record<string, number>;
   costByWorkModeUsd: Record<string, number>;
+  costByCostSourceUsd: Record<string, number>;
   costPerUsefulTaskUsd: number | null;
   failureCostUsd: number | null;
   speedToUsefulOutputSeconds: number | null;
@@ -101,6 +103,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     sessionsByLanguage: countBy(sessions, languageKey),
     sessionsByFramework: countBy(sessions, frameworkKey),
     sessionsByWorkMode: countBy(sessions, (session) => session.work_mode),
+    sessionsByCostSource: countBy(sessions, costSourceKey),
     sessionsByTaskType: countBy(sessions, (session) => session.task_type),
     acceptedOrPartiallyAcceptedCount: usefulSessions.length,
     rejectedCount: rejectedSessions.length,
@@ -112,6 +115,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     costByLanguageUsd: sumBy(estimatedCostSessions, languageKey),
     costByFrameworkUsd: sumBy(estimatedCostSessions, frameworkKey),
     costByWorkModeUsd: sumBy(estimatedCostSessions, (session) => session.work_mode),
+    costByCostSourceUsd: sumBy(estimatedCostSessions, costSourceKey),
     costPerUsefulTaskUsd:
       estimatedTotalCostUsd === null ? null : calculateRate(estimatedTotalCostUsd, usefulSessions.length),
     failureCostUsd,
@@ -162,6 +166,9 @@ export function formatLocalReport(report: LocalReport): string {
     "Sessions by work mode:",
     ...formatCountMap(report.sessionsByWorkMode),
     "",
+    "Sessions by cost source:",
+    ...formatCountMap(report.sessionsByCostSource),
+    "",
     "Sessions by task type:",
     ...formatCountMap(report.sessionsByTaskType),
     "",
@@ -180,6 +187,7 @@ export function formatLocalReport(report: LocalReport): string {
     ...formatCostMap("Cost by language", report.costByLanguageUsd),
     ...formatCostMap("Cost by framework", report.costByFrameworkUsd),
     ...formatCostMap("Cost by work mode", report.costByWorkModeUsd),
+    ...formatCostMap("Cost by cost source", report.costByCostSourceUsd),
     "",
     "Speed summary:",
     `Speed to useful output: ${formatSecondsOrUnknown(report.speedToUsefulOutputSeconds)}`,
@@ -355,6 +363,10 @@ function languageKey(session: LocalSession): string {
 
 function frameworkKey(session: LocalSession): string {
   return session.framework ?? "unknown";
+}
+
+function costSourceKey(session: LocalSession): string {
+  return session.cost_source ?? "unknown";
 }
 
 function calculateRate(numerator: number, denominator: number): number | null {

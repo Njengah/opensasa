@@ -23,6 +23,8 @@ All notable changes to OpenSasa will be documented in this file.
 - Provider grouping and provider cost totals in local reports.
 - Tool grouping and tool cost totals in local reports.
 - Language grouping and language cost totals in local reports.
+- Framework grouping and framework cost totals in local reports.
+- Work mode grouping and work mode cost totals in local reports.
 - Cost per useful task and failure cost metrics in local reports.
 - Speed to useful output metric in local reports.
 - Unknown outcome rate metric in local reports.

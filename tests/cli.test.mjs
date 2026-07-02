@@ -1236,7 +1236,6 @@ test("prints a local report from saved sessions", async () => {
       task_type: "bug_fix",
       final_outcome: "accepted",
       work_mode: "manual_log",
-      framework: "Node.js",
       tests_outcome: "passed",
       duration_seconds: 300,
       retry_count: 1,
@@ -1280,6 +1279,11 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /Sessions by language:/);
   assert.match(stdout, /TypeScript: 1/);
   assert.match(stdout, /unknown: 1/);
+  assert.match(stdout, /Sessions by framework:/);
+  assert.match(stdout, /Node\.js: 1/);
+  assert.match(stdout, /Django: 1/);
+  assert.match(stdout, /Sessions by work mode:/);
+  assert.match(stdout, /manual_log: 2/);
   assert.match(stdout, /bug_fix: 1/);
   assert.match(stdout, /feature: 1/);
   assert.match(stdout, /Accepted or partially accepted: 1/);
@@ -1296,6 +1300,11 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /Cost by language:/);
   assert.match(stdout, /TypeScript: \$0\.5000/);
   assert.match(stdout, /unknown: \$1\.0000/);
+  assert.match(stdout, /Cost by framework:/);
+  assert.match(stdout, /Node\.js: \$0\.5000/);
+  assert.match(stdout, /Django: \$1\.0000/);
+  assert.match(stdout, /Cost by work mode:/);
+  assert.match(stdout, /manual_log: \$1\.5000/);
   assert.match(stdout, /Speed to useful output: 300\.0s/);
   assert.match(stdout, /Retry burden: 1\.00/);
   assert.match(stdout, /Total retries on rejected sessions: 2/);
@@ -1386,6 +1395,8 @@ test("prints a filtered local report from saved sessions", async () => {
   assert.match(stdout, /OpenAI\/gpt-5: 1/);
   assert.match(stdout, /Codex: 1/);
   assert.match(stdout, /TypeScript: 1/);
+  assert.match(stdout, /Node\.js: 1/);
+  assert.match(stdout, /manual_log: 1/);
   assert.match(stdout, /bug_fix: 1/);
   assert.match(stdout, /Accepted or partially accepted: 1/);
   assert.match(stdout, /Estimated total cost: \$0\.5000/);
@@ -1417,6 +1428,7 @@ test("prints a date-filtered local report from saved sessions", async () => {
       retry_count: 1,
       estimated_cost_usd: 0.5,
       language: "TypeScript",
+      framework: "Node.js",
     });
     store.createSession({
       timestamp: "2026-06-09T12:00:00.000Z",
@@ -1565,6 +1577,7 @@ test("prints a local report from saved sessions as JSON", async () => {
       retry_count: 1,
       estimated_cost_usd: 0.5,
       language: "TypeScript",
+      framework: "Node.js",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1600,6 +1613,9 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.sessionsByTool["Claude Code"], 1);
   assert.equal(report.sessionsByLanguage.TypeScript, 1);
   assert.equal(report.sessionsByLanguage.unknown, 1);
+  assert.equal(report.sessionsByFramework.unknown, 1);
+  assert.equal(report.sessionsByFramework["Node.js"], 1);
+  assert.equal(report.sessionsByWorkMode.manual_log, 2);
   assert.equal(report.estimatedTotalCostUsd, 1.5);
   assert.equal(report.costByProviderUsd.OpenAI, 0.5);
   assert.equal(report.costByProviderUsd.Anthropic, 1);
@@ -1607,6 +1623,9 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.costByToolUsd["Claude Code"], 1);
   assert.equal(report.costByLanguageUsd.TypeScript, 0.5);
   assert.equal(report.costByLanguageUsd.unknown, 1);
+  assert.equal(report.costByFrameworkUsd.unknown, 1);
+  assert.equal(report.costByFrameworkUsd["Node.js"], 0.5);
+  assert.equal(report.costByWorkModeUsd.manual_log, 1.5);
   assert.equal(report.costPerUsefulTaskUsd, 1.5);
   assert.equal(report.failureCostUsd, 1);
   assert.equal(report.speedToUsefulOutputSeconds, 300);
@@ -1686,8 +1705,12 @@ test("prints a filtered local report as JSON", async () => {
   assert.deepEqual(report.sessionsByModel, { "OpenAI/gpt-5": 1 });
   assert.deepEqual(report.sessionsByTool, { Codex: 1 });
   assert.deepEqual(report.sessionsByLanguage, { TypeScript: 1 });
+  assert.deepEqual(report.sessionsByFramework, { "Node.js": 1 });
+  assert.deepEqual(report.sessionsByWorkMode, { manual_log: 1 });
   assert.deepEqual(report.sessionsByTaskType, { bug_fix: 1 });
   assert.equal(report.estimatedTotalCostUsd, 0.5);
+  assert.deepEqual(report.costByFrameworkUsd, { "Node.js": 0.5 });
+  assert.deepEqual(report.costByWorkModeUsd, { manual_log: 0.5 });
   assert.equal(report.costPerUsefulTaskUsd, 0.5);
   assert.equal(report.failureCostUsd, 0);
   assert.equal(report.speedToUsefulOutputSeconds, 300);

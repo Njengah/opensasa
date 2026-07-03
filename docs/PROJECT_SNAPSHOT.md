@@ -136,6 +136,9 @@ Recent PRs focused on hardening the local CLI workflow:
 
 Current stage: local CLI-first MVP.
 
+For the working timeline from CLI MVP to a WakaTime-style product, see
+[`docs/PRODUCT_TIMELINE.md`](./PRODUCT_TIMELINE.md).
+
 Completed:
 
 - manual local tracker,

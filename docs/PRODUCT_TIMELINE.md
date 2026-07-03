@@ -4,6 +4,22 @@ This is the working build plan for turning OpenSasa from a CLI-first local track
 
 The dates are planning estimates, not promises. The plan assumes we keep shipping small, reviewable PRs and merge continuously.
 
+## Tracking Protocol
+
+Use this file as the project checklist.
+
+After a PR is merged:
+
+1. Pull the latest `main`.
+2. Find the matching checklist item in this file.
+3. Change `[ ]` to `[x]`.
+4. Add the merged PR number at the end of the item, for example: `(#52)`.
+5. If the next task changes because of what we learned, update the list in the same docs PR.
+
+When the user says "build next", use the first unchecked item in
+`Recommended Near-Term PR Order` unless there is a clear blocker or a more urgent
+dependency.
+
 ## Product Vision
 
 OpenSasa should become:
@@ -79,18 +95,19 @@ Goal:
 
 Expected PRs:
 
-1. Add changed-file-count bucket report grouping.
-2. Add lines-added bucket report grouping.
-3. Add lines-removed bucket report grouping.
-4. Add token estimate summaries to reports.
-5. Add duration bucket summaries to reports.
-6. Add error count summaries to reports.
-7. Improve report section ordering and empty-state readability.
-8. Add compact report mode for terminal readability.
-9. Add report snapshot tests for stable text output.
-10. Add report schema/version metadata to JSON output.
-11. Add `opensasa doctor` for local database/config checks.
-12. Add demo seed database or fixture generator.
+- [ ] Add changed-file-count bucket report grouping.
+- [x] Add file-count bucket report grouping. (#50)
+- [ ] Add lines-added bucket report grouping.
+- [ ] Add lines-removed bucket report grouping.
+- [ ] Add token estimate summaries to reports.
+- [ ] Add duration bucket summaries to reports.
+- [ ] Add error count summaries to reports.
+- [ ] Improve report section ordering and empty-state readability.
+- [ ] Add compact report mode for terminal readability.
+- [ ] Add report snapshot tests for stable text output.
+- [ ] Add report schema/version metadata to JSON output.
+- [ ] Add `opensasa doctor` for local database/config checks.
+- [ ] Add demo seed database or fixture generator.
 
 Exit criteria:
 
@@ -107,18 +124,18 @@ Goal:
 
 Expected PRs:
 
-1. Add internal report API module reusable by CLI and dashboard.
-2. Add local HTTP server command: `opensasa dashboard`.
-3. Add dashboard static app scaffold.
-4. Add dashboard overview cards.
-5. Add model/tool comparison table.
-6. Add trend chart by day/week.
-7. Add filters in dashboard for provider, model, tool, language, framework, task type, and outcome.
-8. Add cost summary charts.
-9. Add outcome and verification charts.
-10. Add local-only privacy notice in dashboard.
-11. Add dashboard empty state with demo instructions.
-12. Add Playwright/smoke tests for dashboard rendering.
+- [ ] Add internal report API module reusable by CLI and dashboard.
+- [ ] Add local HTTP server command: `opensasa dashboard`.
+- [ ] Add dashboard static app scaffold.
+- [ ] Add dashboard overview cards.
+- [ ] Add model/tool comparison table.
+- [ ] Add trend chart by day/week.
+- [ ] Add filters in dashboard for provider, model, tool, language, framework, task type, and outcome.
+- [ ] Add cost summary charts.
+- [ ] Add outcome and verification charts.
+- [ ] Add local-only privacy notice in dashboard.
+- [ ] Add dashboard empty state with demo instructions.
+- [ ] Add Playwright/smoke tests for dashboard rendering.
 
 Exit criteria:
 
@@ -135,18 +152,18 @@ Goal:
 
 Expected PRs:
 
-1. Add local config file support.
-2. Add project identity hashing without storing repo names.
-3. Add git metadata helper for coarse repo/file/change buckets.
-4. Add command wrapper for test/build/lint outcome capture.
-5. Add session draft command.
-6. Add session finalize command.
-7. Add auto-duration capture for started/finalized sessions.
-8. Add local activity heartbeat table.
-9. Add privacy-safe terminal command outcome capture.
-10. Add import provenance fields to session records.
-11. Add agent status command.
-12. Add docs for manual, wrapper, and agent modes.
+- [ ] Add local config file support.
+- [ ] Add project identity hashing without storing repo names.
+- [ ] Add git metadata helper for coarse repo/file/change buckets.
+- [ ] Add command wrapper for test/build/lint outcome capture.
+- [ ] Add session draft command.
+- [ ] Add session finalize command.
+- [ ] Add auto-duration capture for started/finalized sessions.
+- [ ] Add local activity heartbeat table.
+- [ ] Add privacy-safe terminal command outcome capture.
+- [ ] Add import provenance fields to session records.
+- [ ] Add agent status command.
+- [ ] Add docs for manual, wrapper, and agent modes.
 
 Exit criteria:
 
@@ -162,18 +179,18 @@ Goal:
 
 Expected PRs:
 
-1. Create VS Code extension package scaffold.
-2. Add extension-to-local-CLI communication.
-3. Add start session command in VS Code.
-4. Add finish session command in VS Code.
-5. Add quick-pick fields for task type, outcome, model, and tool.
-6. Add status bar item for active OpenSasa session.
-7. Add local privacy notice in extension.
-8. Add extension config for local database path.
-9. Add extension command to open dashboard.
-10. Add extension tests or smoke checks.
-11. Add extension install/dev docs.
-12. Add release packaging workflow for extension.
+- [ ] Create VS Code extension package scaffold.
+- [ ] Add extension-to-local-CLI communication.
+- [ ] Add start session command in VS Code.
+- [ ] Add finish session command in VS Code.
+- [ ] Add quick-pick fields for task type, outcome, model, and tool.
+- [ ] Add status bar item for active OpenSasa session.
+- [ ] Add local privacy notice in extension.
+- [ ] Add extension config for local database path.
+- [ ] Add extension command to open dashboard.
+- [ ] Add extension tests or smoke checks.
+- [ ] Add extension install/dev docs.
+- [ ] Add release packaging workflow for extension.
 
 Exit criteria:
 
@@ -189,18 +206,18 @@ Goal:
 
 Expected PRs:
 
-1. Add contribution export command that writes a local JSON file.
-2. Add explicit consent confirmation for export.
-3. Add contribution payload version field.
-4. Add contribution validation report.
-5. Add red-team tests for forbidden fields.
-6. Add contribution bundle preview in dashboard.
-7. Add local contribution history.
-8. Add contribution revocation state semantics.
-9. Add docs for what is and is not shared.
-10. Add sample contribution file.
-11. Add optional signed export metadata.
-12. Decide whether upload exists in v0.1 or remains manual export.
+- [ ] Add contribution export command that writes a local JSON file.
+- [ ] Add explicit consent confirmation for export.
+- [ ] Add contribution payload version field.
+- [ ] Add contribution validation report.
+- [ ] Add red-team tests for forbidden fields.
+- [ ] Add contribution bundle preview in dashboard.
+- [ ] Add local contribution history.
+- [ ] Add contribution revocation state semantics.
+- [ ] Add docs for what is and is not shared.
+- [ ] Add sample contribution file.
+- [ ] Add optional signed export metadata.
+- [ ] Decide whether upload exists in v0.1 or remains manual export.
 
 Exit criteria:
 
@@ -216,18 +233,18 @@ Goal:
 
 Expected PRs:
 
-1. Add npm package metadata and bin validation.
-2. Add install docs.
-3. Add first release checklist.
-4. Add demo walkthrough.
-5. Add screenshots or dashboard preview images.
-6. Add architecture doc.
-7. Add security/privacy FAQ.
-8. Add issue templates.
-9. Add good-first-issue labels/docs.
-10. Add CI release checks.
-11. Tag `v0.1.0-beta.1`.
-12. Publish launch case study.
+- [ ] Add npm package metadata and bin validation.
+- [ ] Add install docs.
+- [ ] Add first release checklist.
+- [ ] Add demo walkthrough.
+- [ ] Add screenshots or dashboard preview images.
+- [ ] Add architecture doc.
+- [ ] Add security/privacy FAQ.
+- [ ] Add issue templates.
+- [ ] Add good-first-issue labels/docs.
+- [ ] Add CI release checks.
+- [ ] Tag `v0.1.0-beta.1`.
+- [ ] Publish launch case study.
 
 Exit criteria:
 
@@ -243,18 +260,18 @@ Goal:
 
 Expected PRs:
 
-1. Decide hosted architecture.
-2. Add public aggregate schema.
-3. Add ingestion endpoint for safe contribution payloads.
-4. Add server-side validation.
-5. Add confidence labels for aggregate views.
-6. Add seed-data-only public dashboard.
-7. Add real-data dashboard only after enough contributions.
-8. Add account system only if needed.
-9. Add optional sync.
-10. Add organization/team private dashboard design.
-11. Add abuse and anti-gaming rules.
-12. Add public methodology changelog.
+- [ ] Decide hosted architecture.
+- [ ] Add public aggregate schema.
+- [ ] Add ingestion endpoint for safe contribution payloads.
+- [ ] Add server-side validation.
+- [ ] Add confidence labels for aggregate views.
+- [ ] Add seed-data-only public dashboard.
+- [ ] Add real-data dashboard only after enough contributions.
+- [ ] Add account system only if needed.
+- [ ] Add optional sync.
+- [ ] Add organization/team private dashboard design.
+- [ ] Add abuse and anti-gaming rules.
+- [ ] Add public methodology changelog.
 
 Exit criteria:
 
@@ -266,16 +283,16 @@ Exit criteria:
 
 Use this list when asking "build next":
 
-1. Add changed-file-count bucket report grouping.
-2. Add lines-added bucket report grouping.
-3. Add lines-removed bucket report grouping.
-4. Add token estimate summaries.
-5. Add duration bucket summaries.
-6. Add error count summaries.
-7. Improve report readability and empty states.
-8. Add JSON report schema version.
-9. Add demo seed data generator.
-10. Start local dashboard server.
+- [ ] Add changed-file-count bucket report grouping.
+- [ ] Add lines-added bucket report grouping.
+- [ ] Add lines-removed bucket report grouping.
+- [ ] Add token estimate summaries.
+- [ ] Add duration bucket summaries.
+- [ ] Add error count summaries.
+- [ ] Improve report readability and empty states.
+- [ ] Add JSON report schema version.
+- [ ] Add demo seed data generator.
+- [ ] Start local dashboard server.
 
 ## Career/Portfolio Goal
 

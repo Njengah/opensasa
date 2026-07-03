@@ -6,6 +6,9 @@ OpenSasa is a privacy-first system for measuring real-world AI coding outcomes. 
 
 The roadmap is intentionally staged. Trust, schema, privacy, and methodology work should come before product implementation and public rankings.
 
+For the current week-by-week product timeline and PR backlog, see
+[`docs/PRODUCT_TIMELINE.md`](./PRODUCT_TIMELINE.md).
+
 ## Roadmap Principles
 
 OpenSasa should:

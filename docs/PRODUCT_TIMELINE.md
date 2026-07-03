@@ -39,6 +39,7 @@ items are already merged.
 - [x] File count bucket grouping in local reports. (#50)
 - [x] Product timeline and PR roadmap. (#51)
 - [x] Timeline checklist tracking. (#52)
+- [ ] Changed file count bucket grouping in local reports. (current PR)
 
 ## Product Vision
 
@@ -115,7 +116,7 @@ Goal:
 
 Expected PRs:
 
-- [ ] Add changed-file-count bucket report grouping.
+- [ ] Add changed-file-count bucket report grouping. (current PR)
 - [x] Add file-count bucket report grouping. (#50)
 - [ ] Add lines-added bucket report grouping.
 - [ ] Add lines-removed bucket report grouping.
@@ -303,7 +304,7 @@ Exit criteria:
 
 Use this list when asking "build next":
 
-- [ ] Add changed-file-count bucket report grouping.
+- [ ] Add changed-file-count bucket report grouping. (current PR)
 - [x] Add file-count bucket report grouping. (#50)
 - [ ] Add lines-added bucket report grouping.
 - [ ] Add lines-removed bucket report grouping.

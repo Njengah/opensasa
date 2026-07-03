@@ -41,6 +41,7 @@ export type LocalReport = {
   sessionsByCostSource: CountMap;
   sessionsByRepoSizeBucket: CountMap;
   sessionsByFileCountBucket: CountMap;
+  sessionsByChangedFileCountBucket: CountMap;
   sessionsByTaskType: CountMap;
   acceptedOrPartiallyAcceptedCount: number;
   rejectedCount: number;
@@ -55,6 +56,7 @@ export type LocalReport = {
   costByCostSourceUsd: Record<string, number>;
   costByRepoSizeBucketUsd: Record<string, number>;
   costByFileCountBucketUsd: Record<string, number>;
+  costByChangedFileCountBucketUsd: Record<string, number>;
   costPerUsefulTaskUsd: number | null;
   failureCostUsd: number | null;
   speedToUsefulOutputSeconds: number | null;
@@ -110,6 +112,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     sessionsByCostSource: countBy(sessions, costSourceKey),
     sessionsByRepoSizeBucket: countBy(sessions, repoSizeBucketKey),
     sessionsByFileCountBucket: countBy(sessions, fileCountBucketKey),
+    sessionsByChangedFileCountBucket: countBy(sessions, changedFileCountBucketKey),
     sessionsByTaskType: countBy(sessions, (session) => session.task_type),
     acceptedOrPartiallyAcceptedCount: usefulSessions.length,
     rejectedCount: rejectedSessions.length,
@@ -124,6 +127,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     costByCostSourceUsd: sumBy(estimatedCostSessions, costSourceKey),
     costByRepoSizeBucketUsd: sumBy(estimatedCostSessions, repoSizeBucketKey),
     costByFileCountBucketUsd: sumBy(estimatedCostSessions, fileCountBucketKey),
+    costByChangedFileCountBucketUsd: sumBy(estimatedCostSessions, changedFileCountBucketKey),
     costPerUsefulTaskUsd:
       estimatedTotalCostUsd === null ? null : calculateRate(estimatedTotalCostUsd, usefulSessions.length),
     failureCostUsd,
@@ -183,6 +187,9 @@ export function formatLocalReport(report: LocalReport): string {
     "Sessions by file count bucket:",
     ...formatCountMap(report.sessionsByFileCountBucket),
     "",
+    "Sessions by changed file count bucket:",
+    ...formatCountMap(report.sessionsByChangedFileCountBucket),
+    "",
     "Sessions by task type:",
     ...formatCountMap(report.sessionsByTaskType),
     "",
@@ -204,6 +211,7 @@ export function formatLocalReport(report: LocalReport): string {
     ...formatCostMap("Cost by cost source", report.costByCostSourceUsd),
     ...formatCostMap("Cost by repo size bucket", report.costByRepoSizeBucketUsd),
     ...formatCostMap("Cost by file count bucket", report.costByFileCountBucketUsd),
+    ...formatCostMap("Cost by changed file count bucket", report.costByChangedFileCountBucketUsd),
     "",
     "Speed summary:",
     `Speed to useful output: ${formatSecondsOrUnknown(report.speedToUsefulOutputSeconds)}`,
@@ -391,6 +399,10 @@ function repoSizeBucketKey(session: LocalSession): string {
 
 function fileCountBucketKey(session: LocalSession): string {
   return session.file_count_bucket ?? "unknown";
+}
+
+function changedFileCountBucketKey(session: LocalSession): string {
+  return session.changed_file_count_bucket ?? "unknown";
 }
 
 function calculateRate(numerator: number, denominator: number): number | null {

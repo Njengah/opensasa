@@ -20,6 +20,26 @@ When the user says "build next", use the first unchecked item in
 `Recommended Near-Term PR Order` unless there is a clear blocker or a more urgent
 dependency.
 
+## Completed PR Tracker
+
+Use this section when you want the fastest view of where the project is. Checked
+items are already merged.
+
+- [x] Contribution preview validation. (#39)
+- [x] Local contribution consent state. (#40)
+- [x] Seed methodology examples. (#41)
+- [x] Provider grouping and provider cost totals in local reports. (#42)
+- [x] Tool grouping and tool cost totals in local reports. (#43)
+- [x] Language grouping and language cost totals in local reports. (#44)
+- [x] Tool and language filters for sessions and reports. (#45)
+- [x] Framework and work mode filters for sessions and reports. (#46)
+- [x] Framework and work mode grouping in local reports. (#47)
+- [x] Cost source grouping in local reports. (#48)
+- [x] Repo size bucket grouping in local reports. (#49)
+- [x] File count bucket grouping in local reports. (#50)
+- [x] Product timeline and PR roadmap. (#51)
+- [x] Timeline checklist tracking. (#52)
+
 ## Product Vision
 
 OpenSasa should become:
@@ -44,28 +64,28 @@ CLI-first local MVP
 
 Already working:
 
-- manual session logging,
-- local SQLite storage,
-- safe metadata validation,
-- session listing,
-- local report generation,
-- report filters,
-- report JSON output,
-- local inspection,
-- no-upload contribution preview,
-- local contribution consent state,
-- many local report metrics and groupings,
-- tests around the CLI, storage, schema, reports, inspection, and bucket helpers.
+- [x] Manual session logging.
+- [x] Local SQLite storage.
+- [x] Safe metadata validation.
+- [x] Session listing.
+- [x] Local report generation.
+- [x] Report filters.
+- [x] Report JSON output.
+- [x] Local inspection.
+- [x] No-upload contribution preview.
+- [x] Local contribution consent state.
+- [x] Many local report metrics and groupings.
+- [x] Tests around the CLI, storage, schema, reports, inspection, and bucket helpers.
 
 Still missing for the broader product:
 
-- less manual data capture,
-- local dashboard,
-- background agent,
-- VS Code integration,
-- real export/submission workflow,
-- install/release packaging,
-- public aggregate prototype.
+- [ ] Less manual data capture.
+- [ ] Local dashboard.
+- [ ] Background agent.
+- [ ] VS Code integration.
+- [ ] Real export/submission workflow.
+- [ ] Install/release packaging.
+- [ ] Public aggregate prototype.
 
 ## Timeline Summary
 
@@ -284,6 +304,7 @@ Exit criteria:
 Use this list when asking "build next":
 
 - [ ] Add changed-file-count bucket report grouping.
+- [x] Add file-count bucket report grouping. (#50)
 - [ ] Add lines-added bucket report grouping.
 - [ ] Add lines-removed bucket report grouping.
 - [ ] Add token estimate summaries.
@@ -293,6 +314,7 @@ Use this list when asking "build next":
 - [ ] Add JSON report schema version.
 - [ ] Add demo seed data generator.
 - [ ] Start local dashboard server.
+- [x] Convert product timeline to merge-tracking checklists. (#52)
 
 ## Career/Portfolio Goal
 

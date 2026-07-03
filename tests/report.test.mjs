@@ -38,6 +38,7 @@ test("calculates local report metrics from safe session metadata", () => {
       tests_outcome: "passed",
       estimated_cost_usd: 0.5,
       cost_source: "provider_usage",
+      repo_size_bucket: "small",
     }),
     session({
       provider: "Anthropic",
@@ -52,6 +53,7 @@ test("calculates local report metrics from safe session metadata", () => {
       manual_review_outcome: "accepted",
       estimated_cost_usd: 1.25,
       cost_source: "tool_reported",
+      repo_size_bucket: "medium",
     }),
     session({
       provider: "OpenAI",
@@ -65,6 +67,7 @@ test("calculates local report metrics from safe session metadata", () => {
       tests_outcome: "failed",
       estimated_cost_usd: 0.75,
       cost_source: "estimated",
+      repo_size_bucket: "small",
     }),
     session({
       provider: "Google",
@@ -109,6 +112,11 @@ test("calculates local report metrics from safe session metadata", () => {
     tool_reported: 1,
     unknown: 1,
   });
+  assert.deepEqual(report.sessionsByRepoSizeBucket, {
+    medium: 1,
+    small: 2,
+    unknown: 1,
+  });
   assert.deepEqual(report.sessionsByTaskType, {
     bug_fix: 2,
     documentation: 1,
@@ -145,6 +153,10 @@ test("calculates local report metrics from safe session metadata", () => {
     estimated: 0.75,
     provider_usage: 0.5,
     tool_reported: 1.25,
+  });
+  assert.deepEqual(report.costByRepoSizeBucketUsd, {
+    medium: 1.25,
+    small: 1.25,
   });
   assert.equal(report.costPerUsefulTaskUsd, 1.25);
   assert.equal(report.failureCostUsd, 0.75);
@@ -201,6 +213,7 @@ test("labels missing cost and unknown outcome rates clearly", () => {
   assert.deepEqual(report.costByFrameworkUsd, {});
   assert.deepEqual(report.costByWorkModeUsd, {});
   assert.deepEqual(report.costByCostSourceUsd, {});
+  assert.deepEqual(report.costByRepoSizeBucketUsd, {});
   assert.equal(report.costPerUsefulTaskUsd, null);
   assert.equal(report.failureCostUsd, 0);
   assert.equal(report.speedToUsefulOutputSeconds, null);
@@ -241,6 +254,7 @@ test("formats a readable local report", () => {
       duration_seconds: 300,
       estimated_cost_usd: 0.5,
       cost_source: "estimated",
+      repo_size_bucket: "small",
     }),
   ]);
   const output = formatLocalReport(report);
@@ -254,6 +268,7 @@ test("formats a readable local report", () => {
   assert.match(output, /Sessions by framework:\n- Node\.js: 1/);
   assert.match(output, /Sessions by work mode:\n- manual_log: 1/);
   assert.match(output, /Sessions by cost source:\n- estimated: 1/);
+  assert.match(output, /Sessions by repo size bucket:\n- small: 1/);
   assert.match(output, /Estimated total cost: \$0\.5000/);
   assert.match(output, /Cost per useful task: \$0\.5000/);
   assert.match(output, /Failure cost: \$0\.0000/);
@@ -263,6 +278,7 @@ test("formats a readable local report", () => {
   assert.match(output, /Cost by framework:\n- Node\.js: \$0\.5000/);
   assert.match(output, /Cost by work mode:\n- manual_log: \$0\.5000/);
   assert.match(output, /Cost by cost source:\n- estimated: \$0\.5000/);
+  assert.match(output, /Cost by repo size bucket:\n- small: \$0\.5000/);
   assert.match(output, /Speed to useful output: 300\.0s/);
   assert.match(output, /Total retries on rejected sessions: 0/);
   assert.match(output, /Failure retry burden: unknown/);
@@ -286,6 +302,7 @@ test("formats a local report as JSON", () => {
       duration_seconds: 300,
       estimated_cost_usd: 0.5,
       cost_source: "estimated",
+      repo_size_bucket: "small",
     }),
   ]);
   const parsed = JSON.parse(formatLocalReportJson(report));
@@ -297,6 +314,7 @@ test("formats a local report as JSON", () => {
   assert.equal(parsed.sessionsByFramework["Node.js"], 1);
   assert.equal(parsed.sessionsByWorkMode.manual_log, 1);
   assert.equal(parsed.sessionsByCostSource.estimated, 1);
+  assert.equal(parsed.sessionsByRepoSizeBucket.small, 1);
   assert.equal(parsed.estimatedTotalCostUsd, 0.5);
   assert.equal(parsed.costByProviderUsd.OpenAI, 0.5);
   assert.equal(parsed.costByToolUsd.Codex, 0.5);
@@ -304,6 +322,7 @@ test("formats a local report as JSON", () => {
   assert.equal(parsed.costByFrameworkUsd["Node.js"], 0.5);
   assert.equal(parsed.costByWorkModeUsd.manual_log, 0.5);
   assert.equal(parsed.costByCostSourceUsd.estimated, 0.5);
+  assert.equal(parsed.costByRepoSizeBucketUsd.small, 0.5);
   assert.equal(parsed.costPerUsefulTaskUsd, 0.5);
   assert.equal(parsed.failureCostUsd, 0);
   assert.equal(parsed.speedToUsefulOutputSeconds, 300);

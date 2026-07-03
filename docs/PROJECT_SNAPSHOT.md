@@ -90,6 +90,7 @@ Local reports currently include:
 - sessions by framework,
 - sessions by work mode,
 - sessions by cost source,
+- sessions by repo size bucket,
 - sessions by task type,
 - accepted or partially accepted count,
 - rejected count,
@@ -102,6 +103,7 @@ Local reports currently include:
 - cost by framework,
 - cost by work mode,
 - cost by cost source,
+- cost by repo size bucket,
 - cost per useful task,
 - failure cost,
 - speed to useful output,
@@ -126,7 +128,7 @@ Recent PRs focused on hardening the local CLI workflow:
 - local inspection and no-upload contribution preview,
 - local contribution consent state,
 - seed methodology examples,
-- provider, tool, language, framework, work mode, and cost source grouping in local reports.
+- provider, tool, language, framework, work mode, cost source, and repo size grouping in local reports.
 
 ## Where We Are In The Roadmap
 

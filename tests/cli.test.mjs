@@ -1243,6 +1243,8 @@ test("prints a local report from saved sessions", async () => {
       cost_source: "provider_usage",
       language: "TypeScript",
       framework: "Node.js",
+      repo_size_bucket: "small",
+      repo_size_bucket: "small",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1257,6 +1259,7 @@ test("prints a local report from saved sessions", async () => {
       retry_count: 2,
       estimated_cost_usd: 1,
       cost_source: "estimated",
+      repo_size_bucket: "medium",
     });
   } finally {
     store.close();
@@ -1289,6 +1292,9 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /Sessions by cost source:/);
   assert.match(stdout, /provider_usage: 1/);
   assert.match(stdout, /estimated: 1/);
+  assert.match(stdout, /Sessions by repo size bucket:/);
+  assert.match(stdout, /small: 1/);
+  assert.match(stdout, /medium: 1/);
   assert.match(stdout, /bug_fix: 1/);
   assert.match(stdout, /feature: 1/);
   assert.match(stdout, /Accepted or partially accepted: 1/);
@@ -1313,6 +1319,9 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /Cost by cost source:/);
   assert.match(stdout, /provider_usage: \$0\.5000/);
   assert.match(stdout, /estimated: \$1\.0000/);
+  assert.match(stdout, /Cost by repo size bucket:/);
+  assert.match(stdout, /small: \$0\.5000/);
+  assert.match(stdout, /medium: \$1\.0000/);
   assert.match(stdout, /Speed to useful output: 300\.0s/);
   assert.match(stdout, /Retry burden: 1\.00/);
   assert.match(stdout, /Total retries on rejected sessions: 2/);
@@ -1346,6 +1355,7 @@ test("prints a filtered local report from saved sessions", async () => {
       cost_source: "provider_usage",
       language: "TypeScript",
       framework: "Node.js",
+      repo_size_bucket: "small",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1407,6 +1417,7 @@ test("prints a filtered local report from saved sessions", async () => {
   assert.match(stdout, /Node\.js: 1/);
   assert.match(stdout, /manual_log: 1/);
   assert.match(stdout, /provider_usage: 1/);
+  assert.match(stdout, /small: 1/);
   assert.match(stdout, /bug_fix: 1/);
   assert.match(stdout, /Accepted or partially accepted: 1/);
   assert.match(stdout, /Estimated total cost: \$0\.5000/);
@@ -1440,6 +1451,7 @@ test("prints a date-filtered local report from saved sessions", async () => {
       cost_source: "provider_usage",
       language: "TypeScript",
       framework: "Node.js",
+      repo_size_bucket: "small",
     });
     store.createSession({
       timestamp: "2026-06-09T12:00:00.000Z",
@@ -1453,6 +1465,7 @@ test("prints a date-filtered local report from saved sessions", async () => {
       retry_count: 2,
       estimated_cost_usd: 1,
       cost_source: "estimated",
+      repo_size_bucket: "medium",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1591,6 +1604,7 @@ test("prints a local report from saved sessions as JSON", async () => {
       cost_source: "provider_usage",
       language: "TypeScript",
       framework: "Node.js",
+      repo_size_bucket: "small",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1604,6 +1618,7 @@ test("prints a local report from saved sessions as JSON", async () => {
       retry_count: 2,
       estimated_cost_usd: 1,
       cost_source: "estimated",
+      repo_size_bucket: "medium",
     });
   } finally {
     store.close();
@@ -1632,6 +1647,8 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.sessionsByWorkMode.manual_log, 2);
   assert.equal(report.sessionsByCostSource.provider_usage, 1);
   assert.equal(report.sessionsByCostSource.estimated, 1);
+  assert.equal(report.sessionsByRepoSizeBucket.small, 1);
+  assert.equal(report.sessionsByRepoSizeBucket.medium, 1);
   assert.equal(report.estimatedTotalCostUsd, 1.5);
   assert.equal(report.costByProviderUsd.OpenAI, 0.5);
   assert.equal(report.costByProviderUsd.Anthropic, 1);
@@ -1644,6 +1661,8 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.costByWorkModeUsd.manual_log, 1.5);
   assert.equal(report.costByCostSourceUsd.provider_usage, 0.5);
   assert.equal(report.costByCostSourceUsd.estimated, 1);
+  assert.equal(report.costByRepoSizeBucketUsd.small, 0.5);
+  assert.equal(report.costByRepoSizeBucketUsd.medium, 1);
   assert.equal(report.costPerUsefulTaskUsd, 1.5);
   assert.equal(report.failureCostUsd, 1);
   assert.equal(report.speedToUsefulOutputSeconds, 300);
@@ -1680,6 +1699,7 @@ test("prints a filtered local report as JSON", async () => {
       retry_count: 1,
       estimated_cost_usd: 0.5,
       cost_source: "provider_usage",
+      repo_size_bucket: "small",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1727,11 +1747,13 @@ test("prints a filtered local report as JSON", async () => {
   assert.deepEqual(report.sessionsByFramework, { "Node.js": 1 });
   assert.deepEqual(report.sessionsByWorkMode, { manual_log: 1 });
   assert.deepEqual(report.sessionsByCostSource, { provider_usage: 1 });
+  assert.deepEqual(report.sessionsByRepoSizeBucket, { small: 1 });
   assert.deepEqual(report.sessionsByTaskType, { bug_fix: 1 });
   assert.equal(report.estimatedTotalCostUsd, 0.5);
   assert.deepEqual(report.costByFrameworkUsd, { "Node.js": 0.5 });
   assert.deepEqual(report.costByWorkModeUsd, { manual_log: 0.5 });
   assert.deepEqual(report.costByCostSourceUsd, { provider_usage: 0.5 });
+  assert.deepEqual(report.costByRepoSizeBucketUsd, { small: 0.5 });
   assert.equal(report.costPerUsefulTaskUsd, 0.5);
   assert.equal(report.failureCostUsd, 0);
   assert.equal(report.speedToUsefulOutputSeconds, 300);

@@ -27,6 +27,7 @@ All notable changes to OpenSasa will be documented in this file.
 - Work mode grouping and work mode cost totals in local reports.
 - Cost source grouping and cost source cost totals in local reports.
 - Repository size bucket grouping and repository size cost totals in local reports.
+- File count bucket grouping and file count cost totals in local reports.
 - Cost per useful task and failure cost metrics in local reports.
 - Speed to useful output metric in local reports.
 - Unknown outcome rate metric in local reports.

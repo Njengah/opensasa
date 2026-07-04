@@ -100,6 +100,7 @@ Local reports currently include:
 - rejected count,
 - unknown outcome count,
 - estimated total cost,
+- token estimate summary,
 - cost by provider,
 - cost by model,
 - cost by tool,
@@ -136,7 +137,7 @@ Recent PRs focused on hardening the local CLI workflow:
 - local inspection and no-upload contribution preview,
 - local contribution consent state,
 - seed methodology examples,
-- provider, tool, language, framework, work mode, cost source, repo size, file count, changed file count, lines added, and lines removed grouping in local reports.
+- provider, tool, language, framework, work mode, cost source, repo size, file count, changed file count, lines added, lines removed, and token estimate summaries in local reports.
 
 ## Where We Are In The Roadmap
 

@@ -30,6 +30,14 @@ export type ConfidenceSummary = {
   note: string;
 };
 
+export type TokenEstimateSummary = {
+  sessionsWithTokenEstimates: number;
+  inputTokensEstimateTotal: number | null;
+  outputTokensEstimateTotal: number | null;
+  cachedTokensEstimateTotal: number | null;
+  totalTokensEstimate: number | null;
+};
+
 export type LocalReport = {
   totalSessions: number;
   sessionsByProvider: CountMap;
@@ -61,6 +69,7 @@ export type LocalReport = {
   costByChangedFileCountBucketUsd: Record<string, number>;
   costByLinesAddedBucketUsd: Record<string, number>;
   costByLinesRemovedBucketUsd: Record<string, number>;
+  tokenEstimateSummary: TokenEstimateSummary;
   costPerUsefulTaskUsd: number | null;
   failureCostUsd: number | null;
   speedToUsefulOutputSeconds: number | null;
@@ -136,6 +145,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     costByChangedFileCountBucketUsd: sumBy(estimatedCostSessions, changedFileCountBucketKey),
     costByLinesAddedBucketUsd: sumBy(estimatedCostSessions, linesAddedBucketKey),
     costByLinesRemovedBucketUsd: sumBy(estimatedCostSessions, linesRemovedBucketKey),
+    tokenEstimateSummary: calculateTokenEstimateSummary(sessions),
     costPerUsefulTaskUsd:
       estimatedTotalCostUsd === null ? null : calculateRate(estimatedTotalCostUsd, usefulSessions.length),
     failureCostUsd,
@@ -229,6 +239,13 @@ export function formatLocalReport(report: LocalReport): string {
     ...formatCostMap("Cost by lines added bucket", report.costByLinesAddedBucketUsd),
     ...formatCostMap("Cost by lines removed bucket", report.costByLinesRemovedBucketUsd),
     "",
+    "Token estimate summary:",
+    `Sessions with token estimates: ${report.tokenEstimateSummary.sessionsWithTokenEstimates}`,
+    `Input tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.inputTokensEstimateTotal)}`,
+    `Output tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.outputTokensEstimateTotal)}`,
+    `Cached tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.cachedTokensEstimateTotal)}`,
+    `Total tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.totalTokensEstimate)}`,
+    "",
     "Speed summary:",
     `Speed to useful output: ${formatSecondsOrUnknown(report.speedToUsefulOutputSeconds)}`,
     "",
@@ -283,6 +300,40 @@ function calculateFailureRetrySummary(rejectedSessions: LocalSession[]): Failure
     rejectedSessionCount: rejectedSessions.length,
     failureRetryBurden: calculateRate(totalRetries, rejectedSessions.length),
   };
+}
+
+function calculateTokenEstimateSummary(sessions: LocalSession[]): TokenEstimateSummary {
+  const tokenSessions = sessions.filter(hasAnyTokenEstimate);
+
+  if (tokenSessions.length === 0) {
+    return {
+      sessionsWithTokenEstimates: 0,
+      inputTokensEstimateTotal: null,
+      outputTokensEstimateTotal: null,
+      cachedTokensEstimateTotal: null,
+      totalTokensEstimate: null,
+    };
+  }
+
+  const inputTokensEstimateTotal = sum(tokenSessions.map((session) => session.input_tokens_estimate ?? 0));
+  const outputTokensEstimateTotal = sum(tokenSessions.map((session) => session.output_tokens_estimate ?? 0));
+  const cachedTokensEstimateTotal = sum(tokenSessions.map((session) => session.cached_tokens_estimate ?? 0));
+
+  return {
+    sessionsWithTokenEstimates: tokenSessions.length,
+    inputTokensEstimateTotal,
+    outputTokensEstimateTotal,
+    cachedTokensEstimateTotal,
+    totalTokensEstimate: inputTokensEstimateTotal + outputTokensEstimateTotal + cachedTokensEstimateTotal,
+  };
+}
+
+function hasAnyTokenEstimate(session: LocalSession): boolean {
+  return (
+    session.input_tokens_estimate !== undefined ||
+    session.output_tokens_estimate !== undefined ||
+    session.cached_tokens_estimate !== undefined
+  );
 }
 
 function calculateConfidenceSummary(
@@ -478,6 +529,10 @@ function formatCurrency(value: number): string {
 
 function formatNumberOrUnknown(value: number | null): string {
   return value === null ? "unknown" : value.toFixed(2);
+}
+
+function formatIntegerOrUnknown(value: number | null): string {
+  return value === null ? "unknown" : value.toString();
 }
 
 function formatSecondsOrUnknown(value: number | null): string {

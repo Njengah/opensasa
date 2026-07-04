@@ -42,7 +42,8 @@ items are already merged.
 - [x] Completed PR tracker updates. (#53)
 - [x] Changed file count bucket grouping in local reports. (#54)
 - [x] Lines added bucket grouping in local reports. (#55)
-- [ ] Lines removed bucket grouping in local reports. (current PR)
+- [x] Lines removed bucket grouping in local reports. (#56)
+- [ ] Token estimate summaries in local reports. (current PR)
 
 ## Product Vision
 
@@ -122,8 +123,8 @@ Expected PRs:
 - [x] Add changed-file-count bucket report grouping. (#54)
 - [x] Add file-count bucket report grouping. (#50)
 - [x] Add lines-added bucket report grouping. (#55)
-- [ ] Add lines-removed bucket report grouping. (current PR)
-- [ ] Add token estimate summaries to reports.
+- [x] Add lines-removed bucket report grouping. (#56)
+- [ ] Add token estimate summaries to reports. (current PR)
 - [ ] Add duration bucket summaries to reports.
 - [ ] Add error count summaries to reports.
 - [ ] Improve report section ordering and empty-state readability.
@@ -310,8 +311,8 @@ Use this list when asking "build next":
 - [x] Add changed-file-count bucket report grouping. (#54)
 - [x] Add file-count bucket report grouping. (#50)
 - [x] Add lines-added bucket report grouping. (#55)
-- [ ] Add lines-removed bucket report grouping. (current PR)
-- [ ] Add token estimate summaries.
+- [x] Add lines-removed bucket report grouping. (#56)
+- [ ] Add token estimate summaries. (current PR)
 - [ ] Add duration bucket summaries.
 - [ ] Add error count summaries.
 - [ ] Improve report readability and empty states.

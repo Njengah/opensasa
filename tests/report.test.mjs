@@ -36,6 +36,9 @@ test("calculates local report metrics from safe session metadata", () => {
       retry_count: 1,
       duration_seconds: 600,
       tests_outcome: "passed",
+      input_tokens_estimate: 1000,
+      output_tokens_estimate: 400,
+      cached_tokens_estimate: 50,
       estimated_cost_usd: 0.5,
       cost_source: "provider_usage",
       repo_size_bucket: "small",
@@ -55,6 +58,8 @@ test("calculates local report metrics from safe session metadata", () => {
       retry_count: 2,
       duration_seconds: 120,
       manual_review_outcome: "accepted",
+      input_tokens_estimate: 2000,
+      output_tokens_estimate: 800,
       estimated_cost_usd: 1.25,
       cost_source: "tool_reported",
       repo_size_bucket: "medium",
@@ -206,6 +211,13 @@ test("calculates local report metrics from safe session metadata", () => {
     small: 1.25,
     tiny: 1.25,
   });
+  assert.deepEqual(report.tokenEstimateSummary, {
+    sessionsWithTokenEstimates: 2,
+    inputTokensEstimateTotal: 3000,
+    outputTokensEstimateTotal: 1200,
+    cachedTokensEstimateTotal: 50,
+    totalTokensEstimate: 4250,
+  });
   assert.equal(report.costPerUsefulTaskUsd, 1.25);
   assert.equal(report.failureCostUsd, 0.75);
   assert.equal(report.speedToUsefulOutputSeconds, 360);
@@ -266,6 +278,13 @@ test("labels missing cost and unknown outcome rates clearly", () => {
   assert.deepEqual(report.costByChangedFileCountBucketUsd, {});
   assert.deepEqual(report.costByLinesAddedBucketUsd, {});
   assert.deepEqual(report.costByLinesRemovedBucketUsd, {});
+  assert.deepEqual(report.tokenEstimateSummary, {
+    sessionsWithTokenEstimates: 0,
+    inputTokensEstimateTotal: null,
+    outputTokensEstimateTotal: null,
+    cachedTokensEstimateTotal: null,
+    totalTokensEstimate: null,
+  });
   assert.equal(report.costPerUsefulTaskUsd, null);
   assert.equal(report.failureCostUsd, 0);
   assert.equal(report.speedToUsefulOutputSeconds, null);
@@ -304,6 +323,9 @@ test("formats a readable local report", () => {
       framework: "Node.js",
       tests_outcome: "passed",
       duration_seconds: 300,
+      input_tokens_estimate: 1200,
+      output_tokens_estimate: 500,
+      cached_tokens_estimate: 100,
       estimated_cost_usd: 0.5,
       cost_source: "estimated",
       repo_size_bucket: "small",
@@ -343,6 +365,12 @@ test("formats a readable local report", () => {
   assert.match(output, /Cost by changed file count bucket:\n- tiny: \$0\.5000/);
   assert.match(output, /Cost by lines added bucket:\n- small: \$0\.5000/);
   assert.match(output, /Cost by lines removed bucket:\n- tiny: \$0\.5000/);
+  assert.match(output, /Token estimate summary:/);
+  assert.match(output, /Sessions with token estimates: 1/);
+  assert.match(output, /Input tokens estimate: 1200/);
+  assert.match(output, /Output tokens estimate: 500/);
+  assert.match(output, /Cached tokens estimate: 100/);
+  assert.match(output, /Total tokens estimate: 1800/);
   assert.match(output, /Speed to useful output: 300\.0s/);
   assert.match(output, /Total retries on rejected sessions: 0/);
   assert.match(output, /Failure retry burden: unknown/);
@@ -364,6 +392,9 @@ test("formats a local report as JSON", () => {
       framework: "Node.js",
       tests_outcome: "passed",
       duration_seconds: 300,
+      input_tokens_estimate: 1200,
+      output_tokens_estimate: 500,
+      cached_tokens_estimate: 100,
       estimated_cost_usd: 0.5,
       cost_source: "estimated",
       repo_size_bucket: "small",
@@ -399,6 +430,13 @@ test("formats a local report as JSON", () => {
   assert.equal(parsed.costByChangedFileCountBucketUsd.tiny, 0.5);
   assert.equal(parsed.costByLinesAddedBucketUsd.small, 0.5);
   assert.equal(parsed.costByLinesRemovedBucketUsd.tiny, 0.5);
+  assert.deepEqual(parsed.tokenEstimateSummary, {
+    sessionsWithTokenEstimates: 1,
+    inputTokensEstimateTotal: 1200,
+    outputTokensEstimateTotal: 500,
+    cachedTokensEstimateTotal: 100,
+    totalTokensEstimate: 1800,
+  });
   assert.equal(parsed.costPerUsefulTaskUsd, 0.5);
   assert.equal(parsed.failureCostUsd, 0);
   assert.equal(parsed.speedToUsefulOutputSeconds, 300);

@@ -94,6 +94,7 @@ Local reports currently include:
 - sessions by file count bucket,
 - sessions by changed file count bucket,
 - sessions by lines added bucket,
+- sessions by lines removed bucket,
 - sessions by task type,
 - accepted or partially accepted count,
 - rejected count,
@@ -110,6 +111,7 @@ Local reports currently include:
 - cost by file count bucket,
 - cost by changed file count bucket,
 - cost by lines added bucket,
+- cost by lines removed bucket,
 - cost per useful task,
 - failure cost,
 - speed to useful output,
@@ -134,7 +136,7 @@ Recent PRs focused on hardening the local CLI workflow:
 - local inspection and no-upload contribution preview,
 - local contribution consent state,
 - seed methodology examples,
-- provider, tool, language, framework, work mode, cost source, repo size, file count, changed file count, and lines added grouping in local reports.
+- provider, tool, language, framework, work mode, cost source, repo size, file count, changed file count, lines added, and lines removed grouping in local reports.
 
 ## Where We Are In The Roadmap
 

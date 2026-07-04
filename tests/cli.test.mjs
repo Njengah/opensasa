@@ -1247,6 +1247,7 @@ test("prints a local report from saved sessions", async () => {
       file_count_bucket: "medium",
       changed_file_count_bucket: "tiny",
       lines_added_bucket: "small",
+      lines_removed_bucket: "tiny",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1265,6 +1266,7 @@ test("prints a local report from saved sessions", async () => {
       file_count_bucket: "large",
       changed_file_count_bucket: "small",
       lines_added_bucket: "medium",
+      lines_removed_bucket: "small",
     });
   } finally {
     store.close();
@@ -1306,6 +1308,8 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /tiny: 1/);
   assert.match(stdout, /Sessions by lines added bucket:/);
   assert.match(stdout, /small: 1/);
+  assert.match(stdout, /Sessions by lines removed bucket:/);
+  assert.match(stdout, /tiny: 1/);
   assert.match(stdout, /bug_fix: 1/);
   assert.match(stdout, /feature: 1/);
   assert.match(stdout, /Accepted or partially accepted: 1/);
@@ -1339,6 +1343,8 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /tiny: \$0\.5000/);
   assert.match(stdout, /Cost by lines added bucket:/);
   assert.match(stdout, /small: \$0\.5000/);
+  assert.match(stdout, /Cost by lines removed bucket:/);
+  assert.match(stdout, /tiny: \$0\.5000/);
   assert.match(stdout, /Speed to useful output: 300\.0s/);
   assert.match(stdout, /Retry burden: 1\.00/);
   assert.match(stdout, /Total retries on rejected sessions: 2/);
@@ -1376,6 +1382,7 @@ test("prints a filtered local report from saved sessions", async () => {
       file_count_bucket: "medium",
       changed_file_count_bucket: "tiny",
       lines_added_bucket: "small",
+      lines_removed_bucket: "tiny",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1495,6 +1502,7 @@ test("prints a date-filtered local report from saved sessions", async () => {
       file_count_bucket: "large",
       changed_file_count_bucket: "small",
       lines_added_bucket: "medium",
+      lines_removed_bucket: "small",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1637,6 +1645,7 @@ test("prints a local report from saved sessions as JSON", async () => {
       file_count_bucket: "medium",
       changed_file_count_bucket: "tiny",
       lines_added_bucket: "small",
+      lines_removed_bucket: "tiny",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1654,6 +1663,7 @@ test("prints a local report from saved sessions as JSON", async () => {
       file_count_bucket: "large",
       changed_file_count_bucket: "small",
       lines_added_bucket: "medium",
+      lines_removed_bucket: "small",
     });
   } finally {
     store.close();
@@ -1690,6 +1700,8 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.sessionsByChangedFileCountBucket.small, 1);
   assert.equal(report.sessionsByLinesAddedBucket.small, 1);
   assert.equal(report.sessionsByLinesAddedBucket.medium, 1);
+  assert.equal(report.sessionsByLinesRemovedBucket.tiny, 1);
+  assert.equal(report.sessionsByLinesRemovedBucket.small, 1);
   assert.equal(report.estimatedTotalCostUsd, 1.5);
   assert.equal(report.costByProviderUsd.OpenAI, 0.5);
   assert.equal(report.costByProviderUsd.Anthropic, 1);
@@ -1710,6 +1722,8 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.costByChangedFileCountBucketUsd.small, 1);
   assert.equal(report.costByLinesAddedBucketUsd.small, 0.5);
   assert.equal(report.costByLinesAddedBucketUsd.medium, 1);
+  assert.equal(report.costByLinesRemovedBucketUsd.tiny, 0.5);
+  assert.equal(report.costByLinesRemovedBucketUsd.small, 1);
   assert.equal(report.costPerUsefulTaskUsd, 1.5);
   assert.equal(report.failureCostUsd, 1);
   assert.equal(report.speedToUsefulOutputSeconds, 300);
@@ -1750,6 +1764,7 @@ test("prints a filtered local report as JSON", async () => {
       file_count_bucket: "medium",
       changed_file_count_bucket: "tiny",
       lines_added_bucket: "small",
+      lines_removed_bucket: "tiny",
     });
     store.createSession({
       timestamp: "2026-06-10T12:00:00.000Z",
@@ -1801,6 +1816,7 @@ test("prints a filtered local report as JSON", async () => {
   assert.deepEqual(report.sessionsByFileCountBucket, { medium: 1 });
   assert.deepEqual(report.sessionsByChangedFileCountBucket, { tiny: 1 });
   assert.deepEqual(report.sessionsByLinesAddedBucket, { small: 1 });
+  assert.deepEqual(report.sessionsByLinesRemovedBucket, { tiny: 1 });
   assert.deepEqual(report.sessionsByTaskType, { bug_fix: 1 });
   assert.equal(report.estimatedTotalCostUsd, 0.5);
   assert.deepEqual(report.costByFrameworkUsd, { "Node.js": 0.5 });
@@ -1810,6 +1826,7 @@ test("prints a filtered local report as JSON", async () => {
   assert.deepEqual(report.costByFileCountBucketUsd, { medium: 0.5 });
   assert.deepEqual(report.costByChangedFileCountBucketUsd, { tiny: 0.5 });
   assert.deepEqual(report.costByLinesAddedBucketUsd, { small: 0.5 });
+  assert.deepEqual(report.costByLinesRemovedBucketUsd, { tiny: 0.5 });
   assert.equal(report.costPerUsefulTaskUsd, 0.5);
   assert.equal(report.failureCostUsd, 0);
   assert.equal(report.speedToUsefulOutputSeconds, 300);

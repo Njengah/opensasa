@@ -129,6 +129,9 @@ Local reports currently include:
 - unknown outcome rate,
 - and verified success rate.
 
+Text reports show headline outcomes and rates before detailed groupings, and
+empty sections say when no matching local data was recorded.
+
 ## Recent Build Path
 
 Recent PRs focused on hardening the local CLI workflow:

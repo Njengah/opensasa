@@ -350,6 +350,16 @@ test("labels missing cost and unknown outcome rates clearly", () => {
   assert.equal(report.confidenceSummary.verificationShare.rate, null);
 });
 
+test("formats empty report sections clearly", () => {
+  const output = formatLocalReport(calculateLocalReport([]));
+
+  assert.match(output, /Total sessions: 0/);
+  assert.match(output, /No local sessions matched this report/);
+  assert.match(output, /Sessions by provider:\n- none recorded/);
+  assert.match(output, /Cost by provider: none recorded/);
+  assert.match(output, /tests_outcome:\n- none recorded/);
+});
+
 test("formats a readable local report", () => {
   const report = calculateLocalReport([
     session({

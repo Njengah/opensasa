@@ -1,3 +1,4 @@
+import { durationBucket } from "./buckets.js";
 import { deriveVerifiedSuccess, isUsefulOutcome, type LocalSession } from "./schema.js";
 
 export type CountMap = Record<string, number>;
@@ -52,6 +53,7 @@ export type LocalReport = {
   sessionsByChangedFileCountBucket: CountMap;
   sessionsByLinesAddedBucket: CountMap;
   sessionsByLinesRemovedBucket: CountMap;
+  sessionsByDurationBucket: CountMap;
   sessionsByTaskType: CountMap;
   acceptedOrPartiallyAcceptedCount: number;
   rejectedCount: number;
@@ -69,6 +71,7 @@ export type LocalReport = {
   costByChangedFileCountBucketUsd: Record<string, number>;
   costByLinesAddedBucketUsd: Record<string, number>;
   costByLinesRemovedBucketUsd: Record<string, number>;
+  costByDurationBucketUsd: Record<string, number>;
   tokenEstimateSummary: TokenEstimateSummary;
   costPerUsefulTaskUsd: number | null;
   failureCostUsd: number | null;
@@ -128,6 +131,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     sessionsByChangedFileCountBucket: countBy(sessions, changedFileCountBucketKey),
     sessionsByLinesAddedBucket: countBy(sessions, linesAddedBucketKey),
     sessionsByLinesRemovedBucket: countBy(sessions, linesRemovedBucketKey),
+    sessionsByDurationBucket: countBy(sessions, durationBucketKey),
     sessionsByTaskType: countBy(sessions, (session) => session.task_type),
     acceptedOrPartiallyAcceptedCount: usefulSessions.length,
     rejectedCount: rejectedSessions.length,
@@ -145,6 +149,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     costByChangedFileCountBucketUsd: sumBy(estimatedCostSessions, changedFileCountBucketKey),
     costByLinesAddedBucketUsd: sumBy(estimatedCostSessions, linesAddedBucketKey),
     costByLinesRemovedBucketUsd: sumBy(estimatedCostSessions, linesRemovedBucketKey),
+    costByDurationBucketUsd: sumBy(estimatedCostSessions, durationBucketKey),
     tokenEstimateSummary: calculateTokenEstimateSummary(sessions),
     costPerUsefulTaskUsd:
       estimatedTotalCostUsd === null ? null : calculateRate(estimatedTotalCostUsd, usefulSessions.length),
@@ -214,6 +219,9 @@ export function formatLocalReport(report: LocalReport): string {
     "Sessions by lines removed bucket:",
     ...formatCountMap(report.sessionsByLinesRemovedBucket),
     "",
+    "Sessions by duration bucket:",
+    ...formatCountMap(report.sessionsByDurationBucket),
+    "",
     "Sessions by task type:",
     ...formatCountMap(report.sessionsByTaskType),
     "",
@@ -238,6 +246,7 @@ export function formatLocalReport(report: LocalReport): string {
     ...formatCostMap("Cost by changed file count bucket", report.costByChangedFileCountBucketUsd),
     ...formatCostMap("Cost by lines added bucket", report.costByLinesAddedBucketUsd),
     ...formatCostMap("Cost by lines removed bucket", report.costByLinesRemovedBucketUsd),
+    ...formatCostMap("Cost by duration bucket", report.costByDurationBucketUsd),
     "",
     "Token estimate summary:",
     `Sessions with token estimates: ${report.tokenEstimateSummary.sessionsWithTokenEstimates}`,
@@ -478,6 +487,10 @@ function linesAddedBucketKey(session: LocalSession): string {
 
 function linesRemovedBucketKey(session: LocalSession): string {
   return session.lines_removed_bucket ?? "unknown";
+}
+
+function durationBucketKey(session: LocalSession): string {
+  return durationBucket(session.duration_seconds);
 }
 
 function calculateRate(numerator: number, denominator: number): number | null {

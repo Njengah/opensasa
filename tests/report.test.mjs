@@ -154,6 +154,11 @@ test("calculates local report metrics from safe session metadata", () => {
     tiny: 2,
     unknown: 1,
   });
+  assert.deepEqual(report.sessionsByDurationBucket, {
+    "1m_to_5m": 1,
+    "5m_to_30m": 1,
+    unknown: 2,
+  });
   assert.deepEqual(report.sessionsByTaskType, {
     bug_fix: 2,
     documentation: 1,
@@ -210,6 +215,11 @@ test("calculates local report metrics from safe session metadata", () => {
   assert.deepEqual(report.costByLinesRemovedBucketUsd, {
     small: 1.25,
     tiny: 1.25,
+  });
+  assert.deepEqual(report.costByDurationBucketUsd, {
+    "1m_to_5m": 1.25,
+    "5m_to_30m": 0.5,
+    unknown: 0.75,
   });
   assert.deepEqual(report.tokenEstimateSummary, {
     sessionsWithTokenEstimates: 2,
@@ -278,6 +288,7 @@ test("labels missing cost and unknown outcome rates clearly", () => {
   assert.deepEqual(report.costByChangedFileCountBucketUsd, {});
   assert.deepEqual(report.costByLinesAddedBucketUsd, {});
   assert.deepEqual(report.costByLinesRemovedBucketUsd, {});
+  assert.deepEqual(report.costByDurationBucketUsd, {});
   assert.deepEqual(report.tokenEstimateSummary, {
     sessionsWithTokenEstimates: 0,
     inputTokensEstimateTotal: null,
@@ -351,6 +362,7 @@ test("formats a readable local report", () => {
   assert.match(output, /Sessions by changed file count bucket:\n- tiny: 1/);
   assert.match(output, /Sessions by lines added bucket:\n- small: 1/);
   assert.match(output, /Sessions by lines removed bucket:\n- tiny: 1/);
+  assert.match(output, /Sessions by duration bucket:\n- 1m_to_5m: 1/);
   assert.match(output, /Estimated total cost: \$0\.5000/);
   assert.match(output, /Cost per useful task: \$0\.5000/);
   assert.match(output, /Failure cost: \$0\.0000/);
@@ -365,6 +377,7 @@ test("formats a readable local report", () => {
   assert.match(output, /Cost by changed file count bucket:\n- tiny: \$0\.5000/);
   assert.match(output, /Cost by lines added bucket:\n- small: \$0\.5000/);
   assert.match(output, /Cost by lines removed bucket:\n- tiny: \$0\.5000/);
+  assert.match(output, /Cost by duration bucket:\n- 1m_to_5m: \$0\.5000/);
   assert.match(output, /Token estimate summary:/);
   assert.match(output, /Sessions with token estimates: 1/);
   assert.match(output, /Input tokens estimate: 1200/);
@@ -418,6 +431,7 @@ test("formats a local report as JSON", () => {
   assert.equal(parsed.sessionsByChangedFileCountBucket.tiny, 1);
   assert.equal(parsed.sessionsByLinesAddedBucket.small, 1);
   assert.equal(parsed.sessionsByLinesRemovedBucket.tiny, 1);
+  assert.equal(parsed.sessionsByDurationBucket["1m_to_5m"], 1);
   assert.equal(parsed.estimatedTotalCostUsd, 0.5);
   assert.equal(parsed.costByProviderUsd.OpenAI, 0.5);
   assert.equal(parsed.costByToolUsd.Codex, 0.5);
@@ -430,6 +444,7 @@ test("formats a local report as JSON", () => {
   assert.equal(parsed.costByChangedFileCountBucketUsd.tiny, 0.5);
   assert.equal(parsed.costByLinesAddedBucketUsd.small, 0.5);
   assert.equal(parsed.costByLinesRemovedBucketUsd.tiny, 0.5);
+  assert.equal(parsed.costByDurationBucketUsd["1m_to_5m"], 0.5);
   assert.deepEqual(parsed.tokenEstimateSummary, {
     sessionsWithTokenEstimates: 1,
     inputTokensEstimateTotal: 1200,

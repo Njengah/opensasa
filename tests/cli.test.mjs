@@ -1315,6 +1315,8 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /small: 1/);
   assert.match(stdout, /Sessions by lines removed bucket:/);
   assert.match(stdout, /tiny: 1/);
+  assert.match(stdout, /Sessions by duration bucket:/);
+  assert.match(stdout, /1m_to_5m: 1/);
   assert.match(stdout, /bug_fix: 1/);
   assert.match(stdout, /feature: 1/);
   assert.match(stdout, /Accepted or partially accepted: 1/);
@@ -1350,6 +1352,8 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /small: \$0\.5000/);
   assert.match(stdout, /Cost by lines removed bucket:/);
   assert.match(stdout, /tiny: \$0\.5000/);
+  assert.match(stdout, /Cost by duration bucket:/);
+  assert.match(stdout, /1m_to_5m: \$0\.5000/);
   assert.match(stdout, /Token estimate summary:/);
   assert.match(stdout, /Sessions with token estimates: 2/);
   assert.match(stdout, /Input tokens estimate: 2000/);
@@ -1729,6 +1733,8 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.sessionsByLinesAddedBucket.medium, 1);
   assert.equal(report.sessionsByLinesRemovedBucket.tiny, 1);
   assert.equal(report.sessionsByLinesRemovedBucket.small, 1);
+  assert.equal(report.sessionsByDurationBucket["1m_to_5m"], 1);
+  assert.equal(report.sessionsByDurationBucket.unknown, 1);
   assert.equal(report.estimatedTotalCostUsd, 1.5);
   assert.equal(report.costByProviderUsd.OpenAI, 0.5);
   assert.equal(report.costByProviderUsd.Anthropic, 1);
@@ -1751,6 +1757,8 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.costByLinesAddedBucketUsd.medium, 1);
   assert.equal(report.costByLinesRemovedBucketUsd.tiny, 0.5);
   assert.equal(report.costByLinesRemovedBucketUsd.small, 1);
+  assert.equal(report.costByDurationBucketUsd["1m_to_5m"], 0.5);
+  assert.equal(report.costByDurationBucketUsd.unknown, 1);
   assert.deepEqual(report.tokenEstimateSummary, {
     sessionsWithTokenEstimates: 2,
     inputTokensEstimateTotal: 2000,
@@ -1854,6 +1862,7 @@ test("prints a filtered local report as JSON", async () => {
   assert.deepEqual(report.sessionsByChangedFileCountBucket, { tiny: 1 });
   assert.deepEqual(report.sessionsByLinesAddedBucket, { small: 1 });
   assert.deepEqual(report.sessionsByLinesRemovedBucket, { tiny: 1 });
+  assert.deepEqual(report.sessionsByDurationBucket, { "1m_to_5m": 1 });
   assert.deepEqual(report.sessionsByTaskType, { bug_fix: 1 });
   assert.equal(report.estimatedTotalCostUsd, 0.5);
   assert.deepEqual(report.costByFrameworkUsd, { "Node.js": 0.5 });
@@ -1864,6 +1873,7 @@ test("prints a filtered local report as JSON", async () => {
   assert.deepEqual(report.costByChangedFileCountBucketUsd, { tiny: 0.5 });
   assert.deepEqual(report.costByLinesAddedBucketUsd, { small: 0.5 });
   assert.deepEqual(report.costByLinesRemovedBucketUsd, { tiny: 0.5 });
+  assert.deepEqual(report.costByDurationBucketUsd, { "1m_to_5m": 0.5 });
   assert.deepEqual(report.tokenEstimateSummary, {
     sessionsWithTokenEstimates: 1,
     inputTokensEstimateTotal: 1200,

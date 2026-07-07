@@ -1,4 +1,4 @@
-import { durationBucket } from "./buckets.js";
+import { countBucket, durationBucket } from "./buckets.js";
 import { deriveVerifiedSuccess, isUsefulOutcome, type LocalSession } from "./schema.js";
 
 export type CountMap = Record<string, number>;
@@ -39,6 +39,12 @@ export type TokenEstimateSummary = {
   totalTokensEstimate: number | null;
 };
 
+export type ErrorCountSummary = {
+  sessionsWithErrorCounts: number;
+  totalErrorCount: number | null;
+  averageErrorsPerRecordedSession: number | null;
+};
+
 export type LocalReport = {
   totalSessions: number;
   sessionsByProvider: CountMap;
@@ -54,6 +60,7 @@ export type LocalReport = {
   sessionsByLinesAddedBucket: CountMap;
   sessionsByLinesRemovedBucket: CountMap;
   sessionsByDurationBucket: CountMap;
+  sessionsByErrorCountBucket: CountMap;
   sessionsByTaskType: CountMap;
   acceptedOrPartiallyAcceptedCount: number;
   rejectedCount: number;
@@ -72,7 +79,9 @@ export type LocalReport = {
   costByLinesAddedBucketUsd: Record<string, number>;
   costByLinesRemovedBucketUsd: Record<string, number>;
   costByDurationBucketUsd: Record<string, number>;
+  costByErrorCountBucketUsd: Record<string, number>;
   tokenEstimateSummary: TokenEstimateSummary;
+  errorCountSummary: ErrorCountSummary;
   costPerUsefulTaskUsd: number | null;
   failureCostUsd: number | null;
   speedToUsefulOutputSeconds: number | null;
@@ -132,6 +141,7 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     sessionsByLinesAddedBucket: countBy(sessions, linesAddedBucketKey),
     sessionsByLinesRemovedBucket: countBy(sessions, linesRemovedBucketKey),
     sessionsByDurationBucket: countBy(sessions, durationBucketKey),
+    sessionsByErrorCountBucket: countBy(sessions, errorCountBucketKey),
     sessionsByTaskType: countBy(sessions, (session) => session.task_type),
     acceptedOrPartiallyAcceptedCount: usefulSessions.length,
     rejectedCount: rejectedSessions.length,
@@ -150,7 +160,9 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
     costByLinesAddedBucketUsd: sumBy(estimatedCostSessions, linesAddedBucketKey),
     costByLinesRemovedBucketUsd: sumBy(estimatedCostSessions, linesRemovedBucketKey),
     costByDurationBucketUsd: sumBy(estimatedCostSessions, durationBucketKey),
+    costByErrorCountBucketUsd: sumBy(estimatedCostSessions, errorCountBucketKey),
     tokenEstimateSummary: calculateTokenEstimateSummary(sessions),
+    errorCountSummary: calculateErrorCountSummary(sessions),
     costPerUsefulTaskUsd:
       estimatedTotalCostUsd === null ? null : calculateRate(estimatedTotalCostUsd, usefulSessions.length),
     failureCostUsd,
@@ -222,6 +234,9 @@ export function formatLocalReport(report: LocalReport): string {
     "Sessions by duration bucket:",
     ...formatCountMap(report.sessionsByDurationBucket),
     "",
+    "Sessions by error count bucket:",
+    ...formatCountMap(report.sessionsByErrorCountBucket),
+    "",
     "Sessions by task type:",
     ...formatCountMap(report.sessionsByTaskType),
     "",
@@ -247,6 +262,7 @@ export function formatLocalReport(report: LocalReport): string {
     ...formatCostMap("Cost by lines added bucket", report.costByLinesAddedBucketUsd),
     ...formatCostMap("Cost by lines removed bucket", report.costByLinesRemovedBucketUsd),
     ...formatCostMap("Cost by duration bucket", report.costByDurationBucketUsd),
+    ...formatCostMap("Cost by error count bucket", report.costByErrorCountBucketUsd),
     "",
     "Token estimate summary:",
     `Sessions with token estimates: ${report.tokenEstimateSummary.sessionsWithTokenEstimates}`,
@@ -254,6 +270,11 @@ export function formatLocalReport(report: LocalReport): string {
     `Output tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.outputTokensEstimateTotal)}`,
     `Cached tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.cachedTokensEstimateTotal)}`,
     `Total tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.totalTokensEstimate)}`,
+    "",
+    "Error count summary:",
+    `Sessions with error counts: ${report.errorCountSummary.sessionsWithErrorCounts}`,
+    `Total error count: ${formatIntegerOrUnknown(report.errorCountSummary.totalErrorCount)}`,
+    `Average errors per recorded session: ${formatNumberOrUnknown(report.errorCountSummary.averageErrorsPerRecordedSession)}`,
     "",
     "Speed summary:",
     `Speed to useful output: ${formatSecondsOrUnknown(report.speedToUsefulOutputSeconds)}`,
@@ -343,6 +364,29 @@ function hasAnyTokenEstimate(session: LocalSession): boolean {
     session.output_tokens_estimate !== undefined ||
     session.cached_tokens_estimate !== undefined
   );
+}
+
+function calculateErrorCountSummary(sessions: LocalSession[]): ErrorCountSummary {
+  const errorCountSessions = sessions.filter(
+    (session): session is LocalSession & { error_count: number } =>
+      session.error_count !== undefined,
+  );
+
+  if (errorCountSessions.length === 0) {
+    return {
+      sessionsWithErrorCounts: 0,
+      totalErrorCount: null,
+      averageErrorsPerRecordedSession: null,
+    };
+  }
+
+  const totalErrorCount = sum(errorCountSessions.map((session) => session.error_count));
+
+  return {
+    sessionsWithErrorCounts: errorCountSessions.length,
+    totalErrorCount,
+    averageErrorsPerRecordedSession: calculateRate(totalErrorCount, errorCountSessions.length),
+  };
 }
 
 function calculateConfidenceSummary(
@@ -491,6 +535,10 @@ function linesRemovedBucketKey(session: LocalSession): string {
 
 function durationBucketKey(session: LocalSession): string {
   return durationBucket(session.duration_seconds);
+}
+
+function errorCountBucketKey(session: LocalSession): string {
+  return countBucket(session.error_count);
 }
 
 function calculateRate(numerator: number, denominator: number): number | null {

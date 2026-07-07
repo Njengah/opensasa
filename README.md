@@ -360,6 +360,7 @@ The report is generated from local data only. It includes:
 - verified success rate.
 
 Unknown or missing data is labeled directly.
+Empty report sections say when no matching local data was recorded.
 
 ### Inspect A Session
 

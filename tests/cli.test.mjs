@@ -1184,6 +1184,9 @@ test("prints an empty local report with unknown rates", async () => {
 
   assert.match(stdout, /OpenSasa Local Report/);
   assert.match(stdout, /Total sessions: 0/);
+  assert.match(stdout, /No local sessions matched this report/);
+  assert.match(stdout, /Sessions by provider:\n- none recorded/);
+  assert.match(stdout, /Cost by provider: none recorded/);
   assert.match(stdout, /Estimated total cost: unknown/);
   assert.match(stdout, /Useful outcome rate: unknown \(0\/0\)/);
   assert.match(stdout, /Verified success rate: unknown \(0\/0\)/);

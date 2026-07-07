@@ -194,7 +194,59 @@ export function formatLocalReport(report: LocalReport): string {
     "OpenSasa Local Report",
     "",
     `Total sessions: ${report.totalSessions}`,
+    ...(report.totalSessions === 0
+      ? [
+          "No local sessions matched this report. Log sessions with `opensasa log` or broaden filters.",
+        ]
+      : []),
     "",
+    "Outcome summary:",
+    `Accepted or partially accepted: ${report.acceptedOrPartiallyAcceptedCount}`,
+    `Rejected: ${report.rejectedCount}`,
+    `Unknown outcome: ${report.unknownOutcomeCount}`,
+    "",
+    "Rates:",
+    `Useful outcome rate: ${formatRate(report.usefulOutcomeRate)}`,
+    `Unknown outcome rate: ${formatRate(report.unknownOutcomeRate)}`,
+    `Verified success rate: ${formatRate(report.verifiedSuccessRate)}`,
+    "",
+    "Cost summary:",
+    `Estimated total cost: ${formatCurrencyOrUnknown(report.estimatedTotalCostUsd)}`,
+    `Cost per useful task: ${formatCurrencyOrUnknown(report.costPerUsefulTaskUsd)}`,
+    `Failure cost: ${formatCurrencyOrUnknown(report.failureCostUsd)}`,
+    "",
+    "Token estimate summary:",
+    `Sessions with token estimates: ${report.tokenEstimateSummary.sessionsWithTokenEstimates}`,
+    `Input tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.inputTokensEstimateTotal)}`,
+    `Output tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.outputTokensEstimateTotal)}`,
+    `Cached tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.cachedTokensEstimateTotal)}`,
+    `Total tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.totalTokensEstimate)}`,
+    "",
+    "Error count summary:",
+    `Sessions with error counts: ${report.errorCountSummary.sessionsWithErrorCounts}`,
+    `Total error count: ${formatIntegerOrUnknown(report.errorCountSummary.totalErrorCount)}`,
+    `Average errors per recorded session: ${formatNumberOrUnknown(report.errorCountSummary.averageErrorsPerRecordedSession)}`,
+    "",
+    "Speed summary:",
+    `Speed to useful output: ${formatSecondsOrUnknown(report.speedToUsefulOutputSeconds)}`,
+    "",
+    "Retry summary:",
+    `Total retries on useful sessions: ${report.retrySummary.totalRetries}`,
+    `Retry burden: ${formatNumberOrUnknown(report.retrySummary.retryBurden)}`,
+    `Total retries on rejected sessions: ${report.failureRetrySummary.totalRetries}`,
+    `Failure retry burden: ${formatNumberOrUnknown(report.failureRetrySummary.failureRetryBurden)}`,
+    "",
+    "Confidence summary:",
+    `Confidence level: ${report.confidenceSummary.level}`,
+    `Known outcome sessions: ${report.confidenceSummary.knownOutcomeCount}`,
+    `Verified sessions: ${report.confidenceSummary.verifiedSessionCount}`,
+    `Verification share: ${formatRate(report.confidenceSummary.verificationShare)}`,
+    `Confidence note: ${report.confidenceSummary.note}`,
+    "",
+    "Verification outcome summary:",
+    ...formatVerificationSummary(report.verificationOutcomeSummary),
+    "",
+    "Session groupings:",
     "Sessions by provider:",
     ...formatCountMap(report.sessionsByProvider),
     "",
@@ -240,15 +292,7 @@ export function formatLocalReport(report: LocalReport): string {
     "Sessions by task type:",
     ...formatCountMap(report.sessionsByTaskType),
     "",
-    "Outcome summary:",
-    `Accepted or partially accepted: ${report.acceptedOrPartiallyAcceptedCount}`,
-    `Rejected: ${report.rejectedCount}`,
-    `Unknown outcome: ${report.unknownOutcomeCount}`,
-    "",
-    "Cost summary:",
-    `Estimated total cost: ${formatCurrencyOrUnknown(report.estimatedTotalCostUsd)}`,
-    `Cost per useful task: ${formatCurrencyOrUnknown(report.costPerUsefulTaskUsd)}`,
-    `Failure cost: ${formatCurrencyOrUnknown(report.failureCostUsd)}`,
+    "Cost groupings:",
     ...formatCostMap("Cost by provider", report.costByProviderUsd),
     ...formatCostByModel(report.costByModelUsd),
     ...formatCostMap("Cost by tool", report.costByToolUsd),
@@ -263,42 +307,6 @@ export function formatLocalReport(report: LocalReport): string {
     ...formatCostMap("Cost by lines removed bucket", report.costByLinesRemovedBucketUsd),
     ...formatCostMap("Cost by duration bucket", report.costByDurationBucketUsd),
     ...formatCostMap("Cost by error count bucket", report.costByErrorCountBucketUsd),
-    "",
-    "Token estimate summary:",
-    `Sessions with token estimates: ${report.tokenEstimateSummary.sessionsWithTokenEstimates}`,
-    `Input tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.inputTokensEstimateTotal)}`,
-    `Output tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.outputTokensEstimateTotal)}`,
-    `Cached tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.cachedTokensEstimateTotal)}`,
-    `Total tokens estimate: ${formatIntegerOrUnknown(report.tokenEstimateSummary.totalTokensEstimate)}`,
-    "",
-    "Error count summary:",
-    `Sessions with error counts: ${report.errorCountSummary.sessionsWithErrorCounts}`,
-    `Total error count: ${formatIntegerOrUnknown(report.errorCountSummary.totalErrorCount)}`,
-    `Average errors per recorded session: ${formatNumberOrUnknown(report.errorCountSummary.averageErrorsPerRecordedSession)}`,
-    "",
-    "Speed summary:",
-    `Speed to useful output: ${formatSecondsOrUnknown(report.speedToUsefulOutputSeconds)}`,
-    "",
-    "Retry summary:",
-    `Total retries on useful sessions: ${report.retrySummary.totalRetries}`,
-    `Retry burden: ${formatNumberOrUnknown(report.retrySummary.retryBurden)}`,
-    `Total retries on rejected sessions: ${report.failureRetrySummary.totalRetries}`,
-    `Failure retry burden: ${formatNumberOrUnknown(report.failureRetrySummary.failureRetryBurden)}`,
-    "",
-    "Confidence summary:",
-    `Confidence level: ${report.confidenceSummary.level}`,
-    `Known outcome sessions: ${report.confidenceSummary.knownOutcomeCount}`,
-    `Verified sessions: ${report.confidenceSummary.verifiedSessionCount}`,
-    `Verification share: ${formatRate(report.confidenceSummary.verificationShare)}`,
-    `Confidence note: ${report.confidenceSummary.note}`,
-    "",
-    "Verification outcome summary:",
-    ...formatVerificationSummary(report.verificationOutcomeSummary),
-    "",
-    "Rates:",
-    `Useful outcome rate: ${formatRate(report.usefulOutcomeRate)}`,
-    `Unknown outcome rate: ${formatRate(report.unknownOutcomeRate)}`,
-    `Verified success rate: ${formatRate(report.verifiedSuccessRate)}`,
   ].join("\n");
 }
 
@@ -552,7 +560,7 @@ function sum(values: number[]): number {
 function formatCountMap(counts: CountMap): string[] {
   const entries = Object.entries(counts).sort(([left], [right]) => left.localeCompare(right));
   return entries.length === 0
-    ? ["- unknown"]
+    ? ["- none recorded"]
     : entries.map(([key, count]) => `- ${key}: ${count}`);
 }
 
@@ -563,7 +571,7 @@ function formatCostByModel(costs: Record<string, number>): string[] {
 function formatCostMap(label: string, costs: Record<string, number>): string[] {
   const entries = Object.entries(costs).sort(([left], [right]) => left.localeCompare(right));
   return entries.length === 0
-    ? [`${label}: unknown`]
+    ? [`${label}: none recorded`]
     : [`${label}:`, ...entries.map(([key, cost]) => `- ${key}: ${formatCurrency(cost)}`)];
 }
 

@@ -34,6 +34,7 @@ All notable changes to OpenSasa will be documented in this file.
 - Duration bucket grouping and duration bucket cost totals in local reports.
 - Token estimate summaries in local reports.
 - Error count summaries in local reports.
+- Clearer local report section ordering and empty-state text.
 - Cost per useful task and failure cost metrics in local reports.
 - Speed to useful output metric in local reports.
 - Unknown outcome rate metric in local reports.

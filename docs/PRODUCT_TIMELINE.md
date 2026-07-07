@@ -43,7 +43,8 @@ items are already merged.
 - [x] Changed file count bucket grouping in local reports. (#54)
 - [x] Lines added bucket grouping in local reports. (#55)
 - [x] Lines removed bucket grouping in local reports. (#56)
-- [ ] Token estimate summaries in local reports. (current PR)
+- [ ] Token estimate summaries in local reports. (#57 open)
+- [ ] Duration bucket summaries in local reports. (current PR)
 
 ## Product Vision
 
@@ -124,8 +125,8 @@ Expected PRs:
 - [x] Add file-count bucket report grouping. (#50)
 - [x] Add lines-added bucket report grouping. (#55)
 - [x] Add lines-removed bucket report grouping. (#56)
-- [ ] Add token estimate summaries to reports. (current PR)
-- [ ] Add duration bucket summaries to reports.
+- [ ] Add token estimate summaries to reports. (#57 open)
+- [ ] Add duration bucket summaries to reports. (current PR)
 - [ ] Add error count summaries to reports.
 - [ ] Improve report section ordering and empty-state readability.
 - [ ] Add compact report mode for terminal readability.
@@ -312,8 +313,8 @@ Use this list when asking "build next":
 - [x] Add file-count bucket report grouping. (#50)
 - [x] Add lines-added bucket report grouping. (#55)
 - [x] Add lines-removed bucket report grouping. (#56)
-- [ ] Add token estimate summaries. (current PR)
-- [ ] Add duration bucket summaries.
+- [ ] Add token estimate summaries. (#57 open)
+- [ ] Add duration bucket summaries. (current PR)
 - [ ] Add error count summaries.
 - [ ] Improve report readability and empty states.
 - [ ] Add JSON report schema version.

@@ -1239,6 +1239,7 @@ test("prints a local report from saved sessions", async () => {
       tests_outcome: "passed",
       duration_seconds: 300,
       retry_count: 1,
+      error_count: 0,
       input_tokens_estimate: 1200,
       output_tokens_estimate: 500,
       cached_tokens_estimate: 100,
@@ -1263,6 +1264,7 @@ test("prints a local report from saved sessions", async () => {
       framework: "Django",
       tests_outcome: "failed",
       retry_count: 2,
+      error_count: 2,
       input_tokens_estimate: 800,
       output_tokens_estimate: 300,
       estimated_cost_usd: 1,
@@ -1317,6 +1319,9 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /tiny: 1/);
   assert.match(stdout, /Sessions by duration bucket:/);
   assert.match(stdout, /1m_to_5m: 1/);
+  assert.match(stdout, /Sessions by error count bucket:/);
+  assert.match(stdout, /zero: 1/);
+  assert.match(stdout, /tiny: 1/);
   assert.match(stdout, /bug_fix: 1/);
   assert.match(stdout, /feature: 1/);
   assert.match(stdout, /Accepted or partially accepted: 1/);
@@ -1354,12 +1359,19 @@ test("prints a local report from saved sessions", async () => {
   assert.match(stdout, /tiny: \$0\.5000/);
   assert.match(stdout, /Cost by duration bucket:/);
   assert.match(stdout, /1m_to_5m: \$0\.5000/);
+  assert.match(stdout, /Cost by error count bucket:/);
+  assert.match(stdout, /zero: \$0\.5000/);
+  assert.match(stdout, /tiny: \$1\.0000/);
   assert.match(stdout, /Token estimate summary:/);
   assert.match(stdout, /Sessions with token estimates: 2/);
   assert.match(stdout, /Input tokens estimate: 2000/);
   assert.match(stdout, /Output tokens estimate: 800/);
   assert.match(stdout, /Cached tokens estimate: 100/);
   assert.match(stdout, /Total tokens estimate: 2900/);
+  assert.match(stdout, /Error count summary:/);
+  assert.match(stdout, /Sessions with error counts: 2/);
+  assert.match(stdout, /Total error count: 2/);
+  assert.match(stdout, /Average errors per recorded session: 1\.00/);
   assert.match(stdout, /Speed to useful output: 300\.0s/);
   assert.match(stdout, /Retry burden: 1\.00/);
   assert.match(stdout, /Total retries on rejected sessions: 2/);
@@ -1389,6 +1401,7 @@ test("prints a filtered local report from saved sessions", async () => {
       tests_outcome: "passed",
       duration_seconds: 300,
       retry_count: 1,
+      error_count: 0,
       input_tokens_estimate: 1200,
       output_tokens_estimate: 500,
       cached_tokens_estimate: 100,
@@ -1495,6 +1508,7 @@ test("prints a date-filtered local report from saved sessions", async () => {
       tests_outcome: "passed",
       duration_seconds: 300,
       retry_count: 1,
+      error_count: 0,
       input_tokens_estimate: 1200,
       output_tokens_estimate: 500,
       cached_tokens_estimate: 100,
@@ -1581,6 +1595,7 @@ test("prints a limited local report from newest sessions", async () => {
       tests_outcome: "passed",
       duration_seconds: 300,
       retry_count: 1,
+      error_count: 0,
       input_tokens_estimate: 1200,
       output_tokens_estimate: 500,
       cached_tokens_estimate: 100,
@@ -1595,6 +1610,7 @@ test("prints a limited local report from newest sessions", async () => {
       work_mode: "manual_log",
       tests_outcome: "failed",
       retry_count: 2,
+      error_count: 2,
       input_tokens_estimate: 800,
       output_tokens_estimate: 300,
       estimated_cost_usd: 1,
@@ -1663,6 +1679,7 @@ test("prints a local report from saved sessions as JSON", async () => {
       tests_outcome: "passed",
       duration_seconds: 300,
       retry_count: 1,
+      error_count: 0,
       input_tokens_estimate: 1200,
       output_tokens_estimate: 500,
       cached_tokens_estimate: 100,
@@ -1686,6 +1703,7 @@ test("prints a local report from saved sessions as JSON", async () => {
       work_mode: "manual_log",
       tests_outcome: "failed",
       retry_count: 2,
+      error_count: 2,
       input_tokens_estimate: 800,
       output_tokens_estimate: 300,
       estimated_cost_usd: 1,
@@ -1735,6 +1753,8 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.sessionsByLinesRemovedBucket.small, 1);
   assert.equal(report.sessionsByDurationBucket["1m_to_5m"], 1);
   assert.equal(report.sessionsByDurationBucket.unknown, 1);
+  assert.equal(report.sessionsByErrorCountBucket.zero, 1);
+  assert.equal(report.sessionsByErrorCountBucket.tiny, 1);
   assert.equal(report.estimatedTotalCostUsd, 1.5);
   assert.equal(report.costByProviderUsd.OpenAI, 0.5);
   assert.equal(report.costByProviderUsd.Anthropic, 1);
@@ -1759,12 +1779,19 @@ test("prints a local report from saved sessions as JSON", async () => {
   assert.equal(report.costByLinesRemovedBucketUsd.small, 1);
   assert.equal(report.costByDurationBucketUsd["1m_to_5m"], 0.5);
   assert.equal(report.costByDurationBucketUsd.unknown, 1);
+  assert.equal(report.costByErrorCountBucketUsd.zero, 0.5);
+  assert.equal(report.costByErrorCountBucketUsd.tiny, 1);
   assert.deepEqual(report.tokenEstimateSummary, {
     sessionsWithTokenEstimates: 2,
     inputTokensEstimateTotal: 2000,
     outputTokensEstimateTotal: 800,
     cachedTokensEstimateTotal: 100,
     totalTokensEstimate: 2900,
+  });
+  assert.deepEqual(report.errorCountSummary, {
+    sessionsWithErrorCounts: 2,
+    totalErrorCount: 2,
+    averageErrorsPerRecordedSession: 1,
   });
   assert.equal(report.costPerUsefulTaskUsd, 1.5);
   assert.equal(report.failureCostUsd, 1);
@@ -1800,6 +1827,7 @@ test("prints a filtered local report as JSON", async () => {
       tests_outcome: "passed",
       duration_seconds: 300,
       retry_count: 1,
+      error_count: 0,
       input_tokens_estimate: 1200,
       output_tokens_estimate: 500,
       cached_tokens_estimate: 100,
@@ -1863,6 +1891,7 @@ test("prints a filtered local report as JSON", async () => {
   assert.deepEqual(report.sessionsByLinesAddedBucket, { small: 1 });
   assert.deepEqual(report.sessionsByLinesRemovedBucket, { tiny: 1 });
   assert.deepEqual(report.sessionsByDurationBucket, { "1m_to_5m": 1 });
+  assert.deepEqual(report.sessionsByErrorCountBucket, { zero: 1 });
   assert.deepEqual(report.sessionsByTaskType, { bug_fix: 1 });
   assert.equal(report.estimatedTotalCostUsd, 0.5);
   assert.deepEqual(report.costByFrameworkUsd, { "Node.js": 0.5 });
@@ -1874,12 +1903,18 @@ test("prints a filtered local report as JSON", async () => {
   assert.deepEqual(report.costByLinesAddedBucketUsd, { small: 0.5 });
   assert.deepEqual(report.costByLinesRemovedBucketUsd, { tiny: 0.5 });
   assert.deepEqual(report.costByDurationBucketUsd, { "1m_to_5m": 0.5 });
+  assert.deepEqual(report.costByErrorCountBucketUsd, { zero: 0.5 });
   assert.deepEqual(report.tokenEstimateSummary, {
     sessionsWithTokenEstimates: 1,
     inputTokensEstimateTotal: 1200,
     outputTokensEstimateTotal: 500,
     cachedTokensEstimateTotal: 100,
     totalTokensEstimate: 1800,
+  });
+  assert.deepEqual(report.errorCountSummary, {
+    sessionsWithErrorCounts: 1,
+    totalErrorCount: 0,
+    averageErrorsPerRecordedSession: 0,
   });
   assert.equal(report.costPerUsefulTaskUsd, 0.5);
   assert.equal(report.failureCostUsd, 0);

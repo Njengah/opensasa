@@ -44,7 +44,8 @@ items are already merged.
 - [x] Lines added bucket grouping in local reports. (#55)
 - [x] Lines removed bucket grouping in local reports. (#56)
 - [ ] Token estimate summaries in local reports. (#57 open)
-- [ ] Duration bucket summaries in local reports. (current PR)
+- [x] Duration bucket summaries in local reports. (#58)
+- [ ] Error count summaries in local reports. (current PR)
 
 ## Product Vision
 
@@ -126,8 +127,8 @@ Expected PRs:
 - [x] Add lines-added bucket report grouping. (#55)
 - [x] Add lines-removed bucket report grouping. (#56)
 - [ ] Add token estimate summaries to reports. (#57 open)
-- [ ] Add duration bucket summaries to reports. (current PR)
-- [ ] Add error count summaries to reports.
+- [x] Add duration bucket summaries to reports. (#58)
+- [ ] Add error count summaries to reports. (current PR)
 - [ ] Improve report section ordering and empty-state readability.
 - [ ] Add compact report mode for terminal readability.
 - [ ] Add report snapshot tests for stable text output.
@@ -314,8 +315,8 @@ Use this list when asking "build next":
 - [x] Add lines-added bucket report grouping. (#55)
 - [x] Add lines-removed bucket report grouping. (#56)
 - [ ] Add token estimate summaries. (#57 open)
-- [ ] Add duration bucket summaries. (current PR)
-- [ ] Add error count summaries.
+- [x] Add duration bucket summaries. (#58)
+- [ ] Add error count summaries. (current PR)
 - [ ] Improve report readability and empty states.
 - [ ] Add JSON report schema version.
 - [ ] Add demo seed data generator.

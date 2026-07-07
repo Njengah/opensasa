@@ -34,6 +34,7 @@ test("calculates local report metrics from safe session metadata", () => {
       language: "TypeScript",
       framework: "Node.js",
       retry_count: 1,
+      error_count: 0,
       duration_seconds: 600,
       tests_outcome: "passed",
       input_tokens_estimate: 1000,
@@ -56,6 +57,7 @@ test("calculates local report metrics from safe session metadata", () => {
       language: "Python",
       framework: "Django",
       retry_count: 2,
+      error_count: 2,
       duration_seconds: 120,
       manual_review_outcome: "accepted",
       input_tokens_estimate: 2000,
@@ -77,6 +79,7 @@ test("calculates local report metrics from safe session metadata", () => {
       language: "TypeScript",
       framework: "Node.js",
       retry_count: 3,
+      error_count: 11,
       tests_outcome: "failed",
       estimated_cost_usd: 0.75,
       cost_source: "estimated",
@@ -159,6 +162,12 @@ test("calculates local report metrics from safe session metadata", () => {
     "5m_to_30m": 1,
     unknown: 2,
   });
+  assert.deepEqual(report.sessionsByErrorCountBucket, {
+    small: 1,
+    tiny: 1,
+    unknown: 1,
+    zero: 1,
+  });
   assert.deepEqual(report.sessionsByTaskType, {
     bug_fix: 2,
     documentation: 1,
@@ -221,12 +230,22 @@ test("calculates local report metrics from safe session metadata", () => {
     "5m_to_30m": 0.5,
     unknown: 0.75,
   });
+  assert.deepEqual(report.costByErrorCountBucketUsd, {
+    small: 0.75,
+    tiny: 1.25,
+    zero: 0.5,
+  });
   assert.deepEqual(report.tokenEstimateSummary, {
     sessionsWithTokenEstimates: 2,
     inputTokensEstimateTotal: 3000,
     outputTokensEstimateTotal: 1200,
     cachedTokensEstimateTotal: 50,
     totalTokensEstimate: 4250,
+  });
+  assert.deepEqual(report.errorCountSummary, {
+    sessionsWithErrorCounts: 3,
+    totalErrorCount: 13,
+    averageErrorsPerRecordedSession: 13 / 3,
   });
   assert.equal(report.costPerUsefulTaskUsd, 1.25);
   assert.equal(report.failureCostUsd, 0.75);
@@ -289,12 +308,18 @@ test("labels missing cost and unknown outcome rates clearly", () => {
   assert.deepEqual(report.costByLinesAddedBucketUsd, {});
   assert.deepEqual(report.costByLinesRemovedBucketUsd, {});
   assert.deepEqual(report.costByDurationBucketUsd, {});
+  assert.deepEqual(report.costByErrorCountBucketUsd, {});
   assert.deepEqual(report.tokenEstimateSummary, {
     sessionsWithTokenEstimates: 0,
     inputTokensEstimateTotal: null,
     outputTokensEstimateTotal: null,
     cachedTokensEstimateTotal: null,
     totalTokensEstimate: null,
+  });
+  assert.deepEqual(report.errorCountSummary, {
+    sessionsWithErrorCounts: 0,
+    totalErrorCount: null,
+    averageErrorsPerRecordedSession: null,
   });
   assert.equal(report.costPerUsefulTaskUsd, null);
   assert.equal(report.failureCostUsd, 0);
@@ -333,6 +358,7 @@ test("formats a readable local report", () => {
       language: "TypeScript",
       framework: "Node.js",
       tests_outcome: "passed",
+      error_count: 2,
       duration_seconds: 300,
       input_tokens_estimate: 1200,
       output_tokens_estimate: 500,
@@ -363,6 +389,7 @@ test("formats a readable local report", () => {
   assert.match(output, /Sessions by lines added bucket:\n- small: 1/);
   assert.match(output, /Sessions by lines removed bucket:\n- tiny: 1/);
   assert.match(output, /Sessions by duration bucket:\n- 1m_to_5m: 1/);
+  assert.match(output, /Sessions by error count bucket:\n- tiny: 1/);
   assert.match(output, /Estimated total cost: \$0\.5000/);
   assert.match(output, /Cost per useful task: \$0\.5000/);
   assert.match(output, /Failure cost: \$0\.0000/);
@@ -378,12 +405,17 @@ test("formats a readable local report", () => {
   assert.match(output, /Cost by lines added bucket:\n- small: \$0\.5000/);
   assert.match(output, /Cost by lines removed bucket:\n- tiny: \$0\.5000/);
   assert.match(output, /Cost by duration bucket:\n- 1m_to_5m: \$0\.5000/);
+  assert.match(output, /Cost by error count bucket:\n- tiny: \$0\.5000/);
   assert.match(output, /Token estimate summary:/);
   assert.match(output, /Sessions with token estimates: 1/);
   assert.match(output, /Input tokens estimate: 1200/);
   assert.match(output, /Output tokens estimate: 500/);
   assert.match(output, /Cached tokens estimate: 100/);
   assert.match(output, /Total tokens estimate: 1800/);
+  assert.match(output, /Error count summary:/);
+  assert.match(output, /Sessions with error counts: 1/);
+  assert.match(output, /Total error count: 2/);
+  assert.match(output, /Average errors per recorded session: 2\.00/);
   assert.match(output, /Speed to useful output: 300\.0s/);
   assert.match(output, /Total retries on rejected sessions: 0/);
   assert.match(output, /Failure retry burden: unknown/);
@@ -404,6 +436,7 @@ test("formats a local report as JSON", () => {
       language: "TypeScript",
       framework: "Node.js",
       tests_outcome: "passed",
+      error_count: 2,
       duration_seconds: 300,
       input_tokens_estimate: 1200,
       output_tokens_estimate: 500,
@@ -432,6 +465,7 @@ test("formats a local report as JSON", () => {
   assert.equal(parsed.sessionsByLinesAddedBucket.small, 1);
   assert.equal(parsed.sessionsByLinesRemovedBucket.tiny, 1);
   assert.equal(parsed.sessionsByDurationBucket["1m_to_5m"], 1);
+  assert.equal(parsed.sessionsByErrorCountBucket.tiny, 1);
   assert.equal(parsed.estimatedTotalCostUsd, 0.5);
   assert.equal(parsed.costByProviderUsd.OpenAI, 0.5);
   assert.equal(parsed.costByToolUsd.Codex, 0.5);
@@ -445,12 +479,18 @@ test("formats a local report as JSON", () => {
   assert.equal(parsed.costByLinesAddedBucketUsd.small, 0.5);
   assert.equal(parsed.costByLinesRemovedBucketUsd.tiny, 0.5);
   assert.equal(parsed.costByDurationBucketUsd["1m_to_5m"], 0.5);
+  assert.equal(parsed.costByErrorCountBucketUsd.tiny, 0.5);
   assert.deepEqual(parsed.tokenEstimateSummary, {
     sessionsWithTokenEstimates: 1,
     inputTokensEstimateTotal: 1200,
     outputTokensEstimateTotal: 500,
     cachedTokensEstimateTotal: 100,
     totalTokensEstimate: 1800,
+  });
+  assert.deepEqual(parsed.errorCountSummary, {
+    sessionsWithErrorCounts: 1,
+    totalErrorCount: 2,
+    averageErrorsPerRecordedSession: 2,
   });
   assert.equal(parsed.costPerUsefulTaskUsd, 0.5);
   assert.equal(parsed.failureCostUsd, 0);

@@ -132,6 +132,9 @@ Local reports currently include:
 Text reports show headline outcomes and rates before detailed groupings, and
 empty sections say when no matching local data was recorded.
 
+JSON reports include report and metadata schema version fields for downstream
+consumers.
+
 ## Recent Build Path
 
 Recent PRs focused on hardening the local CLI workflow:

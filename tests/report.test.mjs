@@ -462,6 +462,8 @@ test("formats a local report as JSON", () => {
   ]);
   const parsed = JSON.parse(formatLocalReportJson(report));
 
+  assert.equal(parsed.reportSchemaVersion, "opensasa.report.v0");
+  assert.equal(parsed.metadataSchemaVersion, "opensasa.metadata.v0");
   assert.equal(parsed.totalSessions, 1);
   assert.equal(parsed.sessionsByProvider.OpenAI, 1);
   assert.equal(parsed.sessionsByTool.Codex, 1);

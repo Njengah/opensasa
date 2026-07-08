@@ -46,7 +46,8 @@ items are already merged.
 - [ ] Token estimate summaries in local reports. (#57 open)
 - [x] Duration bucket summaries in local reports. (#58)
 - [x] Error count summaries in local reports. (#59)
-- [ ] Report readability and empty states. (current PR)
+- [x] Report readability and empty states. (#60)
+- [ ] JSON report schema version. (current PR)
 
 ## Product Vision
 
@@ -130,10 +131,10 @@ Expected PRs:
 - [ ] Add token estimate summaries to reports. (#57 open)
 - [x] Add duration bucket summaries to reports. (#58)
 - [x] Add error count summaries to reports. (#59)
-- [ ] Improve report section ordering and empty-state readability. (current PR)
+- [x] Improve report section ordering and empty-state readability. (#60)
 - [ ] Add compact report mode for terminal readability.
 - [ ] Add report snapshot tests for stable text output.
-- [ ] Add report schema/version metadata to JSON output.
+- [ ] Add report schema/version metadata to JSON output. (current PR)
 - [ ] Add `opensasa doctor` for local database/config checks.
 - [ ] Add demo seed database or fixture generator.
 
@@ -318,8 +319,8 @@ Use this list when asking "build next":
 - [ ] Add token estimate summaries. (#57 open)
 - [x] Add duration bucket summaries. (#58)
 - [x] Add error count summaries. (#59)
-- [ ] Improve report readability and empty states. (current PR)
-- [ ] Add JSON report schema version.
+- [x] Improve report readability and empty states. (#60)
+- [ ] Add JSON report schema version. (current PR)
 - [ ] Add demo seed data generator.
 - [ ] Start local dashboard server.
 - [x] Convert product timeline to merge-tracking checklists. (#52)

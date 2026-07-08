@@ -1,7 +1,14 @@
 import { countBucket, durationBucket } from "./buckets.js";
-import { deriveVerifiedSuccess, isUsefulOutcome, type LocalSession } from "./schema.js";
+import {
+  deriveVerifiedSuccess,
+  isUsefulOutcome,
+  schemaVersion,
+  type LocalSession,
+} from "./schema.js";
 
 export type CountMap = Record<string, number>;
+
+export const reportSchemaVersion = "opensasa.report.v0";
 
 export type RetrySummary = {
   totalRetries: number;
@@ -46,6 +53,8 @@ export type ErrorCountSummary = {
 };
 
 export type LocalReport = {
+  reportSchemaVersion: typeof reportSchemaVersion;
+  metadataSchemaVersion: typeof schemaVersion;
   totalSessions: number;
   sessionsByProvider: CountMap;
   sessionsByModel: CountMap;
@@ -127,6 +136,8 @@ export function calculateLocalReport(sessions: LocalSession[]): LocalReport {
   const verifiedSessionCount = sessions.filter(hasAnyVerificationSignal).length;
 
   return {
+    reportSchemaVersion,
+    metadataSchemaVersion: schemaVersion,
     totalSessions: sessions.length,
     sessionsByProvider: countBy(sessions, (session) => session.provider),
     sessionsByModel: countBy(sessions, modelKey),

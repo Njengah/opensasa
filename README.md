@@ -282,6 +282,9 @@ Use JSON output for scripting:
 node ./dist/index.js report --json
 ```
 
+JSON reports include `reportSchemaVersion` and `metadataSchemaVersion` fields
+so downstream tools can detect report format changes.
+
 Limit the report to the newest sessions:
 
 ```bash

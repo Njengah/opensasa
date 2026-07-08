@@ -1660,6 +1660,8 @@ test("prints an empty local report as JSON", async () => {
   ]);
   const report = JSON.parse(stdout);
 
+  assert.equal(report.reportSchemaVersion, "opensasa.report.v0");
+  assert.equal(report.metadataSchemaVersion, "opensasa.metadata.v0");
   assert.equal(report.totalSessions, 0);
   assert.equal(report.estimatedTotalCostUsd, null);
   assert.equal(report.usefulOutcomeRate.rate, null);
@@ -1730,6 +1732,8 @@ test("prints a local report from saved sessions as JSON", async () => {
   ]);
   const report = JSON.parse(stdout);
 
+  assert.equal(report.reportSchemaVersion, "opensasa.report.v0");
+  assert.equal(report.metadataSchemaVersion, "opensasa.metadata.v0");
   assert.equal(report.totalSessions, 2);
   assert.equal(report.sessionsByProvider.OpenAI, 1);
   assert.equal(report.sessionsByProvider.Anthropic, 1);
@@ -1881,6 +1885,8 @@ test("prints a filtered local report as JSON", async () => {
   ]);
   const report = JSON.parse(stdout);
 
+  assert.equal(report.reportSchemaVersion, "opensasa.report.v0");
+  assert.equal(report.metadataSchemaVersion, "opensasa.metadata.v0");
   assert.equal(report.totalSessions, 1);
   assert.deepEqual(report.sessionsByModel, { "OpenAI/gpt-5": 1 });
   assert.deepEqual(report.sessionsByTool, { Codex: 1 });

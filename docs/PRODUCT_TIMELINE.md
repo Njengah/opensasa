@@ -47,7 +47,8 @@ items are already merged.
 - [x] Duration bucket summaries in local reports. (#58)
 - [x] Error count summaries in local reports. (#59)
 - [x] Report readability and empty states. (#60)
-- [ ] JSON report schema version. (current PR)
+- [x] JSON report schema version. (#61)
+- [ ] Demo seed data generator. (current PR)
 
 ## Product Vision
 
@@ -134,9 +135,9 @@ Expected PRs:
 - [x] Improve report section ordering and empty-state readability. (#60)
 - [ ] Add compact report mode for terminal readability.
 - [ ] Add report snapshot tests for stable text output.
-- [ ] Add report schema/version metadata to JSON output. (current PR)
+- [x] Add report schema/version metadata to JSON output. (#61)
 - [ ] Add `opensasa doctor` for local database/config checks.
-- [ ] Add demo seed database or fixture generator.
+- [ ] Add demo seed database or fixture generator. (current PR)
 
 Exit criteria:
 
@@ -320,8 +321,8 @@ Use this list when asking "build next":
 - [x] Add duration bucket summaries. (#58)
 - [x] Add error count summaries. (#59)
 - [x] Improve report readability and empty states. (#60)
-- [ ] Add JSON report schema version. (current PR)
-- [ ] Add demo seed data generator.
+- [x] Add JSON report schema version. (#61)
+- [ ] Add demo seed data generator. (current PR)
 - [ ] Start local dashboard server.
 - [x] Convert product timeline to merge-tracking checklists. (#52)
 

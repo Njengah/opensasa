@@ -70,6 +70,7 @@ Implemented local commands:
 - `opensasa log`
 - `opensasa update`
 - `opensasa delete`
+- `opensasa demo-seed`
 - `opensasa sessions`
 - `opensasa report`
 - `opensasa inspect`
@@ -218,6 +219,23 @@ node ./dist/index.js delete <session-id> --yes --json
 
 The delete command removes one local session record from the local SQLite
 database. It requires `--yes` so deletion is explicit.
+
+### Seed Demo Data
+
+```bash
+node ./dist/index.js demo-seed
+```
+
+Use JSON output for scripting:
+
+```bash
+node ./dist/index.js demo-seed --json
+```
+
+The demo seed command creates safe synthetic sessions in the local database so
+you can try `sessions`, `report`, and `inspect` without entering your own data.
+It does not store source code, prompts, model responses, exact paths, or raw
+terminal output.
 
 ### List Sessions
 

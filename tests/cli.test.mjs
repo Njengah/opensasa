@@ -21,6 +21,7 @@ test("prints help with planned MVP commands", async () => {
   assert.match(stdout, /log/);
   assert.match(stdout, /update/);
   assert.match(stdout, /delete/);
+  assert.match(stdout, /demo-seed/);
   assert.match(stdout, /sessions/);
   assert.match(stdout, /report/);
   assert.match(stdout, /inspect/);
@@ -519,6 +520,72 @@ test("returns an error when deleting a missing session", async () => {
       return true;
     },
   );
+});
+
+test("prints demo seed help", async () => {
+  const { stdout } = await execFileAsync("node", ["./dist/index.js", "demo-seed", "--help"]);
+
+  assert.match(stdout, /Create safe synthetic demo sessions/);
+  assert.match(stdout, /--db-path/);
+  assert.match(stdout, /--json/);
+  assert.doesNotMatch(stdout, /prompt/i);
+  assert.doesNotMatch(stdout, /source-code/i);
+});
+
+test("creates safe synthetic demo sessions", async () => {
+  const dbPath = join(tmpRoot, "demo-seed.db");
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "demo-seed",
+    "--db-path",
+    dbPath,
+  ]);
+  const store = openStore(dbPath);
+
+  try {
+    const sessions = store.listSessions();
+
+    assert.equal(stdout.trim(), "Seeded 3 synthetic demo sessions.");
+    assert.equal(sessions.length, 3);
+    assert.deepEqual(
+      new Set(sessions.map((session) => session.provider)),
+      new Set(["OpenAI", "Anthropic", "Google"]),
+    );
+    assert.equal(sessions.every((session) => session.work_mode === "manual_log"), true);
+    assert.equal(sessions.every((session) => session.contribution_consent === "not_granted"), true);
+    assert.equal(sessions.some((session) => session.tests_outcome === "passed"), true);
+    assert.equal(sessions.some((session) => session.final_outcome === "rejected"), true);
+    assert.equal(sessions.some((session) => session.estimated_cost_usd !== undefined), true);
+    assert.equal(sessions.some((session) => Object.hasOwn(session, "prompt")), false);
+    assert.equal(sessions.some((session) => Object.hasOwn(session, "source_code")), false);
+  } finally {
+    store.close();
+  }
+});
+
+test("creates safe synthetic demo sessions as JSON", async () => {
+  const dbPath = join(tmpRoot, "demo-seed-json.db");
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "demo-seed",
+    "--json",
+    "--db-path",
+    dbPath,
+  ]);
+  const payload = JSON.parse(stdout);
+  const store = openStore(dbPath);
+
+  try {
+    assert.equal(payload.status, "seeded");
+    assert.equal(payload.seeded_count, 3);
+    assert.equal(payload.sessions.length, 3);
+    assert.equal(payload.sessions[0].schema_version, "opensasa.metadata.v0");
+    assert.equal(Object.hasOwn(payload.sessions[0], "prompt"), false);
+    assert.equal(Object.hasOwn(payload.sessions[0], "source_code"), false);
+    assert.equal(store.listSessions().length, 3);
+  } finally {
+    store.close();
+  }
 });
 
 test("prints sessions help", async () => {

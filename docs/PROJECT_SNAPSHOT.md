@@ -74,6 +74,7 @@ node ./dist/index.js inspect <session-id> --contribution --db-path ./opensasa-de
 - `opensasa log` records a manual AI coding session.
 - `opensasa update` edits safe metadata for an existing session.
 - `opensasa delete` removes a local session after explicit `--yes` confirmation.
+- `opensasa demo-seed` creates safe synthetic local sessions for demos.
 - `opensasa sessions` lists local sessions with filters, limits, date ranges, and JSON output.
 - `opensasa report` generates local personal metrics with filters, limits, date ranges, and JSON output.
 - `opensasa inspect` shows one local record or a sanitized contribution preview.
@@ -148,7 +149,9 @@ Recent PRs focused on hardening the local CLI workflow:
 - local inspection and no-upload contribution preview,
 - local contribution consent state,
 - seed methodology examples,
-- provider, tool, language, framework, work mode, cost source, repo size, file count, changed file count, lines added, lines removed, and token estimate summaries in local reports.
+- provider, tool, language, framework, work mode, cost source, repo size, file count, changed file count, lines added, lines removed, duration, error count, and token estimate summaries in local reports,
+- report readability and JSON schema metadata,
+- safe synthetic demo data generation.
 
 ## Where We Are In The Roadmap
 

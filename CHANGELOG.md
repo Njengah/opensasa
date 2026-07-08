@@ -36,6 +36,7 @@ All notable changes to OpenSasa will be documented in this file.
 - Error count summaries in local reports.
 - Clearer local report section ordering and empty-state text.
 - Report schema and metadata schema versions in local report JSON output.
+- `opensasa demo-seed` for creating safe synthetic local sessions.
 - Cost per useful task and failure cost metrics in local reports.
 - Speed to useful output metric in local reports.
 - Unknown outcome rate metric in local reports.

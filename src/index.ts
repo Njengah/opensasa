@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import { ZodError } from "zod";
+import { createDemoSeedSessions } from "./demo.js";
 import {
   formatContributionPreview,
   formatContributionPreviewJson,
@@ -97,6 +98,10 @@ type InspectOptions = StoreOptions & {
 
 type DeleteOptions = StoreOptions & {
   yes?: boolean;
+  json?: boolean;
+};
+
+type DemoSeedOptions = StoreOptions & {
   json?: boolean;
 };
 
@@ -319,6 +324,41 @@ program
       }
 
       console.log(`Deleted session ${sessionId}`);
+    } catch (error) {
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    } finally {
+      store?.close();
+    }
+  });
+
+program
+  .command("demo-seed")
+  .description("Create safe synthetic demo sessions in the local database.")
+  .option("--db-path <path>", "override local database path")
+  .option("--json", "output the seeded sessions as JSON")
+  .action((options: DemoSeedOptions) => {
+    let store;
+    try {
+      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      const sessions = createDemoSeedSessions(store);
+
+      if (options.json) {
+        process.stdout.write(
+          `${JSON.stringify(
+            {
+              status: "seeded",
+              seeded_count: sessions.length,
+              sessions,
+            },
+            null,
+            2,
+          )}\n`,
+        );
+        return;
+      }
+
+      console.log(`Seeded ${sessions.length} synthetic demo sessions.`);
     } catch (error) {
       process.exitCode = 1;
       console.error(formatCliError(error));

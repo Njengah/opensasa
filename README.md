@@ -294,6 +294,12 @@ The list output shows:
 node ./dist/index.js report
 ```
 
+Use compact output when you only need the headline metrics in a terminal:
+
+```bash
+node ./dist/index.js report --compact
+```
+
 Use JSON output for scripting:
 
 ```bash

@@ -9,7 +9,12 @@ import {
   formatLocalInspection,
   formatLocalInspectionJson,
 } from "./inspect.js";
-import { calculateLocalReport, formatLocalReport, formatLocalReportJson } from "./report.js";
+import {
+  calculateLocalReport,
+  formatLocalReport,
+  formatLocalReportCompact,
+  formatLocalReportJson,
+} from "./report.js";
 import { deriveVerifiedSuccess, isoTimestampSchema, type LocalSession } from "./schema.js";
 import { openStore } from "./storage.js";
 
@@ -78,6 +83,7 @@ type SessionsOptions = StoreOptions & {
 
 type ReportOptions = StoreOptions & {
   json?: boolean;
+  compact?: boolean;
   limit?: number;
   provider?: string;
   modelId?: string;
@@ -435,6 +441,7 @@ program
   .option("--final-outcome <final-outcome>", "filter report by final outcome")
   .option("--since <timestamp>", "filter report sessions at or after an ISO timestamp", parseIsoTimestamp)
   .option("--until <timestamp>", "filter report sessions at or before an ISO timestamp", parseIsoTimestamp)
+  .option("--compact", "output a concise terminal report")
   .option("--json", "output the report as JSON")
   .action((options: ReportOptions) => {
     let store;
@@ -454,7 +461,10 @@ program
         until: options.until,
       });
       const report = calculateLocalReport(sessions);
-      process.stdout.write(options.json ? formatLocalReportJson(report) : `${formatLocalReport(report)}\n`);
+      const output = options.json
+        ? formatLocalReportJson(report)
+        : `${options.compact ? formatLocalReportCompact(report) : formatLocalReport(report)}\n`;
+      process.stdout.write(output);
     } catch (error) {
       process.exitCode = 1;
       console.error(formatCliError(error));

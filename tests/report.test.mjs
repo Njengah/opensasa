@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   calculateLocalReport,
   formatLocalReport,
+  formatLocalReportCompact,
   formatLocalReportJson,
 } from "../dist/report.js";
 import { localSessionSchema } from "../dist/schema.js";
@@ -358,6 +359,35 @@ test("formats empty report sections clearly", () => {
   assert.match(output, /Sessions by provider:\n- none recorded/);
   assert.match(output, /Cost by provider: none recorded/);
   assert.match(output, /tests_outcome:\n- none recorded/);
+});
+
+test("formats a compact report for terminal readability", () => {
+  const report = calculateLocalReport([
+    session({
+      final_outcome: "accepted",
+      tests_outcome: "passed",
+      input_tokens_estimate: 1200,
+      output_tokens_estimate: 500,
+      estimated_cost_usd: 0.5,
+      retry_count: 1,
+    }),
+  ]);
+
+  const output = formatLocalReportCompact(report);
+
+  assert.match(output, /^OpenSasa: 1 session\n/);
+  assert.match(output, /Useful 100\.0% \(1\/1\)/);
+  assert.match(output, /Cost \$0\.5000/);
+  assert.match(output, /Tokens 1700/);
+  assert.match(output, /Confidence insufficient/);
+  assert.doesNotMatch(output, /Sessions by provider/);
+});
+
+test("formats an empty compact report clearly", () => {
+  const output = formatLocalReportCompact(calculateLocalReport([]));
+
+  assert.match(output, /^OpenSasa: 0 sessions/);
+  assert.match(output, /No matching sessions/);
 });
 
 test("formats a readable local report", () => {

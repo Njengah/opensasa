@@ -321,6 +321,21 @@ export function formatLocalReport(report: LocalReport): string {
   ].join("\n");
 }
 
+export function formatLocalReportCompact(report: LocalReport): string {
+  const lines = [
+    `OpenSasa: ${report.totalSessions} session${report.totalSessions === 1 ? "" : "s"}`,
+    `Useful ${formatRate(report.usefulOutcomeRate)} | Verified ${formatRate(report.verifiedSuccessRate)} | Unknown ${formatRate(report.unknownOutcomeRate)}`,
+    `Cost ${formatCurrencyOrUnknown(report.estimatedTotalCostUsd)} | Useful task ${formatCurrencyOrUnknown(report.costPerUsefulTaskUsd)} | Retries ${formatNumberOrUnknown(report.retrySummary.retryBurden)}`,
+    `Tokens ${formatIntegerOrUnknown(report.tokenEstimateSummary.totalTokensEstimate)} | Errors ${formatIntegerOrUnknown(report.errorCountSummary.totalErrorCount)} | Confidence ${report.confidenceSummary.level}`,
+  ];
+
+  if (report.totalSessions === 0) {
+    lines.push("No matching sessions. Log one with `opensasa log` or broaden filters.");
+  }
+
+  return lines.join("\n");
+}
+
 export function formatLocalReportJson(report: LocalReport): string {
   return `${JSON.stringify(report, null, 2)}\n`;
 }

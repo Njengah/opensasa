@@ -43,7 +43,7 @@ items are already merged.
 - [x] Changed file count bucket grouping in local reports. (#54)
 - [x] Lines added bucket grouping in local reports. (#55)
 - [x] Lines removed bucket grouping in local reports. (#56)
-- [ ] Token estimate summaries in local reports. (#57 open)
+- [x] Token estimate summaries in local reports. (#57)
 - [x] Duration bucket summaries in local reports. (#58)
 - [x] Error count summaries in local reports. (#59)
 - [x] Report readability and empty states. (#60)
@@ -133,11 +133,11 @@ Expected PRs:
 - [x] Add duration bucket summaries to reports. (#58)
 - [x] Add error count summaries to reports. (#59)
 - [x] Improve report section ordering and empty-state readability. (#60)
-- [ ] Add compact report mode for terminal readability.
+- [x] Add compact report mode for terminal readability. (next PR)
 - [ ] Add report snapshot tests for stable text output.
 - [x] Add report schema/version metadata to JSON output. (#61)
 - [ ] Add `opensasa doctor` for local database/config checks.
-- [ ] Add demo seed database or fixture generator. (current PR)
+- [x] Add demo seed database or fixture generator. (current PR)
 
 Exit criteria:
 
@@ -317,12 +317,13 @@ Use this list when asking "build next":
 - [x] Add file-count bucket report grouping. (#50)
 - [x] Add lines-added bucket report grouping. (#55)
 - [x] Add lines-removed bucket report grouping. (#56)
-- [ ] Add token estimate summaries. (#57 open)
+- [x] Add token estimate summaries. (#57)
 - [x] Add duration bucket summaries. (#58)
 - [x] Add error count summaries. (#59)
 - [x] Improve report readability and empty states. (#60)
 - [x] Add JSON report schema version. (#61)
-- [ ] Add demo seed data generator. (current PR)
+- [x] Add demo seed data generator. (current PR)
+- [x] Add compact report mode for terminal readability. (next PR)
 - [ ] Start local dashboard server.
 - [x] Convert product timeline to merge-tracking checklists. (#52)
 

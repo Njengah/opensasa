@@ -603,6 +603,42 @@ test("prints sessions help", async () => {
   assert.match(stdout, /--json/);
 });
 
+test("prints a compact local report", async () => {
+  const dbPath = join(tmpRoot, "compact-report.db");
+  const store = openStore(dbPath);
+
+  try {
+    store.createSession({
+      timestamp: "2026-06-09T12:00:00.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      input_tokens_estimate: 1200,
+      output_tokens_estimate: 500,
+      estimated_cost_usd: 0.5,
+      retry_count: 1,
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "report",
+    "--compact",
+    "--db-path",
+    dbPath,
+  ]);
+
+  assert.match(stdout, /^OpenSasa: 1 session/m);
+  assert.match(stdout, /Useful 100\.0% \(1\/1\)/);
+  assert.match(stdout, /Tokens 1700/);
+  assert.doesNotMatch(stdout, /Sessions by provider/);
+});
+
 test("prints a clear sessions empty state", async () => {
   const dbPath = join(tmpRoot, "empty-sessions.db");
   const { stdout } = await execFileAsync("node", [
@@ -1237,6 +1273,7 @@ test("prints report help", async () => {
   assert.match(stdout, /--final-outcome/);
   assert.match(stdout, /--since/);
   assert.match(stdout, /--until/);
+  assert.match(stdout, /--compact/);
   assert.match(stdout, /--json/);
 });
 

@@ -3,6 +3,7 @@
 import { Command } from "commander";
 import { ZodError } from "zod";
 import { createDemoSeedSessions } from "./demo.js";
+import { createDashboardServer, listenDashboardServer } from "./dashboard.js";
 import {
   formatContributionPreview,
   formatContributionPreviewJson,
@@ -111,11 +112,34 @@ type DemoSeedOptions = StoreOptions & {
   json?: boolean;
 };
 
+type DashboardOptions = StoreOptions & {
+  host?: string;
+  port?: number;
+};
+
 program
   .name("opensasa")
   .description("Local-first AI coding workflow metadata tracker.")
   .version("0.1.0-alpha.1")
   .showHelpAfterError();
+
+program
+  .command("dashboard")
+  .description("Start the local-only dashboard server.")
+  .option("--db-path <path>", "override local database path")
+  .option("--host <host>", "local interface to bind", "127.0.0.1")
+  .option("--port <port>", "port to bind", parsePositiveInteger, 3210)
+  .action(async (options: DashboardOptions) => {
+    const server = createDashboardServer({ dbPath: options.dbPath });
+    try {
+      const address = await listenDashboardServer(server, options.host, options.port);
+      console.log(`OpenSasa dashboard running at http://${address.host}:${address.port}`);
+    } catch (error) {
+      server.close();
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    }
+  });
 
 program
   .command("log")

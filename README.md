@@ -309,6 +309,19 @@ node ./dist/index.js report --json
 JSON reports include `reportSchemaVersion` and `metadataSchemaVersion` fields
 so downstream tools can detect report format changes.
 
+### Start The Local Dashboard
+
+Start the local-only dashboard server:
+
+```bash
+node ./dist/index.js dashboard
+```
+
+The server binds to `127.0.0.1` by default and prints its local URL. You can
+override the interface, port, or database path with `--host`, `--port`, and
+`--db-path`. The dashboard reads local SQLite data only; it does not upload
+sessions or send telemetry.
+
 Limit the report to the newest sessions:
 
 ```bash

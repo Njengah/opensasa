@@ -154,8 +154,8 @@ Goal:
 
 Expected PRs:
 
-- [ ] Add internal report API module reusable by CLI and dashboard.
-- [ ] Add local HTTP server command: `opensasa dashboard`.
+- [x] Add internal report API module reusable by CLI and dashboard. (next PR)
+- [x] Add local HTTP server command: `opensasa dashboard`. (next PR)
 - [ ] Add dashboard static app scaffold.
 - [ ] Add dashboard overview cards.
 - [ ] Add model/tool comparison table.
@@ -324,7 +324,7 @@ Use this list when asking "build next":
 - [x] Add JSON report schema version. (#61)
 - [x] Add demo seed data generator. (current PR)
 - [x] Add compact report mode for terminal readability. (next PR)
-- [ ] Start local dashboard server.
+- [x] Start local dashboard server. (next PR)
 - [x] Convert product timeline to merge-tracking checklists. (#52)
 
 ## Career/Portfolio Goal

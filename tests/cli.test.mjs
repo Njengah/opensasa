@@ -22,9 +22,19 @@ test("prints help with planned MVP commands", async () => {
   assert.match(stdout, /update/);
   assert.match(stdout, /delete/);
   assert.match(stdout, /demo-seed/);
+  assert.match(stdout, /dashboard/);
   assert.match(stdout, /sessions/);
   assert.match(stdout, /report/);
   assert.match(stdout, /inspect/);
+});
+
+test("prints dashboard help", async () => {
+  const { stdout } = await execFileAsync("node", ["./dist/index.js", "dashboard", "--help"]);
+
+  assert.match(stdout, /Start the local-only dashboard server/);
+  assert.match(stdout, /--db-path/);
+  assert.match(stdout, /--host/);
+  assert.match(stdout, /--port/);
 });
 
 test("prints version", async () => {

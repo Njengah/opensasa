@@ -160,6 +160,8 @@ function dashboardHtml(): string {
       .trend-bar { background: #dcecff; border-radius: 4px; min-width: 2px; height: 18px; }
       .trend-row { align-items: center; display: grid; gap: 10px; grid-template-columns: 100px 1fr 80px; margin: 10px 0; }
       .cost-bar { background: #d8f0df; border-radius: 4px; min-width: 2px; height: 18px; }
+      .empty-state { background: #fffaf0; border: 1px solid #f0d9a3; border-radius: 10px; padding: 16px; }
+      code { background: #eef1f4; border-radius: 4px; padding: 2px 5px; }
       a { color: #1459a6; }
     </style>
   </head>
@@ -170,6 +172,12 @@ function dashboardHtml(): string {
         <p class="muted">Your private AI coding workflow report.</p>
       </header>
       <p class="notice">This dashboard reads only your local OpenSasa database. No data is uploaded.</p>
+      <section id="empty-state" class="empty-state" hidden>
+        <h2>No sessions yet</h2>
+        <p>Your local dashboard is ready. Log a session or create safe demo data to explore the report.</p>
+        <p><code>node ./dist/index.js demo-seed</code></p>
+        <p>After seeding, refresh this page to see the dashboard populate.</p>
+      </section>
       <form id="filters" class="comparison" aria-label="Dashboard filters">
         <h2>Filters</h2>
         <label>Provider <select name="provider"><option value="">All</option></select></label>
@@ -291,6 +299,7 @@ function dashboardHtml(): string {
         .then((response) => response.ok ? response.json() : Promise.reject(new Error("Report unavailable")))
         .then((report) => {
           setFilterOptions(report);
+          document.querySelector("#empty-state").hidden = report.totalSessions !== 0;
           document.querySelector("#total-sessions").textContent = report.totalSessions;
           document.querySelector("#useful-rate").textContent = formatRate(report.usefulOutcomeRate);
           document.querySelector("#estimated-cost").textContent = formatCost(report.estimatedTotalCostUsd);

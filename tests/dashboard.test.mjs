@@ -39,6 +39,8 @@ test("serves a local dashboard and report API", async () => {
     assert.match(pageHtml, /renderComparison/);
     assert.match(pageHtml, /id="filters"/);
     assert.match(pageHtml, /name="provider"/);
+    assert.match(pageHtml, /id="empty-state"/);
+    assert.match(pageHtml, /demo-seed/);
     assert.match(pageHtml, /id="model-cost-chart"/);
     assert.match(pageHtml, /id="tool-cost-chart"/);
     assert.match(pageHtml, /renderCostChart/);

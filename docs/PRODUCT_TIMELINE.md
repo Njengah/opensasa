@@ -163,8 +163,8 @@ Expected PRs:
 - [x] Add filters in dashboard for provider, model, tool, language, framework, task type, and outcome. (next PR)
 - [x] Add cost summary charts. (next PR)
 - [x] Add outcome and verification charts. (next PR)
-- [ ] Add local-only privacy notice in dashboard.
-- [ ] Add dashboard empty state with demo instructions.
+- [x] Add local-only privacy notice in dashboard. (#65)
+- [x] Add dashboard empty state with demo instructions. (next PR)
 - [ ] Add Playwright/smoke tests for dashboard rendering.
 
 Exit criteria:

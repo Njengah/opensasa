@@ -84,3 +84,22 @@ test("calculates a sorted daily dashboard trend", () => {
     { date: "2026-07-12", sessions: 2, usefulSessions: 1, estimatedCostUsd: 1.5 },
   ]);
 });
+
+test("renders the dashboard empty state when no sessions exist", async () => {
+  const root = mkdtempSync(join(tmpdir(), "opensasa-dashboard-empty-"));
+  const server = createDashboardServer({ dbPath: join(root, "empty.db") });
+  const address = await listenDashboardServer(server, "127.0.0.1", 0);
+
+  try {
+    const page = await fetch(`http://${address.host}:${address.port}/`);
+    const html = await page.text();
+    assert.match(html, /No sessions yet/);
+    assert.match(html, /demo-seed/);
+    const report = await (await fetch(`http://${address.host}:${address.port}/api/report`)).json();
+    assert.equal(report.totalSessions, 0);
+  } finally {
+    server.closeIdleConnections?.();
+    await new Promise((resolve) => server.close(resolve));
+    rmSync(root, { recursive: true, force: true });
+  }
+});

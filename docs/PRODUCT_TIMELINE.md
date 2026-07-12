@@ -162,7 +162,7 @@ Expected PRs:
 - [x] Add trend chart by day/week. (next PR)
 - [x] Add filters in dashboard for provider, model, tool, language, framework, task type, and outcome. (next PR)
 - [x] Add cost summary charts. (next PR)
-- [ ] Add outcome and verification charts.
+- [x] Add outcome and verification charts. (next PR)
 - [ ] Add local-only privacy notice in dashboard.
 - [ ] Add dashboard empty state with demo instructions.
 - [ ] Add Playwright/smoke tests for dashboard rendering.

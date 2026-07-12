@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createDashboardServer, listenDashboardServer } from "../dist/dashboard.js";
+import { calculateDashboardTrend, createDashboardServer, listenDashboardServer } from "../dist/dashboard.js";
 import { openStore } from "../dist/storage.js";
 
 test("serves a local dashboard and report API", async () => {
@@ -43,6 +43,12 @@ test("serves a local dashboard and report API", async () => {
     const report = await reportResponse.json();
     assert.equal(report.totalSessions, 1);
     assert.equal(report.estimatedTotalCostUsd, 0.5);
+    assert.deepEqual(report.trendByDay, [{
+      date: "2026-07-11",
+      sessions: 1,
+      usefulSessions: 1,
+      estimatedCostUsd: 0.5,
+    }]);
 
     const missingResponse = await fetch(`http://${address.host}:${address.port}/missing`);
     assert.equal(missingResponse.status, 404);
@@ -51,4 +57,17 @@ test("serves a local dashboard and report API", async () => {
     await new Promise((resolve) => server.close(resolve));
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+test("calculates a sorted daily dashboard trend", () => {
+  const trend = calculateDashboardTrend([
+    { timestamp: "2026-07-12T12:00:00.000Z", final_outcome: "rejected", estimated_cost_usd: 1 },
+    { timestamp: "2026-07-11T12:00:00.000Z", final_outcome: "accepted" },
+    { timestamp: "2026-07-12T13:00:00.000Z", final_outcome: "partially_accepted", estimated_cost_usd: 0.5 },
+  ]);
+
+  assert.deepEqual(trend, [
+    { date: "2026-07-11", sessions: 1, usefulSessions: 1, estimatedCostUsd: null },
+    { date: "2026-07-12", sessions: 2, usefulSessions: 1, estimatedCostUsd: 1.5 },
+  ]);
 });

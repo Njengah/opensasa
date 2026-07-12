@@ -159,7 +159,7 @@ Expected PRs:
 - [x] Add dashboard static app scaffold. (next PR)
 - [x] Add dashboard overview cards. (#65)
 - [x] Add model/tool comparison table. (next PR)
-- [ ] Add trend chart by day/week.
+- [x] Add trend chart by day/week. (next PR)
 - [ ] Add filters in dashboard for provider, model, tool, language, framework, task type, and outcome.
 - [ ] Add cost summary charts.
 - [ ] Add outcome and verification charts.

@@ -454,6 +454,16 @@ By default, OpenSasa stores records at:
 
 The database path can be overridden with `--db-path` or `OPENSASA_DB_PATH`.
 
+For a persistent local override, create `~/.opensasa/config.json`:
+
+```json
+{
+  "db_path": "/path/to/opensasa.db"
+}
+```
+
+An explicit `--db-path` wins over the environment variable and config file.
+
 ## Current Limitations
 
 The MVP does not include:

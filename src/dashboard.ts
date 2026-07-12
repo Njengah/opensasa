@@ -1,11 +1,19 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { calculateLocalReport, formatLocalReportJson } from "./report.js";
+import { isUsefulOutcome, type LocalSession } from "./schema.js";
 import { openStore } from "./storage.js";
 
 export type DashboardServerOptions = {
   dbPath?: string;
   host?: string;
   port?: number;
+};
+
+export type DashboardTrendPoint = {
+  date: string;
+  sessions: number;
+  usefulSessions: number;
+  estimatedCostUsd: number | null;
 };
 
 export function createDashboardServer(options: DashboardServerOptions = {}): Server {
@@ -63,7 +71,11 @@ function handleDashboardRequest(
     let store;
     try {
       store = openStore(dbPath ?? process.env.OPENSASA_DB_PATH);
-      sendJson(response, 200, JSON.parse(formatLocalReportJson(calculateLocalReport(store.listSessions()))));
+      const sessions = store.listSessions();
+      sendJson(response, 200, {
+        ...JSON.parse(formatLocalReportJson(calculateLocalReport(sessions))),
+        trendByDay: calculateDashboardTrend(sessions),
+      });
     } catch (error) {
       sendJson(response, 500, { error: error instanceof Error ? error.message : "Unable to read local report." });
     } finally {
@@ -73,6 +85,30 @@ function handleDashboardRequest(
   }
 
   sendJson(response, 404, { error: "Not found." });
+}
+
+export function calculateDashboardTrend(sessions: LocalSession[]): DashboardTrendPoint[] {
+  const points = new Map<string, DashboardTrendPoint>();
+
+  for (const session of sessions) {
+    const date = session.timestamp.slice(0, 10);
+    const point = points.get(date) ?? {
+      date,
+      sessions: 0,
+      usefulSessions: 0,
+      estimatedCostUsd: null,
+    };
+    point.sessions += 1;
+    if (isUsefulOutcome(session.final_outcome)) {
+      point.usefulSessions += 1;
+    }
+    if (session.estimated_cost_usd !== undefined) {
+      point.estimatedCostUsd = (point.estimatedCostUsd ?? 0) + session.estimated_cost_usd;
+    }
+    points.set(date, point);
+  }
+
+  return [...points.values()].sort((a, b) => a.date.localeCompare(b.date));
 }
 
 function sendHtml(response: ServerResponse, html: string): void {
@@ -113,6 +149,8 @@ function dashboardHtml(): string {
       table { border-collapse: collapse; width: 100%; }
       th, td { border-bottom: 1px solid #edf0f2; padding: 10px 4px; text-align: left; }
       th:last-child, td:last-child { text-align: right; }
+      .trend-bar { background: #dcecff; border-radius: 4px; min-width: 2px; height: 18px; }
+      .trend-row { align-items: center; display: grid; gap: 10px; grid-template-columns: 100px 1fr 80px; margin: 10px 0; }
       a { color: #1459a6; }
     </style>
   </head>
@@ -137,6 +175,10 @@ function dashboardHtml(): string {
         <h2 id="tool-comparison-title">Tools</h2>
         <table><thead><tr><th>Tool</th><th>Sessions</th><th>Cost</th></tr></thead><tbody id="tool-comparison"><tr><td colspan="3">Loading…</td></tr></tbody></table>
       </section>
+      <section class="comparison" aria-labelledby="trend-title">
+        <h2 id="trend-title">Daily trend</h2>
+        <div id="daily-trend"><p class="muted">Loading…</p></div>
+      </section>
       <p id="status" class="muted">Loading your local report…</p>
       <p><a href="/api/report">View local report JSON</a></p>
     </main>
@@ -150,6 +192,15 @@ function dashboardHtml(): string {
           ? "<tr><td colspan=\"3\">No sessions recorded.</td></tr>"
           : rows.map(([name, count]) => "<tr><td>" + name + "</td><td>" + count + "</td><td>" + formatCost(costs[name] ?? null) + "</td></tr>").join("");
       };
+      const renderTrend = (points) => {
+        const element = document.querySelector("#daily-trend");
+        if (points.length === 0) { element.innerHTML = "<p class=\"muted\">No sessions recorded.</p>"; return; }
+        const maximum = Math.max(...points.map((point) => point.sessions));
+        element.innerHTML = points.map((point) => {
+          const width = Math.max(2, (point.sessions / maximum) * 100);
+          return "<div class=\"trend-row\"><span>" + point.date + "</span><div class=\"trend-bar\" style=\"width:" + width + "%\" title=\"" + point.sessions + " sessions\"></div><span>" + point.usefulSessions + "/" + point.sessions + " useful</span></div>";
+        }).join("");
+      };
       fetch("/api/report")
         .then((response) => response.ok ? response.json() : Promise.reject(new Error("Report unavailable")))
         .then((report) => {
@@ -159,6 +210,7 @@ function dashboardHtml(): string {
           document.querySelector("#confidence").textContent = report.confidenceSummary.level;
           renderComparison("model-comparison", report.sessionsByModel, report.costByModelUsd);
           renderComparison("tool-comparison", report.sessionsByTool, report.costByToolUsd);
+          renderTrend(report.trendByDay);
           document.querySelector("#status").textContent = "Report loaded from local storage.";
         })
         .catch(() => { document.querySelector("#status").textContent = "Unable to load the local report."; });

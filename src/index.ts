@@ -4,6 +4,7 @@ import { Command } from "commander";
 import { ZodError } from "zod";
 import { createDemoSeedSessions } from "./demo.js";
 import { createDashboardServer, listenDashboardServer } from "./dashboard.js";
+import { hashProjectIdentity } from "./project.js";
 import {
   formatContributionPreview,
   formatContributionPreviewJson,
@@ -32,6 +33,7 @@ type LogOptions = {
   workMode?: string;
   language?: string;
   framework?: string;
+  projectPath?: string;
   durationSeconds?: number;
   retryCount?: number;
   errorCount?: number;
@@ -157,6 +159,7 @@ program
   .option("--tool <tool>", "AI coding tool or agent")
   .option("--language <language>", "primary language, if known")
   .option("--framework <framework>", "primary framework, if known")
+  .option("--project-path <path>", "hash a project path without storing the path")
   .option("--duration-seconds <seconds>", "duration in seconds", parseNonNegativeInteger)
   .option("--retry-count <count>", "retry or follow-up count", parseNonNegativeInteger)
   .option("--error-count <count>", "workflow error count", parseNonNegativeInteger)
@@ -208,6 +211,7 @@ program
         work_mode: options.workMode,
         language: options.language,
         framework: options.framework,
+        project_identity_hash: options.projectPath ? hashProjectIdentity(options.projectPath) : undefined,
         duration_seconds: options.durationSeconds,
         retry_count: options.retryCount,
         error_count: options.errorCount,
@@ -257,6 +261,7 @@ program
   .option("--final-outcome <final-outcome>", "accepted, partially_accepted, rejected, or unknown")
   .option("--language <language>", "primary language, if known")
   .option("--framework <framework>", "primary framework, if known")
+  .option("--project-path <path>", "hash a project path without storing the path")
   .option("--duration-seconds <seconds>", "duration in seconds", parseNonNegativeInteger)
   .option("--retry-count <count>", "retry or follow-up count", parseNonNegativeInteger)
   .option("--error-count <count>", "workflow error count", parseNonNegativeInteger)
@@ -581,6 +586,7 @@ function sessionInputFromOptions(options: UpdateOptions): Record<string, unknown
     work_mode: options.workMode,
     language: options.language,
     framework: options.framework,
+    project_identity_hash: options.projectPath ? hashProjectIdentity(options.projectPath) : undefined,
     duration_seconds: options.durationSeconds,
     retry_count: options.retryCount,
     error_count: options.errorCount,

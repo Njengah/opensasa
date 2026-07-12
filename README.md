@@ -464,6 +464,20 @@ For a persistent local override, create `~/.opensasa/config.json`:
 
 An explicit `--db-path` wins over the environment variable and config file.
 
+To associate sessions with a project without storing its name or path, pass a
+path when logging:
+
+```bash
+node ./dist/index.js log \
+  --provider OpenAI \
+  --model-id gpt-5 \
+  --task-type bug_fix \
+  --final-outcome accepted \
+  --project-path .
+```
+
+OpenSasa stores only a one-way SHA-256 identity hash.
+
 ## Current Limitations
 
 The MVP does not include:

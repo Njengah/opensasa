@@ -165,7 +165,7 @@ Expected PRs:
 - [x] Add outcome and verification charts. (next PR)
 - [x] Add local-only privacy notice in dashboard. (#65)
 - [x] Add dashboard empty state with demo instructions. (next PR)
-- [ ] Add Playwright/smoke tests for dashboard rendering.
+- [x] Add Playwright/smoke tests for dashboard rendering. (next PR)
 
 Exit criteria:
 

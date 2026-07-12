@@ -322,6 +322,12 @@ override the interface, port, or database path with `--host`, `--port`, and
 `--db-path`. The dashboard reads local SQLite data only; it does not upload
 sessions or send telemetry.
 
+Run the dashboard smoke tests independently with:
+
+```bash
+npm run test:dashboard
+```
+
 Limit the report to the newest sessions:
 
 ```bash

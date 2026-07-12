@@ -159,6 +159,7 @@ function dashboardHtml(): string {
       th:last-child, td:last-child { text-align: right; }
       .trend-bar { background: #dcecff; border-radius: 4px; min-width: 2px; height: 18px; }
       .trend-row { align-items: center; display: grid; gap: 10px; grid-template-columns: 100px 1fr 80px; margin: 10px 0; }
+      .cost-bar { background: #d8f0df; border-radius: 4px; min-width: 2px; height: 18px; }
       a { color: #1459a6; }
     </style>
   </head>
@@ -196,6 +197,14 @@ function dashboardHtml(): string {
       <section class="comparison" aria-labelledby="trend-title">
         <h2 id="trend-title">Daily trend</h2>
         <div id="daily-trend"><p class="muted">Loading…</p></div>
+      </section>
+      <section class="comparison" aria-labelledby="cost-title">
+        <h2 id="cost-title">Cost summary</h2>
+        <p>Total estimated cost: <strong id="total-cost">Loading…</strong></p>
+        <h3>By model</h3>
+        <div id="model-cost-chart"><p class="muted">Loading…</p></div>
+        <h3>By tool</h3>
+        <div id="tool-cost-chart"><p class="muted">Loading…</p></div>
       </section>
       <p id="status" class="muted">Loading your local report…</p>
       <p><a href="/api/report">View local report JSON</a></p>
@@ -245,6 +254,16 @@ function dashboardHtml(): string {
           return "<div class=\"trend-row\"><span>" + point.date + "</span><div class=\"trend-bar\" style=\"width:" + width + "%\" title=\"" + point.sessions + " sessions\"></div><span>" + point.usefulSessions + "/" + point.sessions + " useful</span></div>";
         }).join("");
       };
+      const renderCostChart = (elementId, costs) => {
+        const rows = Object.entries(costs).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+        const element = document.querySelector("#" + elementId);
+        if (rows.length === 0) { element.innerHTML = "<p class=\"muted\">No cost data recorded.</p>"; return; }
+        const maximum = Math.max(...rows.map((row) => row[1]));
+        element.innerHTML = rows.map(([name, cost]) => {
+          const width = Math.max(2, (cost / maximum) * 100);
+          return "<div class=\"trend-row\"><span>" + name + "</span><div class=\"cost-bar\" style=\"width:" + width + "%\" title=\"" + formatCost(cost) + "\"></div><span>" + formatCost(cost) + "</span></div>";
+        }).join("");
+      };
       fetch("/api/report")
         .then((response) => response.ok ? response.json() : Promise.reject(new Error("Report unavailable")))
         .then((report) => {
@@ -252,10 +271,13 @@ function dashboardHtml(): string {
           document.querySelector("#total-sessions").textContent = report.totalSessions;
           document.querySelector("#useful-rate").textContent = formatRate(report.usefulOutcomeRate);
           document.querySelector("#estimated-cost").textContent = formatCost(report.estimatedTotalCostUsd);
+          document.querySelector("#total-cost").textContent = formatCost(report.estimatedTotalCostUsd);
           document.querySelector("#confidence").textContent = report.confidenceSummary.level;
           renderComparison("model-comparison", report.sessionsByModel, report.costByModelUsd);
           renderComparison("tool-comparison", report.sessionsByTool, report.costByToolUsd);
           renderTrend(report.trendByDay);
+          renderCostChart("model-cost-chart", report.costByModelUsd);
+          renderCostChart("tool-cost-chart", report.costByToolUsd);
           document.querySelector("#status").textContent = "Report loaded from local storage.";
         })
         .catch(() => { document.querySelector("#status").textContent = "Unable to load the local report."; });

@@ -109,6 +109,10 @@ function dashboardHtml(): string {
       .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 24px 0; }
       .card { background: white; border: 1px solid #dfe4e8; border-radius: 10px; padding: 16px; }
       .card strong { display: block; font-size: 1.45rem; margin-top: 6px; }
+      .comparison { background: white; border: 1px solid #dfe4e8; border-radius: 10px; padding: 16px; margin-top: 16px; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border-bottom: 1px solid #edf0f2; padding: 10px 4px; text-align: left; }
+      th:last-child, td:last-child { text-align: right; }
       a { color: #1459a6; }
     </style>
   </head>
@@ -125,12 +129,27 @@ function dashboardHtml(): string {
         <article class="card">Estimated cost<strong id="estimated-cost">Loading…</strong></article>
         <article class="card">Confidence<strong id="confidence">Loading…</strong></article>
       </section>
+      <section class="comparison" aria-labelledby="model-comparison-title">
+        <h2 id="model-comparison-title">Models</h2>
+        <table><thead><tr><th>Model</th><th>Sessions</th><th>Cost</th></tr></thead><tbody id="model-comparison"><tr><td colspan="3">Loading…</td></tr></tbody></table>
+      </section>
+      <section class="comparison" aria-labelledby="tool-comparison-title">
+        <h2 id="tool-comparison-title">Tools</h2>
+        <table><thead><tr><th>Tool</th><th>Sessions</th><th>Cost</th></tr></thead><tbody id="tool-comparison"><tr><td colspan="3">Loading…</td></tr></tbody></table>
+      </section>
       <p id="status" class="muted">Loading your local report…</p>
       <p><a href="/api/report">View local report JSON</a></p>
     </main>
     <script>
       const formatRate = (metric) => metric.rate === null ? "unknown" : (metric.rate * 100).toFixed(1) + "%";
       const formatCost = (value) => value === null ? "unknown" : "$" + value.toFixed(4);
+      const renderComparison = (elementId, counts, costs) => {
+        const rows = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+        const element = document.querySelector("#" + elementId);
+        element.innerHTML = rows.length === 0
+          ? "<tr><td colspan=\"3\">No sessions recorded.</td></tr>"
+          : rows.map(([name, count]) => "<tr><td>" + name + "</td><td>" + count + "</td><td>" + formatCost(costs[name] ?? null) + "</td></tr>").join("");
+      };
       fetch("/api/report")
         .then((response) => response.ok ? response.json() : Promise.reject(new Error("Report unavailable")))
         .then((report) => {
@@ -138,6 +157,8 @@ function dashboardHtml(): string {
           document.querySelector("#useful-rate").textContent = formatRate(report.usefulOutcomeRate);
           document.querySelector("#estimated-cost").textContent = formatCost(report.estimatedTotalCostUsd);
           document.querySelector("#confidence").textContent = report.confidenceSummary.level;
+          renderComparison("model-comparison", report.sessionsByModel, report.costByModelUsd);
+          renderComparison("tool-comparison", report.sessionsByTool, report.costByToolUsd);
           document.querySelector("#status").textContent = "Report loaded from local storage.";
         })
         .catch(() => { document.querySelector("#status").textContent = "Unable to load the local report."; });

@@ -157,8 +157,8 @@ Expected PRs:
 - [x] Add internal report API module reusable by CLI and dashboard. (next PR)
 - [x] Add local HTTP server command: `opensasa dashboard`. (next PR)
 - [x] Add dashboard static app scaffold. (next PR)
-- [ ] Add dashboard overview cards.
-- [ ] Add model/tool comparison table.
+- [x] Add dashboard overview cards. (#65)
+- [x] Add model/tool comparison table. (next PR)
 - [ ] Add trend chart by day/week.
 - [ ] Add filters in dashboard for provider, model, tool, language, framework, task type, and outcome.
 - [ ] Add cost summary charts.

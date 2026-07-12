@@ -31,6 +31,9 @@ test("serves a local dashboard and report API", async () => {
     const pageHtml = await page.text();
     assert.match(pageHtml, /OpenSasa Dashboard/);
     assert.match(pageHtml, /No data is uploaded/);
+    assert.match(pageHtml, /total-sessions/);
+    assert.match(pageHtml, /useful-rate/);
+    assert.match(pageHtml, /fetch\("\/api\/report"\)/);
 
     const reportResponse = await fetch(`http://${address.host}:${address.port}/api/report`);
     assert.equal(reportResponse.status, 200);
@@ -41,6 +44,7 @@ test("serves a local dashboard and report API", async () => {
     const missingResponse = await fetch(`http://${address.host}:${address.port}/missing`);
     assert.equal(missingResponse.status, 404);
   } finally {
+    server.closeIdleConnections?.();
     await new Promise((resolve) => server.close(resolve));
     rmSync(root, { recursive: true, force: true });
   }

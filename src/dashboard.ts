@@ -94,14 +94,54 @@ function sendJson(response: ServerResponse, statusCode: number, value: unknown):
 function dashboardHtml(): string {
   return `<!doctype html>
 <html lang="en">
-  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>OpenSasa Dashboard</title></head>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OpenSasa Dashboard</title>
+    <style>
+      :root { color-scheme: light; font-family: system-ui, sans-serif; background: #f6f7f9; color: #17202a; }
+      body { margin: 0; }
+      main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
+      header { margin-bottom: 28px; }
+      h1 { margin: 0 0 8px; font-size: 2rem; }
+      .muted { color: #5f6b76; }
+      .notice { border: 1px solid #b8d9c2; background: #edf8f0; border-radius: 10px; padding: 12px 16px; }
+      .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 24px 0; }
+      .card { background: white; border: 1px solid #dfe4e8; border-radius: 10px; padding: 16px; }
+      .card strong { display: block; font-size: 1.45rem; margin-top: 6px; }
+      a { color: #1459a6; }
+    </style>
+  </head>
   <body>
     <main>
-      <h1>OpenSasa Dashboard</h1>
-      <p>Local report dashboard foundation.</p>
-      <p>This dashboard reads only your local OpenSasa database. No data is uploaded.</p>
+      <header>
+        <h1>OpenSasa Dashboard</h1>
+        <p class="muted">Your private AI coding workflow report.</p>
+      </header>
+      <p class="notice">This dashboard reads only your local OpenSasa database. No data is uploaded.</p>
+      <section class="cards" aria-label="Report overview">
+        <article class="card">Sessions<strong id="total-sessions">Loading…</strong></article>
+        <article class="card">Useful outcome rate<strong id="useful-rate">Loading…</strong></article>
+        <article class="card">Estimated cost<strong id="estimated-cost">Loading…</strong></article>
+        <article class="card">Confidence<strong id="confidence">Loading…</strong></article>
+      </section>
+      <p id="status" class="muted">Loading your local report…</p>
       <p><a href="/api/report">View local report JSON</a></p>
     </main>
+    <script>
+      const formatRate = (metric) => metric.rate === null ? "unknown" : (metric.rate * 100).toFixed(1) + "%";
+      const formatCost = (value) => value === null ? "unknown" : "$" + value.toFixed(4);
+      fetch("/api/report")
+        .then((response) => response.ok ? response.json() : Promise.reject(new Error("Report unavailable")))
+        .then((report) => {
+          document.querySelector("#total-sessions").textContent = report.totalSessions;
+          document.querySelector("#useful-rate").textContent = formatRate(report.usefulOutcomeRate);
+          document.querySelector("#estimated-cost").textContent = formatCost(report.estimatedTotalCostUsd);
+          document.querySelector("#confidence").textContent = report.confidenceSummary.level;
+          document.querySelector("#status").textContent = "Report loaded from local storage.";
+        })
+        .catch(() => { document.querySelector("#status").textContent = "Unable to load the local report."; });
+    </script>
   </body>
 </html>`;
 }

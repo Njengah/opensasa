@@ -156,7 +156,7 @@ Expected PRs:
 
 - [x] Add internal report API module reusable by CLI and dashboard. (next PR)
 - [x] Add local HTTP server command: `opensasa dashboard`. (next PR)
-- [ ] Add dashboard static app scaffold.
+- [x] Add dashboard static app scaffold. (next PR)
 - [ ] Add dashboard overview cards.
 - [ ] Add model/tool comparison table.
 - [ ] Add trend chart by day/week.
@@ -325,6 +325,7 @@ Use this list when asking "build next":
 - [x] Add demo seed data generator. (current PR)
 - [x] Add compact report mode for terminal readability. (next PR)
 - [x] Start local dashboard server. (next PR)
+- [x] Add dashboard static app scaffold. (next PR)
 - [x] Convert product timeline to merge-tracking checklists. (#52)
 
 ## Career/Portfolio Goal

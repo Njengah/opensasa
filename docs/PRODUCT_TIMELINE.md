@@ -184,7 +184,7 @@ Expected PRs:
 
 - [x] Add local config file support. (#73)
 - [x] Add project identity hashing without storing repo names. (#74)
-- [ ] Add git metadata helper for coarse repo/file/change buckets.
+- [x] Add git metadata helper for coarse repo/file/change buckets. (next PR)
 - [ ] Add command wrapper for test/build/lint outcome capture.
 - [ ] Add session draft command.
 - [ ] Add session finalize command.

@@ -71,7 +71,15 @@ function handleDashboardRequest(
     let store;
     try {
       store = openStore(dbPath ?? process.env.OPENSASA_DB_PATH);
-      const sessions = store.listSessions();
+      const sessions = store.listSessions({
+        provider: url.searchParams.get("provider") ?? undefined,
+        modelId: url.searchParams.get("model") ?? undefined,
+        tool: url.searchParams.get("tool") ?? undefined,
+        language: url.searchParams.get("language") ?? undefined,
+        framework: url.searchParams.get("framework") ?? undefined,
+        taskType: url.searchParams.get("taskType") ?? undefined,
+        finalOutcome: url.searchParams.get("outcome") ?? undefined,
+      });
       sendJson(response, 200, {
         ...JSON.parse(formatLocalReportJson(calculateLocalReport(sessions))),
         trendByDay: calculateDashboardTrend(sessions),
@@ -161,6 +169,16 @@ function dashboardHtml(): string {
         <p class="muted">Your private AI coding workflow report.</p>
       </header>
       <p class="notice">This dashboard reads only your local OpenSasa database. No data is uploaded.</p>
+      <form id="filters" class="comparison" aria-label="Dashboard filters">
+        <h2>Filters</h2>
+        <label>Provider <select name="provider"><option value="">All</option></select></label>
+        <label>Model <select name="model"><option value="">All</option></select></label>
+        <label>Tool <select name="tool"><option value="">All</option></select></label>
+        <label>Language <select name="language"><option value="">All</option></select></label>
+        <label>Framework <select name="framework"><option value="">All</option></select></label>
+        <label>Task type <select name="taskType"><option value="">All</option></select></label>
+        <label>Outcome <select name="outcome"><option value="">All</option><option value="accepted">Accepted</option><option value="partially_accepted">Partially accepted</option><option value="rejected">Rejected</option><option value="unknown">Unknown</option></select></label>
+      </form>
       <section class="cards" aria-label="Report overview">
         <article class="card">Sessions<strong id="total-sessions">Loading…</strong></article>
         <article class="card">Useful outcome rate<strong id="useful-rate">Loading…</strong></article>
@@ -185,6 +203,32 @@ function dashboardHtml(): string {
     <script>
       const formatRate = (metric) => metric.rate === null ? "unknown" : (metric.rate * 100).toFixed(1) + "%";
       const formatCost = (value) => value === null ? "unknown" : "$" + value.toFixed(4);
+      const filterForm = document.querySelector("#filters");
+      const query = new URLSearchParams(window.location.search);
+      const optionValues = (selectName, values) => {
+        const select = filterForm.elements[selectName];
+        const selected = query.get(selectName) || "";
+        for (const value of values) {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = value;
+          option.selected = value === selected;
+          select.append(option);
+        }
+      };
+      const setFilterOptions = (report) => {
+        optionValues("provider", Object.keys(report.sessionsByProvider));
+        optionValues("model", Object.keys(report.sessionsByModel).map((value) => value.split("/").slice(1).join("/")));
+        optionValues("tool", Object.keys(report.sessionsByTool));
+        optionValues("language", Object.keys(report.sessionsByLanguage));
+        optionValues("framework", Object.keys(report.sessionsByFramework));
+        optionValues("taskType", Object.keys(report.sessionsByTaskType));
+      };
+      filterForm.addEventListener("change", () => {
+        const nextQuery = new URLSearchParams(new FormData(filterForm));
+        for (const [key, value] of [...nextQuery]) if (!value) nextQuery.delete(key);
+        window.location.search = nextQuery.toString();
+      });
       const renderComparison = (elementId, counts, costs) => {
         const rows = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
         const element = document.querySelector("#" + elementId);
@@ -204,6 +248,7 @@ function dashboardHtml(): string {
       fetch("/api/report")
         .then((response) => response.ok ? response.json() : Promise.reject(new Error("Report unavailable")))
         .then((report) => {
+          setFilterOptions(report);
           document.querySelector("#total-sessions").textContent = report.totalSessions;
           document.querySelector("#useful-rate").textContent = formatRate(report.usefulOutcomeRate);
           document.querySelector("#estimated-cost").textContent = formatCost(report.estimatedTotalCostUsd);

@@ -37,6 +37,8 @@ test("serves a local dashboard and report API", async () => {
     assert.match(pageHtml, /model-comparison/);
     assert.match(pageHtml, /tool-comparison/);
     assert.match(pageHtml, /renderComparison/);
+    assert.match(pageHtml, /id="filters"/);
+    assert.match(pageHtml, /name="provider"/);
 
     const reportResponse = await fetch(`http://${address.host}:${address.port}/api/report`);
     assert.equal(reportResponse.status, 200);
@@ -49,6 +51,9 @@ test("serves a local dashboard and report API", async () => {
       usefulSessions: 1,
       estimatedCostUsd: 0.5,
     }]);
+
+    const filteredResponse = await fetch(`http://${address.host}:${address.port}/api/report?provider=Anthropic`);
+    assert.equal((await filteredResponse.json()).totalSessions, 0);
 
     const missingResponse = await fetch(`http://${address.host}:${address.port}/missing`);
     assert.equal(missingResponse.status, 404);

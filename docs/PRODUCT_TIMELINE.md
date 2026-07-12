@@ -160,7 +160,7 @@ Expected PRs:
 - [x] Add dashboard overview cards. (#65)
 - [x] Add model/tool comparison table. (next PR)
 - [x] Add trend chart by day/week. (next PR)
-- [ ] Add filters in dashboard for provider, model, tool, language, framework, task type, and outcome.
+- [x] Add filters in dashboard for provider, model, tool, language, framework, task type, and outcome. (next PR)
 - [ ] Add cost summary charts.
 - [ ] Add outcome and verification charts.
 - [ ] Add local-only privacy notice in dashboard.

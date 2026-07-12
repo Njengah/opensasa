@@ -183,7 +183,7 @@ Goal:
 Expected PRs:
 
 - [x] Add local config file support. (#73)
-- [x] Add project identity hashing without storing repo names. (next PR)
+- [x] Add project identity hashing without storing repo names. (#74)
 - [ ] Add git metadata helper for coarse repo/file/change buckets.
 - [ ] Add command wrapper for test/build/lint outcome capture.
 - [ ] Add session draft command.
@@ -333,7 +333,8 @@ Use this list when asking "build next":
 - [x] Add outcome and verification charts. (#70)
 - [x] Add dashboard empty state. (#71)
 - [x] Add dashboard smoke tests. (#72)
-- [ ] Add local config file support.
+- [x] Add local config file support. (#73)
+- [x] Add project identity hashing. (#74)
 - [x] Convert product timeline to merge-tracking checklists. (#52)
 
 ## Career/Portfolio Goal

@@ -70,7 +70,7 @@ function handleDashboardRequest(
   if (url.pathname === "/api/report") {
     let store;
     try {
-      store = openStore(dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(dbPath);
       const sessions = store.listSessions({
         provider: url.searchParams.get("provider") ?? undefined,
         modelId: url.searchParams.get("model") ?? undefined,

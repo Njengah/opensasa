@@ -3,6 +3,7 @@ import { chmodSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { randomUUID } from "node:crypto";
+import { resolveDatabasePath } from "./config.js";
 import {
   bucketValues,
   contributionConsentStates,
@@ -228,7 +229,7 @@ export class OpenSasaStore {
 }
 
 export function openStore(databasePath?: string): OpenSasaStore {
-  return new OpenSasaStore(databasePath);
+  return new OpenSasaStore(resolveDatabasePath(databasePath));
 }
 
 function runMigrations(database: Database.Database): void {

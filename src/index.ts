@@ -196,7 +196,7 @@ program
   .action((options: LogOptions) => {
     let store;
     try {
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const session = store.createSession({
         timestamp: options.timestamp ?? new Date().toISOString(),
         provider: options.provider,
@@ -304,7 +304,7 @@ program
         return;
       }
 
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const session = store.updateSession(sessionId, updates);
 
       if (!session) {
@@ -337,7 +337,7 @@ program
   .action((sessionId: string, options: DeleteOptions) => {
     let store;
     try {
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const deleted = store.deleteSession(sessionId);
 
       if (!deleted) {
@@ -370,7 +370,7 @@ program
   .action((options: DemoSeedOptions) => {
     let store;
     try {
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const sessions = createDemoSeedSessions(store);
 
       if (options.json) {
@@ -416,7 +416,7 @@ program
   .action((options: SessionsOptions) => {
     let store;
     try {
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const sessions = store.listSessions({
         limit: options.limit,
         provider: options.provider,
@@ -470,7 +470,7 @@ program
   .action((options: ReportOptions) => {
     let store;
     try {
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const sessions = store.listSessions({
         limit: options.limit,
         provider: options.provider,
@@ -507,7 +507,7 @@ program
   .action((sessionId: string, options: InspectOptions) => {
     let store;
     try {
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const session = store.getSession(sessionId);
 
       if (!session) {

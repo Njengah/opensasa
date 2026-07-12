@@ -42,6 +42,9 @@ test("serves a local dashboard and report API", async () => {
     assert.match(pageHtml, /id="model-cost-chart"/);
     assert.match(pageHtml, /id="tool-cost-chart"/);
     assert.match(pageHtml, /renderCostChart/);
+    assert.match(pageHtml, /id="outcome-chart"/);
+    assert.match(pageHtml, /id="verification-chart"/);
+    assert.match(pageHtml, /renderVerification/);
 
     const reportResponse = await fetch(`http://${address.host}:${address.port}/api/report`);
     assert.equal(reportResponse.status, 200);

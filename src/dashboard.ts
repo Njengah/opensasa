@@ -206,6 +206,12 @@ function dashboardHtml(): string {
         <h3>By tool</h3>
         <div id="tool-cost-chart"><p class="muted">Loading…</p></div>
       </section>
+      <section class="comparison" aria-labelledby="outcome-title">
+        <h2 id="outcome-title">Outcomes</h2>
+        <div id="outcome-chart"><p class="muted">Loading…</p></div>
+        <h2>Verification</h2>
+        <div id="verification-chart"><p class="muted">Loading…</p></div>
+      </section>
       <p id="status" class="muted">Loading your local report…</p>
       <p><a href="/api/report">View local report JSON</a></p>
     </main>
@@ -264,6 +270,23 @@ function dashboardHtml(): string {
           return "<div class=\"trend-row\"><span>" + name + "</span><div class=\"cost-bar\" style=\"width:" + width + "%\" title=\"" + formatCost(cost) + "\"></div><span>" + formatCost(cost) + "</span></div>";
         }).join("");
       };
+      const renderCountChart = (elementId, counts) => {
+        const rows = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+        const element = document.querySelector("#" + elementId);
+        if (rows.length === 0) { element.innerHTML = "<p class=\"muted\">No verification data recorded.</p>"; return; }
+        const maximum = Math.max(...rows.map((row) => row[1]));
+        element.innerHTML = rows.map(([name, count]) => {
+          const width = Math.max(2, (count / maximum) * 100);
+          return "<div class=\"trend-row\"><span>" + name + "</span><div class=\"trend-bar\" style=\"width:" + width + "%\" title=\"" + count + " sessions\"></div><span>" + count + "</span></div>";
+        }).join("");
+      };
+      const renderVerification = (summary) => {
+        const element = document.querySelector("#verification-chart");
+        element.innerHTML = Object.entries(summary).map(([field, counts]) => {
+          const recorded = Object.entries(counts).filter(([outcome]) => outcome !== "unknown").reduce((total, [, count]) => total + count, 0);
+          return "<div class=\"trend-row\"><span>" + field.replace("_outcome", "") + "</span><div class=\"trend-bar\" style=\"width:" + Math.min(100, recorded * 10) + "%\" title=\"" + recorded + " recorded\"></div><span>" + recorded + " recorded</span></div>";
+        }).join("");
+      };
       fetch("/api/report")
         .then((response) => response.ok ? response.json() : Promise.reject(new Error("Report unavailable")))
         .then((report) => {
@@ -278,6 +301,8 @@ function dashboardHtml(): string {
           renderTrend(report.trendByDay);
           renderCostChart("model-cost-chart", report.costByModelUsd);
           renderCostChart("tool-cost-chart", report.costByToolUsd);
+          renderCountChart("outcome-chart", { accepted: report.acceptedOrPartiallyAcceptedCount, rejected: report.rejectedCount, unknown: report.unknownOutcomeCount });
+          renderVerification(report.verificationOutcomeSummary);
           document.querySelector("#status").textContent = "Report loaded from local storage.";
         })
         .catch(() => { document.querySelector("#status").textContent = "Unable to load the local report."; });

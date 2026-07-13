@@ -90,6 +90,7 @@ export const localSessionSchema = z
     work_mode: z.enum(workModes),
     language: nonEmptyString.optional(),
     framework: nonEmptyString.optional(),
+    project_identity_hash: z.string().regex(/^[a-f0-9]{64}$/).optional(),
     duration_seconds: nonNegativeInteger.optional(),
     retry_count: nonNegativeInteger.optional(),
     error_count: nonNegativeInteger.optional(),

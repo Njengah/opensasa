@@ -70,8 +70,16 @@ function handleDashboardRequest(
   if (url.pathname === "/api/report") {
     let store;
     try {
-      store = openStore(dbPath ?? process.env.OPENSASA_DB_PATH);
-      const sessions = store.listSessions();
+      store = openStore(dbPath);
+      const sessions = store.listSessions({
+        provider: url.searchParams.get("provider") ?? undefined,
+        modelId: url.searchParams.get("model") ?? undefined,
+        tool: url.searchParams.get("tool") ?? undefined,
+        language: url.searchParams.get("language") ?? undefined,
+        framework: url.searchParams.get("framework") ?? undefined,
+        taskType: url.searchParams.get("taskType") ?? undefined,
+        finalOutcome: url.searchParams.get("outcome") ?? undefined,
+      });
       sendJson(response, 200, {
         ...JSON.parse(formatLocalReportJson(calculateLocalReport(sessions))),
         trendByDay: calculateDashboardTrend(sessions),
@@ -151,6 +159,9 @@ function dashboardHtml(): string {
       th:last-child, td:last-child { text-align: right; }
       .trend-bar { background: #dcecff; border-radius: 4px; min-width: 2px; height: 18px; }
       .trend-row { align-items: center; display: grid; gap: 10px; grid-template-columns: 100px 1fr 80px; margin: 10px 0; }
+      .cost-bar { background: #d8f0df; border-radius: 4px; min-width: 2px; height: 18px; }
+      .empty-state { background: #fffaf0; border: 1px solid #f0d9a3; border-radius: 10px; padding: 16px; }
+      code { background: #eef1f4; border-radius: 4px; padding: 2px 5px; }
       a { color: #1459a6; }
     </style>
   </head>
@@ -161,6 +172,22 @@ function dashboardHtml(): string {
         <p class="muted">Your private AI coding workflow report.</p>
       </header>
       <p class="notice">This dashboard reads only your local OpenSasa database. No data is uploaded.</p>
+      <section id="empty-state" class="empty-state" hidden>
+        <h2>No sessions yet</h2>
+        <p>Your local dashboard is ready. Log a session or create safe demo data to explore the report.</p>
+        <p><code>node ./dist/index.js demo-seed</code></p>
+        <p>After seeding, refresh this page to see the dashboard populate.</p>
+      </section>
+      <form id="filters" class="comparison" aria-label="Dashboard filters">
+        <h2>Filters</h2>
+        <label>Provider <select name="provider"><option value="">All</option></select></label>
+        <label>Model <select name="model"><option value="">All</option></select></label>
+        <label>Tool <select name="tool"><option value="">All</option></select></label>
+        <label>Language <select name="language"><option value="">All</option></select></label>
+        <label>Framework <select name="framework"><option value="">All</option></select></label>
+        <label>Task type <select name="taskType"><option value="">All</option></select></label>
+        <label>Outcome <select name="outcome"><option value="">All</option><option value="accepted">Accepted</option><option value="partially_accepted">Partially accepted</option><option value="rejected">Rejected</option><option value="unknown">Unknown</option></select></label>
+      </form>
       <section class="cards" aria-label="Report overview">
         <article class="card">Sessions<strong id="total-sessions">Loading…</strong></article>
         <article class="card">Useful outcome rate<strong id="useful-rate">Loading…</strong></article>
@@ -179,12 +206,52 @@ function dashboardHtml(): string {
         <h2 id="trend-title">Daily trend</h2>
         <div id="daily-trend"><p class="muted">Loading…</p></div>
       </section>
+      <section class="comparison" aria-labelledby="cost-title">
+        <h2 id="cost-title">Cost summary</h2>
+        <p>Total estimated cost: <strong id="total-cost">Loading…</strong></p>
+        <h3>By model</h3>
+        <div id="model-cost-chart"><p class="muted">Loading…</p></div>
+        <h3>By tool</h3>
+        <div id="tool-cost-chart"><p class="muted">Loading…</p></div>
+      </section>
+      <section class="comparison" aria-labelledby="outcome-title">
+        <h2 id="outcome-title">Outcomes</h2>
+        <div id="outcome-chart"><p class="muted">Loading…</p></div>
+        <h2>Verification</h2>
+        <div id="verification-chart"><p class="muted">Loading…</p></div>
+      </section>
       <p id="status" class="muted">Loading your local report…</p>
       <p><a href="/api/report">View local report JSON</a></p>
     </main>
     <script>
       const formatRate = (metric) => metric.rate === null ? "unknown" : (metric.rate * 100).toFixed(1) + "%";
       const formatCost = (value) => value === null ? "unknown" : "$" + value.toFixed(4);
+      const filterForm = document.querySelector("#filters");
+      const query = new URLSearchParams(window.location.search);
+      const optionValues = (selectName, values) => {
+        const select = filterForm.elements[selectName];
+        const selected = query.get(selectName) || "";
+        for (const value of values) {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = value;
+          option.selected = value === selected;
+          select.append(option);
+        }
+      };
+      const setFilterOptions = (report) => {
+        optionValues("provider", Object.keys(report.sessionsByProvider));
+        optionValues("model", Object.keys(report.sessionsByModel).map((value) => value.split("/").slice(1).join("/")));
+        optionValues("tool", Object.keys(report.sessionsByTool));
+        optionValues("language", Object.keys(report.sessionsByLanguage));
+        optionValues("framework", Object.keys(report.sessionsByFramework));
+        optionValues("taskType", Object.keys(report.sessionsByTaskType));
+      };
+      filterForm.addEventListener("change", () => {
+        const nextQuery = new URLSearchParams(new FormData(filterForm));
+        for (const [key, value] of [...nextQuery]) if (!value) nextQuery.delete(key);
+        window.location.search = nextQuery.toString();
+      });
       const renderComparison = (elementId, counts, costs) => {
         const rows = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
         const element = document.querySelector("#" + elementId);
@@ -201,16 +268,50 @@ function dashboardHtml(): string {
           return "<div class=\"trend-row\"><span>" + point.date + "</span><div class=\"trend-bar\" style=\"width:" + width + "%\" title=\"" + point.sessions + " sessions\"></div><span>" + point.usefulSessions + "/" + point.sessions + " useful</span></div>";
         }).join("");
       };
+      const renderCostChart = (elementId, costs) => {
+        const rows = Object.entries(costs).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+        const element = document.querySelector("#" + elementId);
+        if (rows.length === 0) { element.innerHTML = "<p class=\"muted\">No cost data recorded.</p>"; return; }
+        const maximum = Math.max(...rows.map((row) => row[1]));
+        element.innerHTML = rows.map(([name, cost]) => {
+          const width = Math.max(2, (cost / maximum) * 100);
+          return "<div class=\"trend-row\"><span>" + name + "</span><div class=\"cost-bar\" style=\"width:" + width + "%\" title=\"" + formatCost(cost) + "\"></div><span>" + formatCost(cost) + "</span></div>";
+        }).join("");
+      };
+      const renderCountChart = (elementId, counts) => {
+        const rows = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+        const element = document.querySelector("#" + elementId);
+        if (rows.length === 0) { element.innerHTML = "<p class=\"muted\">No verification data recorded.</p>"; return; }
+        const maximum = Math.max(...rows.map((row) => row[1]));
+        element.innerHTML = rows.map(([name, count]) => {
+          const width = Math.max(2, (count / maximum) * 100);
+          return "<div class=\"trend-row\"><span>" + name + "</span><div class=\"trend-bar\" style=\"width:" + width + "%\" title=\"" + count + " sessions\"></div><span>" + count + "</span></div>";
+        }).join("");
+      };
+      const renderVerification = (summary) => {
+        const element = document.querySelector("#verification-chart");
+        element.innerHTML = Object.entries(summary).map(([field, counts]) => {
+          const recorded = Object.entries(counts).filter(([outcome]) => outcome !== "unknown").reduce((total, [, count]) => total + count, 0);
+          return "<div class=\"trend-row\"><span>" + field.replace("_outcome", "") + "</span><div class=\"trend-bar\" style=\"width:" + Math.min(100, recorded * 10) + "%\" title=\"" + recorded + " recorded\"></div><span>" + recorded + " recorded</span></div>";
+        }).join("");
+      };
       fetch("/api/report")
         .then((response) => response.ok ? response.json() : Promise.reject(new Error("Report unavailable")))
         .then((report) => {
+          setFilterOptions(report);
+          document.querySelector("#empty-state").hidden = report.totalSessions !== 0;
           document.querySelector("#total-sessions").textContent = report.totalSessions;
           document.querySelector("#useful-rate").textContent = formatRate(report.usefulOutcomeRate);
           document.querySelector("#estimated-cost").textContent = formatCost(report.estimatedTotalCostUsd);
+          document.querySelector("#total-cost").textContent = formatCost(report.estimatedTotalCostUsd);
           document.querySelector("#confidence").textContent = report.confidenceSummary.level;
           renderComparison("model-comparison", report.sessionsByModel, report.costByModelUsd);
           renderComparison("tool-comparison", report.sessionsByTool, report.costByToolUsd);
           renderTrend(report.trendByDay);
+          renderCostChart("model-cost-chart", report.costByModelUsd);
+          renderCostChart("tool-cost-chart", report.costByToolUsd);
+          renderCountChart("outcome-chart", { accepted: report.acceptedOrPartiallyAcceptedCount, rejected: report.rejectedCount, unknown: report.unknownOutcomeCount });
+          renderVerification(report.verificationOutcomeSummary);
           document.querySelector("#status").textContent = "Report loaded from local storage.";
         })
         .catch(() => { document.querySelector("#status").textContent = "Unable to load the local report."; });

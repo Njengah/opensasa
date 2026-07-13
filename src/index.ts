@@ -4,6 +4,8 @@ import { Command } from "commander";
 import { ZodError } from "zod";
 import { createDemoSeedSessions } from "./demo.js";
 import { createDashboardServer, listenDashboardServer } from "./dashboard.js";
+import { hashProjectIdentity } from "./project.js";
+import { runVerificationCommand, type VerificationKind } from "./verify.js";
 import {
   formatContributionPreview,
   formatContributionPreviewJson,
@@ -32,6 +34,7 @@ type LogOptions = {
   workMode?: string;
   language?: string;
   framework?: string;
+  projectPath?: string;
   durationSeconds?: number;
   retryCount?: number;
   errorCount?: number;
@@ -117,6 +120,13 @@ type DashboardOptions = StoreOptions & {
   port?: number;
 };
 
+type VerifyOptions = StoreOptions & {
+  kind?: VerificationKind;
+  command?: string;
+  cwd?: string;
+  json?: boolean;
+};
+
 program
   .name("opensasa")
   .description("Local-first AI coding workflow metadata tracker.")
@@ -157,6 +167,7 @@ program
   .option("--tool <tool>", "AI coding tool or agent")
   .option("--language <language>", "primary language, if known")
   .option("--framework <framework>", "primary framework, if known")
+  .option("--project-path <path>", "hash a project path without storing the path")
   .option("--duration-seconds <seconds>", "duration in seconds", parseNonNegativeInteger)
   .option("--retry-count <count>", "retry or follow-up count", parseNonNegativeInteger)
   .option("--error-count <count>", "workflow error count", parseNonNegativeInteger)
@@ -196,7 +207,7 @@ program
   .action((options: LogOptions) => {
     let store;
     try {
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const session = store.createSession({
         timestamp: options.timestamp ?? new Date().toISOString(),
         provider: options.provider,
@@ -208,6 +219,7 @@ program
         work_mode: options.workMode,
         language: options.language,
         framework: options.framework,
+        project_identity_hash: options.projectPath ? hashProjectIdentity(options.projectPath) : undefined,
         duration_seconds: options.durationSeconds,
         retry_count: options.retryCount,
         error_count: options.errorCount,
@@ -244,6 +256,42 @@ program
   });
 
 program
+  .command("verify")
+  .description("Run a local test, build, or lint command for a session.")
+  .argument("<session-id>", "local session ID to update")
+  .requiredOption("--kind <kind>", "verification kind: tests, build, or lint", parseVerificationKind)
+  .requiredOption("--command <command>", "command to execute locally")
+  .option("--cwd <path>", "working directory for the command")
+  .option("--db-path <path>", "override local database path")
+  .option("--json", "output the verification result as JSON")
+  .action(async (sessionId: string, options: VerifyOptions) => {
+    let store;
+    try {
+      store = openStore(options.dbPath);
+      if (!store.getSession(sessionId)) {
+        process.exitCode = 1;
+        console.error(`Session not found: ${sessionId}`);
+        return;
+      }
+
+      const result = await runVerificationCommand(options.kind!, options.command!, options.cwd);
+      const updated = store.updateSession(sessionId, { [`${result.kind}_outcome`]: result.outcome });
+      const output = { status: "recorded", result, session_id: updated?.session_id };
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
+      } else {
+        console.log(`${result.kind} verification ${result.outcome} (exit code ${result.exit_code}, ${result.duration_seconds}s).`);
+        console.log("Command text and terminal output were not stored.");
+      }
+    } catch (error) {
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    } finally {
+      store?.close();
+    }
+  });
+
+program
   .command("update")
   .description("Update safe metadata for a local AI coding session.")
   .argument("<session-id>", "local session ID to update")
@@ -257,6 +305,7 @@ program
   .option("--final-outcome <final-outcome>", "accepted, partially_accepted, rejected, or unknown")
   .option("--language <language>", "primary language, if known")
   .option("--framework <framework>", "primary framework, if known")
+  .option("--project-path <path>", "hash a project path without storing the path")
   .option("--duration-seconds <seconds>", "duration in seconds", parseNonNegativeInteger)
   .option("--retry-count <count>", "retry or follow-up count", parseNonNegativeInteger)
   .option("--error-count <count>", "workflow error count", parseNonNegativeInteger)
@@ -304,7 +353,7 @@ program
         return;
       }
 
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const session = store.updateSession(sessionId, updates);
 
       if (!session) {
@@ -337,7 +386,7 @@ program
   .action((sessionId: string, options: DeleteOptions) => {
     let store;
     try {
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const deleted = store.deleteSession(sessionId);
 
       if (!deleted) {
@@ -370,7 +419,7 @@ program
   .action((options: DemoSeedOptions) => {
     let store;
     try {
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const sessions = createDemoSeedSessions(store);
 
       if (options.json) {
@@ -416,7 +465,7 @@ program
   .action((options: SessionsOptions) => {
     let store;
     try {
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const sessions = store.listSessions({
         limit: options.limit,
         provider: options.provider,
@@ -470,7 +519,7 @@ program
   .action((options: ReportOptions) => {
     let store;
     try {
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const sessions = store.listSessions({
         limit: options.limit,
         provider: options.provider,
@@ -507,7 +556,7 @@ program
   .action((sessionId: string, options: InspectOptions) => {
     let store;
     try {
-      store = openStore(options.dbPath ?? process.env.OPENSASA_DB_PATH);
+      store = openStore(options.dbPath);
       const session = store.getSession(sessionId);
 
       if (!session) {
@@ -561,6 +610,13 @@ function parsePositiveInteger(value: string): number {
   return Number(value);
 }
 
+function parseVerificationKind(value: string): VerificationKind {
+  if (value !== "tests" && value !== "build" && value !== "lint") {
+    throw new Error("Expected verification kind: tests, build, or lint.");
+  }
+  return value;
+}
+
 function parseIsoTimestamp(value: string): string {
   if (!isoTimestampSchema.safeParse(value).success) {
     throw new Error("Expected an ISO timestamp.");
@@ -581,6 +637,7 @@ function sessionInputFromOptions(options: UpdateOptions): Record<string, unknown
     work_mode: options.workMode,
     language: options.language,
     framework: options.framework,
+    project_identity_hash: options.projectPath ? hashProjectIdentity(options.projectPath) : undefined,
     duration_seconds: options.durationSeconds,
     retry_count: options.retryCount,
     error_count: options.errorCount,

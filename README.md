@@ -322,6 +322,12 @@ override the interface, port, or database path with `--host`, `--port`, and
 `--db-path`. The dashboard reads local SQLite data only; it does not upload
 sessions or send telemetry.
 
+Run the dashboard smoke tests independently with:
+
+```bash
+npm run test:dashboard
+```
+
 Limit the report to the newest sessions:
 
 ```bash
@@ -447,6 +453,41 @@ By default, OpenSasa stores records at:
 ```
 
 The database path can be overridden with `--db-path` or `OPENSASA_DB_PATH`.
+
+For a persistent local override, create `~/.opensasa/config.json`:
+
+```json
+{
+  "db_path": "/path/to/opensasa.db"
+}
+```
+
+An explicit `--db-path` wins over the environment variable and config file.
+
+To associate sessions with a project without storing its name or path, pass a
+path when logging:
+
+```bash
+node ./dist/index.js log \
+  --provider OpenAI \
+  --model-id gpt-5 \
+  --task-type bug_fix \
+  --final-outcome accepted \
+  --project-path .
+```
+
+OpenSasa stores only a one-way SHA-256 identity hash.
+
+Run a local verification command for a session without storing its command text
+or terminal output:
+
+```bash
+node ./dist/index.js verify <session-id> \
+  --kind tests \
+  --command "npm test"
+```
+
+Only the verification outcome is written back to the session.
 
 ## Current Limitations
 

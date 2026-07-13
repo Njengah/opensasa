@@ -3,6 +3,7 @@ import { chmodSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { randomUUID } from "node:crypto";
+import { resolveDatabasePath } from "./config.js";
 import {
   bucketValues,
   contributionConsentStates,
@@ -18,6 +19,7 @@ import {
 
 const createSessionsMigration = "001_create_sessions";
 const contributionConsentMigration = "002_add_contribution_consent";
+const projectIdentityMigration = "003_add_project_identity_hash";
 
 const sessionColumns = [
   "schema_version",
@@ -32,6 +34,7 @@ const sessionColumns = [
   "work_mode",
   "language",
   "framework",
+  "project_identity_hash",
   "duration_seconds",
   "retry_count",
   "error_count",
@@ -228,7 +231,7 @@ export class OpenSasaStore {
 }
 
 export function openStore(databasePath?: string): OpenSasaStore {
-  return new OpenSasaStore(databasePath);
+  return new OpenSasaStore(resolveDatabasePath(databasePath));
 }
 
 function runMigrations(database: Database.Database): void {
@@ -267,6 +270,7 @@ function runMigrations(database: Database.Database): void {
           work_mode TEXT NOT NULL CHECK (work_mode IN (${workModeValues})),
           language TEXT,
           framework TEXT,
+          project_identity_hash TEXT CHECK (project_identity_hash IS NULL OR length(project_identity_hash) = 64),
           duration_seconds INTEGER CHECK (duration_seconds IS NULL OR (duration_seconds >= 0 AND typeof(duration_seconds) = 'integer')),
           retry_count INTEGER CHECK (retry_count IS NULL OR (retry_count >= 0 AND typeof(retry_count) = 'integer')),
           error_count INTEGER CHECK (error_count IS NULL OR (error_count >= 0 AND typeof(error_count) = 'integer')),
@@ -301,22 +305,38 @@ function runMigrations(database: Database.Database): void {
     .prepare("SELECT name FROM schema_migrations WHERE name = ?")
     .get(contributionConsentMigration);
 
-  if (consentMigration) {
-    return;
+  if (!consentMigration) {
+    const applyConsentMigration = database.transaction(() => {
+      database.exec(`
+        ALTER TABLE sessions ADD COLUMN contribution_consent TEXT NOT NULL DEFAULT 'not_granted'
+          CHECK (contribution_consent IN (${contributionConsentValues}));
+      `);
+
+      database
+        .prepare("INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)")
+        .run(contributionConsentMigration, new Date().toISOString());
+    });
+
+    applyConsentMigration();
   }
 
-  const applyConsentMigration = database.transaction(() => {
-    database.exec(`
-      ALTER TABLE sessions ADD COLUMN contribution_consent TEXT NOT NULL DEFAULT 'not_granted'
-        CHECK (contribution_consent IN (${contributionConsentValues}));
-    `);
+  const identityMigration = database
+    .prepare("SELECT name FROM schema_migrations WHERE name = ?")
+    .get(projectIdentityMigration);
 
-    database
-      .prepare("INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)")
-      .run(contributionConsentMigration, new Date().toISOString());
-  });
+  if (!identityMigration) {
+    const applyIdentityMigration = database.transaction(() => {
+      const columns = database.prepare("PRAGMA table_info(sessions)").all() as Array<{ name: string }>;
+      if (!columns.some((column) => column.name === "project_identity_hash")) {
+        database.exec("ALTER TABLE sessions ADD COLUMN project_identity_hash TEXT CHECK (project_identity_hash IS NULL OR length(project_identity_hash) = 64);");
+      }
+      database
+        .prepare("INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)")
+        .run(projectIdentityMigration, new Date().toISOString());
+    });
 
-  applyConsentMigration();
+    applyIdentityMigration();
+  }
 }
 
 function parseSessionWithGeneratedId(input: unknown): LocalSession {

@@ -48,7 +48,7 @@ items are already merged.
 - [x] Error count summaries in local reports. (#59)
 - [x] Report readability and empty states. (#60)
 - [x] JSON report schema version. (#61)
-- [ ] Demo seed data generator. (current PR)
+- [x] Demo seed data generator. (#62)
 
 ## Product Vision
 
@@ -129,15 +129,15 @@ Expected PRs:
 - [x] Add file-count bucket report grouping. (#50)
 - [x] Add lines-added bucket report grouping. (#55)
 - [x] Add lines-removed bucket report grouping. (#56)
-- [ ] Add token estimate summaries to reports. (#57 open)
+- [x] Add token estimate summaries to reports. (#57)
 - [x] Add duration bucket summaries to reports. (#58)
 - [x] Add error count summaries to reports. (#59)
 - [x] Improve report section ordering and empty-state readability. (#60)
-- [x] Add compact report mode for terminal readability. (next PR)
+- [x] Add compact report mode for terminal readability. (#63)
 - [ ] Add report snapshot tests for stable text output.
 - [x] Add report schema/version metadata to JSON output. (#61)
 - [ ] Add `opensasa doctor` for local database/config checks.
-- [x] Add demo seed database or fixture generator. (current PR)
+- [x] Add demo seed database or fixture generator. (#62)
 
 Exit criteria:
 
@@ -154,18 +154,18 @@ Goal:
 
 Expected PRs:
 
-- [x] Add internal report API module reusable by CLI and dashboard. (next PR)
-- [x] Add local HTTP server command: `opensasa dashboard`. (next PR)
-- [x] Add dashboard static app scaffold. (next PR)
+- [x] Add internal report API module reusable by CLI and dashboard. (#64)
+- [x] Add local HTTP server command: `opensasa dashboard`. (#64)
+- [x] Add dashboard static app scaffold. (#65)
 - [x] Add dashboard overview cards. (#65)
-- [x] Add model/tool comparison table. (next PR)
-- [x] Add trend chart by day/week. (next PR)
-- [ ] Add filters in dashboard for provider, model, tool, language, framework, task type, and outcome.
-- [ ] Add cost summary charts.
-- [ ] Add outcome and verification charts.
-- [ ] Add local-only privacy notice in dashboard.
-- [ ] Add dashboard empty state with demo instructions.
-- [ ] Add Playwright/smoke tests for dashboard rendering.
+- [x] Add model/tool comparison table. (#66)
+- [x] Add trend chart by day/week. (#67)
+- [x] Add filters in dashboard for provider, model, tool, language, framework, task type, and outcome. (#68)
+- [x] Add cost summary charts. (#69)
+- [x] Add outcome and verification charts. (#70)
+- [x] Add local-only privacy notice in dashboard. (#65)
+- [x] Add dashboard empty state with demo instructions. (#71)
+- [x] Add Playwright/smoke tests for dashboard rendering. (#72)
 
 Exit criteria:
 
@@ -182,10 +182,10 @@ Goal:
 
 Expected PRs:
 
-- [ ] Add local config file support.
-- [ ] Add project identity hashing without storing repo names.
-- [ ] Add git metadata helper for coarse repo/file/change buckets.
-- [ ] Add command wrapper for test/build/lint outcome capture.
+- [x] Add local config file support. (#73)
+- [x] Add project identity hashing without storing repo names. (#74)
+- [x] Add git metadata helper for coarse repo/file/change buckets. (#75)
+- [x] Add command wrapper for test/build/lint outcome capture. (#76)
 - [ ] Add session draft command.
 - [ ] Add session finalize command.
 - [ ] Add auto-duration capture for started/finalized sessions.
@@ -322,10 +322,21 @@ Use this list when asking "build next":
 - [x] Add error count summaries. (#59)
 - [x] Improve report readability and empty states. (#60)
 - [x] Add JSON report schema version. (#61)
-- [x] Add demo seed data generator. (current PR)
-- [x] Add compact report mode for terminal readability. (next PR)
-- [x] Start local dashboard server. (next PR)
-- [x] Add dashboard static app scaffold. (next PR)
+- [x] Add demo seed data generator. (#62)
+- [x] Add compact report mode for terminal readability. (#63)
+- [x] Start local dashboard server. (#64)
+- [x] Add dashboard static app scaffold. (#65)
+- [x] Add model/tool comparison table. (#66)
+- [x] Add trend chart by day/week. (#67)
+- [x] Add dashboard filters. (#68)
+- [x] Add cost summary charts. (#69)
+- [x] Add outcome and verification charts. (#70)
+- [x] Add dashboard empty state. (#71)
+- [x] Add dashboard smoke tests. (#72)
+- [x] Add local config file support. (#73)
+- [x] Add project identity hashing. (#74)
+- [x] Add git metadata helper. (#75)
+- [x] Add verification command wrapper. (#76)
 - [x] Convert product timeline to merge-tracking checklists. (#52)
 
 ## Career/Portfolio Goal

@@ -478,6 +478,17 @@ node ./dist/index.js log \
 
 OpenSasa stores only a one-way SHA-256 identity hash.
 
+Run a local verification command for a session without storing its command text
+or terminal output:
+
+```bash
+node ./dist/index.js verify <session-id> \
+  --kind tests \
+  --command "npm test"
+```
+
+Only the verification outcome is written back to the session.
+
 ## Current Limitations
 
 The MVP does not include:

@@ -5,6 +5,7 @@ import { ZodError } from "zod";
 import { createDemoSeedSessions } from "./demo.js";
 import { createDashboardServer, listenDashboardServer } from "./dashboard.js";
 import { hashProjectIdentity } from "./project.js";
+import { runVerificationCommand, type VerificationKind } from "./verify.js";
 import {
   formatContributionPreview,
   formatContributionPreviewJson,
@@ -117,6 +118,13 @@ type DemoSeedOptions = StoreOptions & {
 type DashboardOptions = StoreOptions & {
   host?: string;
   port?: number;
+};
+
+type VerifyOptions = StoreOptions & {
+  kind?: VerificationKind;
+  command?: string;
+  cwd?: string;
+  json?: boolean;
 };
 
 program
@@ -239,6 +247,42 @@ program
       }
 
       console.log(`Logged session ${session.session_id}`);
+    } catch (error) {
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    } finally {
+      store?.close();
+    }
+  });
+
+program
+  .command("verify")
+  .description("Run a local test, build, or lint command for a session.")
+  .argument("<session-id>", "local session ID to update")
+  .requiredOption("--kind <kind>", "verification kind: tests, build, or lint", parseVerificationKind)
+  .requiredOption("--command <command>", "command to execute locally")
+  .option("--cwd <path>", "working directory for the command")
+  .option("--db-path <path>", "override local database path")
+  .option("--json", "output the verification result as JSON")
+  .action(async (sessionId: string, options: VerifyOptions) => {
+    let store;
+    try {
+      store = openStore(options.dbPath);
+      if (!store.getSession(sessionId)) {
+        process.exitCode = 1;
+        console.error(`Session not found: ${sessionId}`);
+        return;
+      }
+
+      const result = await runVerificationCommand(options.kind!, options.command!, options.cwd);
+      const updated = store.updateSession(sessionId, { [`${result.kind}_outcome`]: result.outcome });
+      const output = { status: "recorded", result, session_id: updated?.session_id };
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
+      } else {
+        console.log(`${result.kind} verification ${result.outcome} (exit code ${result.exit_code}, ${result.duration_seconds}s).`);
+        console.log("Command text and terminal output were not stored.");
+      }
     } catch (error) {
       process.exitCode = 1;
       console.error(formatCliError(error));
@@ -564,6 +608,13 @@ function parsePositiveInteger(value: string): number {
   }
 
   return Number(value);
+}
+
+function parseVerificationKind(value: string): VerificationKind {
+  if (value !== "tests" && value !== "build" && value !== "lint") {
+    throw new Error("Expected verification kind: tests, build, or lint.");
+  }
+  return value;
 }
 
 function parseIsoTimestamp(value: string): string {

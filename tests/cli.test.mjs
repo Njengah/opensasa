@@ -83,6 +83,43 @@ test("creates a session draft", async () => {
   assert.equal(result.session.provider, "OpenAI");
 });
 
+test("finalizes a session draft with elapsed duration", async () => {
+  const dbPath = join(tmpRoot, "finalize.db");
+  const draftOutput = await execFileAsync("node", [
+    "./dist/index.js",
+    "draft",
+    "--provider",
+    "OpenAI",
+    "--model-id",
+    "gpt-5",
+    "--task-type",
+    "bug_fix",
+    "--json",
+    "--db-path",
+    dbPath,
+  ]);
+  const draft = JSON.parse(draftOutput.stdout);
+  const finalizedOutput = await execFileAsync("node", [
+    "./dist/index.js",
+    "finalize",
+    draft.session.session_id,
+    "--final-outcome",
+    "accepted",
+    "--tests-outcome",
+    "passed",
+    "--json",
+    "--db-path",
+    dbPath,
+  ]);
+  const finalized = JSON.parse(finalizedOutput.stdout);
+
+  assert.equal(finalized.status, "finalized");
+  assert.equal(finalized.session.final_outcome, "accepted");
+  assert.equal(finalized.session.tests_outcome, "passed");
+  assert.equal(typeof finalized.session.duration_seconds, "number");
+  assert.ok(finalized.session.duration_seconds >= 0);
+});
+
 test("logs a valid manual session to the local database", async () => {
   const dbPath = join(tmpRoot, "valid-log.db");
   const { stdout } = await execFileAsync("node", [

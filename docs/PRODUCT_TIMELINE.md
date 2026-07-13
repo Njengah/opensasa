@@ -192,7 +192,7 @@ Expected PRs:
 - [x] Add local activity heartbeat table. (#79)
 - [x] Add privacy-safe terminal command outcome capture. (#76)
 - [x] Add import provenance fields to session records. (#80)
-- [x] Add agent status command. (next PR)
+- [x] Add agent status command. (#81)
 - [ ] Add docs for manual, wrapper, and agent modes.
 
 Exit criteria:
@@ -341,6 +341,7 @@ Use this list when asking "build next":
 - [x] Add session finalize command. (#78)
 - [x] Add local activity heartbeat table. (#79)
 - [x] Add import provenance fields. (#80)
+- [x] Add agent status command. (#81)
 - [x] Convert product timeline to merge-tracking checklists. (#52)
 
 ## Career/Portfolio Goal

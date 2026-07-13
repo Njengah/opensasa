@@ -127,6 +127,14 @@ type VerifyOptions = StoreOptions & {
   json?: boolean;
 };
 
+type DraftOptions = StoreOptions & {
+  provider?: string;
+  modelId?: string;
+  taskType?: string;
+  projectPath?: string;
+  json?: boolean;
+};
+
 program
   .name("opensasa")
   .description("Local-first AI coding workflow metadata tracker.")
@@ -282,6 +290,42 @@ program
       } else {
         console.log(`${result.kind} verification ${result.outcome} (exit code ${result.exit_code}, ${result.duration_seconds}s).`);
         console.log("Command text and terminal output were not stored.");
+      }
+    } catch (error) {
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    } finally {
+      store?.close();
+    }
+  });
+
+program
+  .command("draft")
+  .description("Start a local AI coding session draft.")
+  .requiredOption("--provider <provider>", "model provider")
+  .requiredOption("--model-id <model-id>", "provider model identifier")
+  .requiredOption("--task-type <task-type>", "task type enum value")
+  .option("--project-path <path>", "hash a project path without storing the path")
+  .option("--db-path <path>", "override local database path")
+  .option("--json", "output the draft as JSON")
+  .action((options: DraftOptions) => {
+    let store;
+    try {
+      store = openStore(options.dbPath);
+      const session = store.createSession({
+        timestamp: new Date().toISOString(),
+        provider: options.provider,
+        model_id: options.modelId,
+        task_type: options.taskType,
+        final_outcome: "unknown",
+        work_mode: "cli_wrapper",
+        project_identity_hash: options.projectPath ? hashProjectIdentity(options.projectPath) : undefined,
+      });
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify({ status: "drafted", session }, null, 2)}\n`);
+      } else {
+        console.log(`Created session draft ${session.session_id}`);
+        console.log("Finalize it later with `opensasa update` or `opensasa verify`.");
       }
     } catch (error) {
       process.exitCode = 1;

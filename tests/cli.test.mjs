@@ -60,6 +60,29 @@ test("prints log help with manual session options", async () => {
   assert.doesNotMatch(stdout, /source-code/i);
 });
 
+test("creates a session draft", async () => {
+  const dbPath = join(tmpRoot, "draft.db");
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "draft",
+    "--provider",
+    "OpenAI",
+    "--model-id",
+    "gpt-5",
+    "--task-type",
+    "bug_fix",
+    "--json",
+    "--db-path",
+    dbPath,
+  ]);
+  const result = JSON.parse(stdout);
+
+  assert.equal(result.status, "drafted");
+  assert.equal(result.session.final_outcome, "unknown");
+  assert.equal(result.session.work_mode, "cli_wrapper");
+  assert.equal(result.session.provider, "OpenAI");
+});
+
 test("logs a valid manual session to the local database", async () => {
   const dbPath = join(tmpRoot, "valid-log.db");
   const { stdout } = await execFileAsync("node", [

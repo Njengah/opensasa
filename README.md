@@ -489,6 +489,16 @@ node ./dist/index.js verify <session-id> \
 
 Only the verification outcome is written back to the session.
 
+Start a lightweight session draft when you know the model and task but not the
+final outcome yet:
+
+```bash
+node ./dist/index.js draft \
+  --provider OpenAI \
+  --model-id gpt-5 \
+  --task-type bug_fix
+```
+
 ## Current Limitations
 
 The MVP does not include:

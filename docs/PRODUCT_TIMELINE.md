@@ -187,7 +187,7 @@ Expected PRs:
 - [x] Add git metadata helper for coarse repo/file/change buckets. (#75)
 - [x] Add command wrapper for test/build/lint outcome capture. (#76)
 - [x] Add session draft command. (#77)
-- [ ] Add session finalize command.
+- [x] Add session finalize command. (next PR)
 - [ ] Add auto-duration capture for started/finalized sessions.
 - [ ] Add local activity heartbeat table.
 - [ ] Add privacy-safe terminal command outcome capture.

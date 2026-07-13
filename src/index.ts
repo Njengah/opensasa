@@ -135,6 +135,16 @@ type DraftOptions = StoreOptions & {
   json?: boolean;
 };
 
+type FinalizeOptions = StoreOptions & {
+  finalOutcome?: string;
+  testsOutcome?: string;
+  buildOutcome?: string;
+  lintOutcome?: string;
+  typecheckOutcome?: string;
+  manualReviewOutcome?: string;
+  json?: boolean;
+};
+
 program
   .name("opensasa")
   .description("Local-first AI coding workflow metadata tracker.")
@@ -326,6 +336,57 @@ program
       } else {
         console.log(`Created session draft ${session.session_id}`);
         console.log("Finalize it later with `opensasa update` or `opensasa verify`.");
+      }
+    } catch (error) {
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    } finally {
+      store?.close();
+    }
+  });
+
+program
+  .command("finalize")
+  .description("Finalize a local AI coding session draft.")
+  .argument("<session-id>", "local session ID to finalize")
+  .requiredOption("--final-outcome <outcome>", "accepted, partially_accepted, rejected, or unknown")
+  .option("--tests-outcome <outcome>", "test verification outcome")
+  .option("--build-outcome <outcome>", "build verification outcome")
+  .option("--lint-outcome <outcome>", "lint verification outcome")
+  .option("--typecheck-outcome <outcome>", "typecheck verification outcome")
+  .option("--manual-review-outcome <outcome>", "manual review outcome")
+  .option("--db-path <path>", "override local database path")
+  .option("--json", "output the finalized session as JSON")
+  .action((sessionId: string, options: FinalizeOptions) => {
+    let store;
+    try {
+      store = openStore(options.dbPath);
+      const existing = store.getSession(sessionId);
+      if (!existing) {
+        process.exitCode = 1;
+        console.error(`Session not found: ${sessionId}`);
+        return;
+      }
+
+      const startedAt = Date.parse(existing.timestamp);
+      const durationSeconds = Number.isFinite(startedAt)
+        ? Math.max(0, Math.round((Date.now() - startedAt) / 1000))
+        : undefined;
+      const session = store.updateSession(sessionId, {
+        final_outcome: options.finalOutcome,
+        duration_seconds: durationSeconds,
+        tests_outcome: options.testsOutcome,
+        build_outcome: options.buildOutcome,
+        lint_outcome: options.lintOutcome,
+        typecheck_outcome: options.typecheckOutcome,
+        manual_review_outcome: options.manualReviewOutcome,
+      });
+
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify({ status: "finalized", session }, null, 2)}\n`);
+      } else {
+        console.log(`Finalized session ${session?.session_id} (${session?.final_outcome}).`);
+        console.log(`Duration: ${session?.duration_seconds ?? "unknown"}s.`);
       }
     } catch (error) {
       process.exitCode = 1;

@@ -499,6 +499,16 @@ node ./dist/index.js draft \
   --task-type bug_fix
 ```
 
+Finalize the draft when the work is complete:
+
+```bash
+node ./dist/index.js finalize <session-id> \
+  --final-outcome accepted \
+  --tests-outcome passed
+```
+
+Finalization records elapsed duration from the draft timestamp.
+
 ## Current Limitations
 
 The MVP does not include:

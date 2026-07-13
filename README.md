@@ -509,6 +509,14 @@ node ./dist/index.js finalize <session-id> \
 
 Finalization records elapsed duration from the draft timestamp.
 
+Record a privacy-safe local activity heartbeat when a coding session is active:
+
+```bash
+node ./dist/index.js heartbeat --project-path .
+```
+
+Heartbeats contain only a timestamp and optional project identity hash.
+
 ## Current Limitations
 
 The MVP does not include:

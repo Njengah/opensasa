@@ -10,16 +10,19 @@ import {
   costSources,
   finalOutcomes,
   localSessionSchema,
+  activityHeartbeatSchema,
   schemaVersion,
   taskTypes,
   verificationOutcomes,
   workModes,
   type LocalSession,
+  type ActivityHeartbeat,
 } from "./schema.js";
 
 const createSessionsMigration = "001_create_sessions";
 const contributionConsentMigration = "002_add_contribution_consent";
 const projectIdentityMigration = "003_add_project_identity_hash";
+const activityHeartbeatMigration = "004_add_activity_heartbeats";
 
 const sessionColumns = [
   "schema_version",
@@ -150,6 +153,35 @@ export class OpenSasaStore {
       .run(values);
 
     return updated;
+  }
+
+  recordActivityHeartbeat(input: unknown): ActivityHeartbeat {
+    const record = input && typeof input === "object" && !Array.isArray(input)
+      ? (input as Record<string, unknown>)
+      : {};
+    const heartbeat = activityHeartbeatSchema.parse({
+      ...record,
+      heartbeat_id: record.heartbeat_id ?? randomUUID(),
+    });
+    this.database
+      .prepare("INSERT INTO activity_heartbeats (heartbeat_id, timestamp, project_identity_hash) VALUES (@heartbeat_id, @timestamp, @project_identity_hash)")
+      .run({
+        heartbeat_id: heartbeat.heartbeat_id,
+        timestamp: heartbeat.timestamp,
+        project_identity_hash: heartbeat.project_identity_hash ?? null,
+      });
+    return heartbeat;
+  }
+
+  listActivityHeartbeats(limit?: number): ActivityHeartbeat[] {
+    const rows = this.database
+      .prepare("SELECT heartbeat_id, timestamp, project_identity_hash FROM activity_heartbeats ORDER BY datetime(timestamp) DESC, heartbeat_id DESC" + (limit ? " LIMIT @limit" : ""))
+      .all(limit ? { limit } : {}) as Array<Record<string, unknown>>;
+    return rows.map((row) => activityHeartbeatSchema.parse({
+      heartbeat_id: row.heartbeat_id,
+      timestamp: row.timestamp,
+      ...(row.project_identity_hash ? { project_identity_hash: row.project_identity_hash } : {}),
+    }));
   }
 
   deleteSession(sessionId: string): boolean {
@@ -336,6 +368,26 @@ function runMigrations(database: Database.Database): void {
     });
 
     applyIdentityMigration();
+  }
+
+  const heartbeatMigration = database
+    .prepare("SELECT name FROM schema_migrations WHERE name = ?")
+    .get(activityHeartbeatMigration);
+
+  if (!heartbeatMigration) {
+    const applyHeartbeatMigration = database.transaction(() => {
+      database.exec(`
+        CREATE TABLE IF NOT EXISTS activity_heartbeats (
+          heartbeat_id TEXT PRIMARY KEY CHECK (length(trim(heartbeat_id)) > 0),
+          timestamp TEXT NOT NULL CHECK (length(trim(timestamp)) > 0),
+          project_identity_hash TEXT CHECK (project_identity_hash IS NULL OR length(project_identity_hash) = 64)
+        );
+      `);
+      database
+        .prepare("INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)")
+        .run(activityHeartbeatMigration, new Date().toISOString());
+    });
+    applyHeartbeatMigration();
   }
 }
 

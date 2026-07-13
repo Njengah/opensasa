@@ -116,6 +116,16 @@ export const localSessionSchema = z
   })
   .strict();
 
+export const activityHeartbeatSchema = z
+  .object({
+    heartbeat_id: nonEmptyString,
+    timestamp: isoTimestampSchema,
+    project_identity_hash: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+  })
+  .strict();
+
+export type ActivityHeartbeat = z.infer<typeof activityHeartbeatSchema>;
+
 export type LocalSession = z.infer<typeof localSessionSchema>;
 export type FinalOutcome = (typeof finalOutcomes)[number];
 export type VerificationOutcome = (typeof verificationOutcomes)[number];

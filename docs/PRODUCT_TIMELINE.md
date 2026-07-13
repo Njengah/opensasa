@@ -186,7 +186,7 @@ Expected PRs:
 - [x] Add project identity hashing without storing repo names. (#74)
 - [x] Add git metadata helper for coarse repo/file/change buckets. (#75)
 - [x] Add command wrapper for test/build/lint outcome capture. (#76)
-- [x] Add session draft command. (next PR)
+- [x] Add session draft command. (#77)
 - [ ] Add session finalize command.
 - [ ] Add auto-duration capture for started/finalized sessions.
 - [ ] Add local activity heartbeat table.
@@ -337,6 +337,7 @@ Use this list when asking "build next":
 - [x] Add project identity hashing. (#74)
 - [x] Add git metadata helper. (#75)
 - [x] Add verification command wrapper. (#76)
+- [x] Add session draft command. (#77)
 - [x] Convert product timeline to merge-tracking checklists. (#52)
 
 ## Career/Portfolio Goal

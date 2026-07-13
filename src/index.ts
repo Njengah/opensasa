@@ -32,6 +32,8 @@ type LogOptions = {
   finalOutcome?: string;
   timestamp?: string;
   workMode?: string;
+  importSource?: string;
+  importSourceVersion?: string;
   language?: string;
   framework?: string;
   projectPath?: string;
@@ -186,6 +188,8 @@ program
   )
   .option("--timestamp <timestamp>", "ISO timestamp for the session")
   .option("--work-mode <work-mode>", "work mode enum value", "manual_log")
+  .option("--import-source <source>", "source or integration that supplied this metadata")
+  .option("--import-source-version <version>", "source integration version")
   .option("--model-version <model-version>", "model version or release label")
   .option("--tool <tool>", "AI coding tool or agent")
   .option("--language <language>", "primary language, if known")
@@ -240,6 +244,8 @@ program
         task_type: options.taskType,
         final_outcome: options.finalOutcome,
         work_mode: options.workMode,
+        import_source: options.importSource,
+        import_source_version: options.importSourceVersion,
         language: options.language,
         framework: options.framework,
         project_identity_hash: options.projectPath ? hashProjectIdentity(options.projectPath) : undefined,
@@ -434,6 +440,8 @@ program
   .argument("<session-id>", "local session ID to update")
   .option("--timestamp <timestamp>", "ISO timestamp for the session")
   .option("--work-mode <work-mode>", "work mode enum value")
+  .option("--import-source <source>", "source or integration that supplied this metadata")
+  .option("--import-source-version <version>", "source integration version")
   .option("--provider <provider>", "model provider, such as OpenAI or Anthropic")
   .option("--model-id <model-id>", "provider model identifier")
   .option("--model-version <model-version>", "model version or release label")
@@ -772,6 +780,8 @@ function sessionInputFromOptions(options: UpdateOptions): Record<string, unknown
     task_type: options.taskType,
     final_outcome: options.finalOutcome,
     work_mode: options.workMode,
+    import_source: options.importSource,
+    import_source_version: options.importSourceVersion,
     language: options.language,
     framework: options.framework,
     project_identity_hash: options.projectPath ? hashProjectIdentity(options.projectPath) : undefined,

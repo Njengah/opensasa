@@ -190,8 +190,8 @@ Expected PRs:
 - [x] Add session finalize command. (#78)
 - [x] Add auto-duration capture for started/finalized sessions. (#78)
 - [x] Add local activity heartbeat table. (#79)
-- [ ] Add privacy-safe terminal command outcome capture.
-- [ ] Add import provenance fields to session records.
+- [x] Add privacy-safe terminal command outcome capture. (#76)
+- [x] Add import provenance fields to session records. (#80)
 - [ ] Add agent status command.
 - [ ] Add docs for manual, wrapper, and agent modes.
 
@@ -340,6 +340,7 @@ Use this list when asking "build next":
 - [x] Add session draft command. (#77)
 - [x] Add session finalize command. (#78)
 - [x] Add local activity heartbeat table. (#79)
+- [x] Add import provenance fields. (#80)
 - [x] Convert product timeline to merge-tracking checklists. (#52)
 
 ## Career/Portfolio Goal

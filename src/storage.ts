@@ -23,6 +23,7 @@ const createSessionsMigration = "001_create_sessions";
 const contributionConsentMigration = "002_add_contribution_consent";
 const projectIdentityMigration = "003_add_project_identity_hash";
 const activityHeartbeatMigration = "004_add_activity_heartbeats";
+const importProvenanceMigration = "005_add_import_provenance";
 
 const sessionColumns = [
   "schema_version",
@@ -35,6 +36,8 @@ const sessionColumns = [
   "task_type",
   "final_outcome",
   "work_mode",
+  "import_source",
+  "import_source_version",
   "language",
   "framework",
   "project_identity_hash",
@@ -300,6 +303,8 @@ function runMigrations(database: Database.Database): void {
           task_type TEXT NOT NULL CHECK (task_type IN (${taskTypeValues})),
           final_outcome TEXT NOT NULL CHECK (final_outcome IN (${finalOutcomeValues})),
           work_mode TEXT NOT NULL CHECK (work_mode IN (${workModeValues})),
+          import_source TEXT,
+          import_source_version TEXT,
           language TEXT,
           framework TEXT,
           project_identity_hash TEXT CHECK (project_identity_hash IS NULL OR length(project_identity_hash) = 64),
@@ -388,6 +393,26 @@ function runMigrations(database: Database.Database): void {
         .run(activityHeartbeatMigration, new Date().toISOString());
     });
     applyHeartbeatMigration();
+  }
+
+  const provenanceMigration = database
+    .prepare("SELECT name FROM schema_migrations WHERE name = ?")
+    .get(importProvenanceMigration);
+
+  if (!provenanceMigration) {
+    const applyProvenanceMigration = database.transaction(() => {
+      const columns = database.prepare("PRAGMA table_info(sessions)").all() as Array<{ name: string }>;
+      if (!columns.some((column) => column.name === "import_source")) {
+        database.exec("ALTER TABLE sessions ADD COLUMN import_source TEXT;");
+      }
+      if (!columns.some((column) => column.name === "import_source_version")) {
+        database.exec("ALTER TABLE sessions ADD COLUMN import_source_version TEXT;");
+      }
+      database
+        .prepare("INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)")
+        .run(importProvenanceMigration, new Date().toISOString());
+    });
+    applyProvenanceMigration();
   }
 }
 

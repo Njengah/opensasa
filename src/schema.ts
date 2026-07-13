@@ -88,6 +88,8 @@ export const localSessionSchema = z
     task_type: z.enum(taskTypes),
     final_outcome: z.enum(finalOutcomes),
     work_mode: z.enum(workModes),
+    import_source: nonEmptyString.optional(),
+    import_source_version: nonEmptyString.optional(),
     language: nonEmptyString.optional(),
     framework: nonEmptyString.optional(),
     project_identity_hash: z.string().regex(/^[a-f0-9]{64}$/).optional(),

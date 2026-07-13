@@ -489,6 +489,10 @@ node ./dist/index.js verify <session-id> \
 
 Only the verification outcome is written back to the session.
 
+Imported or wrapped records can include provenance labels with
+`--import-source` and `--import-source-version`; these identify the metadata
+source without storing private tool logs.
+
 Start a lightweight session draft when you know the model and task but not the
 final outcome yet:
 

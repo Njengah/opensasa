@@ -230,6 +230,10 @@ test("logs supported optional metadata fields", async () => {
     "TypeScript",
     "--framework",
     "Node.js",
+    "--import-source",
+    "codex-session",
+    "--import-source-version",
+    "1.2.0",
     "--duration-seconds",
     "300",
     "--retry-count",
@@ -252,6 +256,8 @@ test("logs supported optional metadata fields", async () => {
     assert.equal(session.tool, "Codex");
     assert.equal(session.language, "TypeScript");
     assert.equal(session.framework, "Node.js");
+    assert.equal(session.import_source, "codex-session");
+    assert.equal(session.import_source_version, "1.2.0");
     assert.equal(session.duration_seconds, 300);
     assert.equal(session.retry_count, 2);
     assert.equal(session.estimated_cost_usd, 0.42);

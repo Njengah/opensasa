@@ -190,8 +190,8 @@ Expected PRs:
 - [x] Add session finalize command. (#78)
 - [x] Add auto-duration capture for started/finalized sessions. (#78)
 - [x] Add local activity heartbeat table. (#79)
-- [ ] Add privacy-safe terminal command outcome capture.
-- [ ] Add import provenance fields to session records.
+- [x] Add privacy-safe terminal command outcome capture. (#76)
+- [x] Add import provenance fields to session records. (next PR)
 - [ ] Add agent status command.
 - [ ] Add docs for manual, wrapper, and agent modes.
 

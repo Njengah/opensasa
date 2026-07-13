@@ -187,7 +187,7 @@ Expected PRs:
 - [x] Add git metadata helper for coarse repo/file/change buckets. (#75)
 - [x] Add command wrapper for test/build/lint outcome capture. (#76)
 - [x] Add session draft command. (#77)
-- [x] Add session finalize command. (next PR)
+- [x] Add session finalize command. (#78)
 - [ ] Add auto-duration capture for started/finalized sessions.
 - [ ] Add local activity heartbeat table.
 - [ ] Add privacy-safe terminal command outcome capture.
@@ -338,6 +338,7 @@ Use this list when asking "build next":
 - [x] Add git metadata helper. (#75)
 - [x] Add verification command wrapper. (#76)
 - [x] Add session draft command. (#77)
+- [x] Add session finalize command. (#78)
 - [x] Convert product timeline to merge-tracking checklists. (#52)
 
 ## Career/Portfolio Goal

@@ -192,7 +192,7 @@ Expected PRs:
 - [x] Add local activity heartbeat table. (#79)
 - [x] Add privacy-safe terminal command outcome capture. (#76)
 - [x] Add import provenance fields to session records. (#80)
-- [ ] Add agent status command.
+- [x] Add agent status command. (next PR)
 - [ ] Add docs for manual, wrapper, and agent modes.
 
 Exit criteria:

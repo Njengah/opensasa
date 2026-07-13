@@ -152,6 +152,11 @@ type HeartbeatOptions = StoreOptions & {
   json?: boolean;
 };
 
+type AgentStatusOptions = StoreOptions & {
+  thresholdSeconds?: number;
+  json?: boolean;
+};
+
 program
   .name("opensasa")
   .description("Local-first AI coding workflow metadata tracker.")
@@ -425,6 +430,51 @@ program
         process.stdout.write(`${JSON.stringify({ status: "recorded", heartbeat }, null, 2)}\n`);
       } else {
         console.log(`Recorded activity heartbeat ${heartbeat.heartbeat_id}.`);
+      }
+    } catch (error) {
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    } finally {
+      store?.close();
+    }
+  });
+
+const agentCommand = program
+  .command("agent")
+  .description("Inspect local agent activity state.");
+
+agentCommand
+  .command("status")
+  .description("Show whether recent local activity is active or idle.")
+  .option("--threshold-seconds <seconds>", "active heartbeat window", parsePositiveInteger, 300)
+  .option("--db-path <path>", "override local database path")
+  .option("--json", "output agent status as JSON")
+  .action((options: AgentStatusOptions) => {
+    let store;
+    try {
+      store = openStore(options.dbPath);
+      const heartbeat = store.listActivityHeartbeats(1)[0];
+      const now = Date.now();
+      const heartbeatTimestamp = heartbeat ? Date.parse(heartbeat.timestamp) : NaN;
+      const ageSeconds = Number.isFinite(heartbeatTimestamp)
+        ? Math.max(0, Math.floor((now - heartbeatTimestamp) / 1000))
+        : null;
+      const state = ageSeconds === null
+        ? "never_started"
+        : ageSeconds <= (options.thresholdSeconds ?? 300)
+          ? "active"
+          : "idle";
+      const result = {
+        status: state,
+        last_heartbeat: heartbeat?.timestamp ?? null,
+        heartbeat_age_seconds: ageSeconds,
+        threshold_seconds: options.thresholdSeconds ?? 300,
+      };
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+      } else {
+        console.log(`Agent status: ${result.status}`);
+        console.log(`Last heartbeat: ${result.last_heartbeat ?? "none"}`);
       }
     } catch (error) {
       process.exitCode = 1;

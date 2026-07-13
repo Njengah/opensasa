@@ -521,6 +521,15 @@ node ./dist/index.js heartbeat --project-path .
 
 Heartbeats contain only a timestamp and optional project identity hash.
 
+Inspect recent local activity:
+
+```bash
+node ./dist/index.js agent status
+```
+
+The status is `active` when a heartbeat is within the five-minute default
+window, otherwise `idle`; a new database reports `never_started`.
+
 ## Current Limitations
 
 The MVP does not include:

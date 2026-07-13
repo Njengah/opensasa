@@ -83,6 +83,33 @@ test("creates a session draft", async () => {
   assert.equal(result.session.provider, "OpenAI");
 });
 
+test("reports agent status from the latest heartbeat", async () => {
+  const dbPath = join(tmpRoot, "agent-status.db");
+  const heartbeat = await execFileAsync("node", [
+    "./dist/index.js",
+    "heartbeat",
+    "--json",
+    "--db-path",
+    dbPath,
+  ]);
+  const heartbeatResult = JSON.parse(heartbeat.stdout);
+  assert.equal(heartbeatResult.status, "recorded");
+
+  const status = await execFileAsync("node", [
+    "./dist/index.js",
+    "agent",
+    "status",
+    "--json",
+    "--db-path",
+    dbPath,
+  ]);
+  const result = JSON.parse(status.stdout);
+
+  assert.equal(result.status, "active");
+  assert.equal(result.last_heartbeat, heartbeatResult.heartbeat.timestamp);
+  assert.equal(result.threshold_seconds, 300);
+});
+
 test("finalizes a session draft with elapsed duration", async () => {
   const dbPath = join(tmpRoot, "finalize.db");
   const draftOutput = await execFileAsync("node", [

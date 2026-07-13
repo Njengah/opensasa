@@ -39,7 +39,7 @@ test("initializes a local SQLite database at an override path", () => {
         .prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name")
         .all()
         .map((row) => row.name),
-      ["schema_migrations", "sessions"],
+      ["activity_heartbeats", "schema_migrations", "sessions"],
     );
   } finally {
     database.close();

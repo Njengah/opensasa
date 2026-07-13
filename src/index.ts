@@ -145,6 +145,11 @@ type FinalizeOptions = StoreOptions & {
   json?: boolean;
 };
 
+type HeartbeatOptions = StoreOptions & {
+  projectPath?: string;
+  json?: boolean;
+};
+
 program
   .name("opensasa")
   .description("Local-first AI coding workflow metadata tracker.")
@@ -387,6 +392,33 @@ program
       } else {
         console.log(`Finalized session ${session?.session_id} (${session?.final_outcome}).`);
         console.log(`Duration: ${session?.duration_seconds ?? "unknown"}s.`);
+      }
+    } catch (error) {
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    } finally {
+      store?.close();
+    }
+  });
+
+program
+  .command("heartbeat")
+  .description("Record a privacy-safe local activity heartbeat.")
+  .option("--project-path <path>", "hash a project path without storing the path")
+  .option("--db-path <path>", "override local database path")
+  .option("--json", "output the heartbeat as JSON")
+  .action((options: HeartbeatOptions) => {
+    let store;
+    try {
+      store = openStore(options.dbPath);
+      const heartbeat = store.recordActivityHeartbeat({
+        timestamp: new Date().toISOString(),
+        project_identity_hash: options.projectPath ? hashProjectIdentity(options.projectPath) : undefined,
+      });
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify({ status: "recorded", heartbeat }, null, 2)}\n`);
+      } else {
+        console.log(`Recorded activity heartbeat ${heartbeat.heartbeat_id}.`);
       }
     } catch (error) {
       process.exitCode = 1;

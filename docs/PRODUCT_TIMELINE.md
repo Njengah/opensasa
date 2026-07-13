@@ -188,8 +188,8 @@ Expected PRs:
 - [x] Add command wrapper for test/build/lint outcome capture. (#76)
 - [x] Add session draft command. (#77)
 - [x] Add session finalize command. (#78)
-- [ ] Add auto-duration capture for started/finalized sessions.
-- [ ] Add local activity heartbeat table.
+- [x] Add auto-duration capture for started/finalized sessions. (#78)
+- [x] Add local activity heartbeat table. (next PR)
 - [ ] Add privacy-safe terminal command outcome capture.
 - [ ] Add import provenance fields to session records.
 - [ ] Add agent status command.

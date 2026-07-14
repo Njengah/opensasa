@@ -1,0 +1,29 @@
+{
+  "name": "opensasa-vscode",
+  "displayName": "OpenSasa",
+  "description": "Local-first AI coding workflow metadata for VS Code.",
+  "version": "0.1.0-alpha.1",
+  "publisher": "opensasa",
+  "license": "MIT",
+  "engines": {
+    "vscode": ">=1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "opensasa.showStatus",
+        "title": "OpenSasa: Show Status"
+      }
+    ]
+  },
+  "scripts": {
+    "check": "node --check src/extension.js"
+  }
+}

@@ -209,7 +209,7 @@ Goal:
 
 Expected PRs:
 
-- [ ] Create VS Code extension package scaffold.
+- [ ] Create VS Code extension package scaffold. (next PR)
 - [ ] Add extension-to-local-CLI communication.
 - [ ] Add start session command in VS Code.
 - [ ] Add finish session command in VS Code.

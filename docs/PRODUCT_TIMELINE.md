@@ -244,7 +244,7 @@ Expected PRs:
 - [ ] Add contribution bundle preview in dashboard.
 - [ ] Add local contribution history.
 - [ ] Add contribution revocation state semantics.
-- [ ] Add docs for what is and is not shared.
+- [x] Add docs for what is and is not shared. (#83)
 - [ ] Add sample contribution file.
 - [ ] Add optional signed export metadata.
 - [ ] Decide whether upload exists in v0.1 or remains manual export.
@@ -343,6 +343,7 @@ Use this list when asking "build next":
 - [x] Add import provenance fields. (#80)
 - [x] Add agent status command. (#81)
 - [x] Add workflow mode documentation. (#82)
+- [x] Add sharing boundary documentation. (#83)
 - [x] Convert product timeline to merge-tracking checklists. (#52)
 
 ## Career/Portfolio Goal

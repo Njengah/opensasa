@@ -244,7 +244,7 @@ Expected PRs:
 - [ ] Add contribution bundle preview in dashboard.
 - [ ] Add local contribution history.
 - [ ] Add contribution revocation state semantics.
-- [ ] Add docs for what is and is not shared.
+- [x] Add docs for what is and is not shared. (next PR)
 - [ ] Add sample contribution file.
 - [ ] Add optional signed export metadata.
 - [ ] Decide whether upload exists in v0.1 or remains manual export.

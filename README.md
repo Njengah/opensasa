@@ -478,6 +478,9 @@ node ./dist/index.js log \
 
 OpenSasa stores only a one-way SHA-256 identity hash.
 
+See [Workflow Modes](docs/WORKFLOW_MODES.md) for the manual, wrapper, and agent
+capture flows.
+
 Run a local verification command for a session without storing its command text
 or terminal output:
 

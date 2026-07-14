@@ -193,7 +193,7 @@ Expected PRs:
 - [x] Add privacy-safe terminal command outcome capture. (#76)
 - [x] Add import provenance fields to session records. (#80)
 - [x] Add agent status command. (#81)
-- [ ] Add docs for manual, wrapper, and agent modes.
+- [x] Add docs for manual, wrapper, and agent modes. (next PR)
 
 Exit criteria:
 

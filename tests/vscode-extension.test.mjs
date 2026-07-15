@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { runOpenSasaCli } from '../vscode-extension/src/cli.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -25,4 +26,23 @@ test('VS Code extension scaffold has an activation entry point', async () => {
 
   assert.match(source, /registerCommand\(\s*['"]opensasa\.showStatus['"]\s*,/);
   assert.match(source, /module\.exports/);
+});
+
+test('VS Code CLI communication passes arguments without a shell', async () => {
+  const result = await runOpenSasaCli(
+    ['-e', "process.stdout.write(JSON.stringify(process.argv.slice(1)))", '--', 'safe-value'],
+    { executable: process.execPath },
+  );
+
+  assert.deepEqual(JSON.parse(result.stdout), ['safe-value']);
+  assert.equal(result.exitCode, 0);
+});
+
+test('VS Code CLI communication reports failures', async () => {
+  await assert.rejects(
+    runOpenSasaCli(['-e', "process.stderr.write('failed'); process.exit(2)"], {
+      executable: process.execPath,
+    }),
+    /failed/,
+  );
 });

@@ -15,5 +15,7 @@ npm run check
 To try the extension in VS Code, open this directory as a workspace and press
 `F5` after installing the VS Code Extension Development host tools.
 
-The current scaffold exposes `OpenSasa: Show Status` as a safe activation
-smoke check. It does not capture, transmit, or persist any data yet.
+The extension exposes `OpenSasa: Show Status`, which invokes the local
+`opensasa agent status --json` command. Arguments are passed without a shell,
+and command output is kept in memory so the extension does not capture or
+transmit it.

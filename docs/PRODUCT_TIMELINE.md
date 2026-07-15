@@ -212,7 +212,7 @@ Expected PRs:
 - [x] Create VS Code extension package scaffold. (#84)
 - [x] Add extension-to-local-CLI communication. (#85)
 - [x] Add start session command in VS Code. (#86)
-- [ ] Add finish session command in VS Code. (next PR)
+- [x] Add finish session command in VS Code. (#87)
 - [ ] Add quick-pick fields for task type, outcome, model, and tool.
 - [ ] Add status bar item for active OpenSasa session.
 - [ ] Add local privacy notice in extension.

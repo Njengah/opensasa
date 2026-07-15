@@ -19,3 +19,7 @@ The extension exposes `OpenSasa: Show Status`, which invokes the local
 `opensasa agent status --json` command. Arguments are passed without a shell,
 and command output is kept in memory so the extension does not capture or
 transmit it.
+
+`OpenSasa: Start Session` asks for the provider, model ID, and task type, then
+creates a local draft with `opensasa draft --json`. The workspace path is only
+sent to the CLI so it can derive the privacy-safe project identity hash.

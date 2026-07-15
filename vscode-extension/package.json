@@ -20,6 +20,10 @@
       {
         "command": "opensasa.showStatus",
         "title": "OpenSasa: Show Status"
+      },
+      {
+        "command": "opensasa.startSession",
+        "title": "OpenSasa: Start Session"
       }
     ]
   },

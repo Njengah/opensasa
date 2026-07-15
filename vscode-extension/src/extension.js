@@ -1,6 +1,8 @@
 const vscode = require('vscode');
 const { runOpenSasaCli } = require('./cli');
 
+let activeSessionId;
+
 /**
  * Extension entry point. Commands communicate with the local CLI only.
  * @param {vscode.ExtensionContext} context
@@ -33,12 +35,38 @@ function activate(context) {
     )
       .then(({ stdout }) => {
         const result = JSON.parse(stdout);
+        activeSessionId = result.session.session_id;
         vscode.window.showInformationMessage(`OpenSasa session started: ${result.session.session_id}`);
       })
       .catch((error) => vscode.window.showErrorMessage(`OpenSasa CLI failed: ${error.message}`));
   });
 
-  context.subscriptions.push(showStatus, startSession);
+  const finishSession = vscode.commands.registerCommand('opensasa.finishSession', async () => {
+    if (!activeSessionId) {
+      vscode.window.showWarningMessage('OpenSasa has no session started in this editor window.');
+      return;
+    }
+
+    const finalOutcome = await vscode.window.showInputBox({
+      prompt: 'Final outcome',
+      placeHolder: 'accepted, partially_accepted, rejected, or unknown',
+    });
+    if (!finalOutcome) return;
+
+    const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    runOpenSasaCli(
+      ['finalize', activeSessionId, '--final-outcome', finalOutcome, '--json'],
+      { cwd },
+    )
+      .then(({ stdout }) => {
+        const result = JSON.parse(stdout);
+        activeSessionId = undefined;
+        vscode.window.showInformationMessage(`OpenSasa session finished: ${result.session.session_id}`);
+      })
+      .catch((error) => vscode.window.showErrorMessage(`OpenSasa CLI failed: ${error.message}`));
+  });
+
+  context.subscriptions.push(showStatus, startSession, finishSession);
 }
 
 function deactivate() {}

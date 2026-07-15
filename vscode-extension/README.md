@@ -23,3 +23,6 @@ transmit it.
 `OpenSasa: Start Session` asks for the provider, model ID, and task type, then
 creates a local draft with `opensasa draft --json`. The workspace path is only
 sent to the CLI so it can derive the privacy-safe project identity hash.
+
+`OpenSasa: Finish Session` asks for the final outcome and finalizes the session
+created in the current editor window with `opensasa finalize --json`.

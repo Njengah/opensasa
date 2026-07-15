@@ -24,6 +24,10 @@
       {
         "command": "opensasa.startSession",
         "title": "OpenSasa: Start Session"
+      },
+      {
+        "command": "opensasa.finishSession",
+        "title": "OpenSasa: Finish Session"
       }
     ]
   },

@@ -17,6 +17,7 @@ test('VS Code extension scaffold has valid package metadata', async () => {
   assert.ok(packageJson.engines.vscode);
   assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.showStatus'));
   assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.startSession'));
+  assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.finishSession'));
 });
 
 test('VS Code extension scaffold has an activation entry point', async () => {
@@ -29,6 +30,8 @@ test('VS Code extension scaffold has an activation entry point', async () => {
   assert.match(source, /module\.exports/);
   assert.match(source, /registerCommand\(\s*['"]opensasa\.startSession['"]\s*,/);
   assert.match(source, /['"]draft['"].*['"]--json['"]/s);
+  assert.match(source, /registerCommand\(\s*['"]opensasa\.finishSession['"]\s*,/);
+  assert.match(source, /['"]finalize['"].*['"]--final-outcome['"].*['"]--json['"]/s);
 });
 
 test('VS Code CLI communication passes arguments without a shell', async () => {

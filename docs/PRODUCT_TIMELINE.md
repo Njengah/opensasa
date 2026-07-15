@@ -210,7 +210,7 @@ Goal:
 Expected PRs:
 
 - [x] Create VS Code extension package scaffold. (#84)
-- [ ] Add extension-to-local-CLI communication.
+- [x] Add extension-to-local-CLI communication. (#85)
 - [ ] Add start session command in VS Code.
 - [ ] Add finish session command in VS Code.
 - [ ] Add quick-pick fields for task type, outcome, model, and tool.

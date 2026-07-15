@@ -1,13 +1,21 @@
 const vscode = require('vscode');
+const { runOpenSasaCli } = require('./cli');
 
 /**
- * Extension entry point. CLI communication is intentionally deferred to the
- * next Phase 4 PR; this scaffold only proves that the package can activate.
+ * Extension entry point. Commands communicate with the local CLI only.
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
   const disposable = vscode.commands.registerCommand('opensasa.showStatus', () => {
-    vscode.window.showInformationMessage('OpenSasa is ready.');
+    const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    runOpenSasaCli(['agent', 'status', '--json'], { cwd })
+      .then(({ stdout }) => {
+        const status = JSON.parse(stdout);
+        vscode.window.showInformationMessage(
+          status.active ? 'OpenSasa session is active.' : 'OpenSasa has no active session.',
+        );
+      })
+      .catch((error) => vscode.window.showErrorMessage(`OpenSasa CLI failed: ${error.message}`));
   });
 
   context.subscriptions.push(disposable);

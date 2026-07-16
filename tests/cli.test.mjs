@@ -69,6 +69,8 @@ test("creates a session draft", async () => {
     "OpenAI",
     "--model-id",
     "gpt-5",
+    "--tool",
+    "Codex",
     "--task-type",
     "bug_fix",
     "--json",
@@ -81,6 +83,7 @@ test("creates a session draft", async () => {
   assert.equal(result.session.final_outcome, "unknown");
   assert.equal(result.session.work_mode, "cli_wrapper");
   assert.equal(result.session.provider, "OpenAI");
+  assert.equal(result.session.tool, "Codex");
 });
 
 test("reports agent status from the latest heartbeat", async () => {

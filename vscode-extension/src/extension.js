@@ -1,5 +1,6 @@
 const vscode = require('vscode');
 const { runOpenSasaCli } = require('./cli');
+const { pickFinalOutcome, pickModelId, pickTaskType, pickTool } = require('./prompts');
 
 let activeSessionId;
 
@@ -22,15 +23,36 @@ function activate(context) {
 
   const startSession = vscode.commands.registerCommand('opensasa.startSession', async () => {
     const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    const provider = await vscode.window.showInputBox({ prompt: 'AI provider', placeHolder: 'OpenAI' });
-    if (!provider) return;
-    const modelId = await vscode.window.showInputBox({ prompt: 'Model ID', placeHolder: 'gpt-4o' });
+    const provider = await vscode.window.showInputBox({
+      prompt: 'AI provider',
+      placeHolder: 'OpenAI',
+      ignoreFocusOut: true,
+    });
+    const trimmedProvider = provider?.trim();
+    if (!trimmedProvider) return;
+
+    const modelId = await pickModelId(vscode.window, trimmedProvider);
     if (!modelId) return;
-    const taskType = await vscode.window.showInputBox({ prompt: 'Task type', placeHolder: 'feature' });
+
+    const tool = await pickTool(vscode.window);
+    if (tool === undefined) return;
+
+    const taskType = await pickTaskType(vscode.window);
     if (!taskType) return;
 
     runOpenSasaCli(
-      ['draft', '--provider', provider, '--model-id', modelId, '--task-type', taskType, '--json', ...(cwd ? ['--project-path', cwd] : [])],
+      [
+        'draft',
+        '--provider',
+        trimmedProvider,
+        '--model-id',
+        modelId,
+        ...(tool ? ['--tool', tool] : []),
+        '--task-type',
+        taskType,
+        '--json',
+        ...(cwd ? ['--project-path', cwd] : []),
+      ],
       { cwd },
     )
       .then(({ stdout }) => {
@@ -47,10 +69,7 @@ function activate(context) {
       return;
     }
 
-    const finalOutcome = await vscode.window.showInputBox({
-      prompt: 'Final outcome',
-      placeHolder: 'accepted, partially_accepted, rejected, or unknown',
-    });
+    const finalOutcome = await pickFinalOutcome(vscode.window);
     if (!finalOutcome) return;
 
     const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;

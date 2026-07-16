@@ -213,7 +213,7 @@ Expected PRs:
 - [x] Add extension-to-local-CLI communication. (#85)
 - [x] Add start session command in VS Code. (#86)
 - [x] Add finish session command in VS Code. (#87)
-- [ ] Add quick-pick fields for task type, outcome, model, and tool.
+- [x] Add quick-pick fields for task type, outcome, model, and tool. (#88)
 - [ ] Add status bar item for active OpenSasa session.
 - [ ] Add local privacy notice in extension.
 - [ ] Add extension config for local database path.

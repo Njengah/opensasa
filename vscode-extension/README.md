@@ -20,9 +20,11 @@ The extension exposes `OpenSasa: Show Status`, which invokes the local
 and command output is kept in memory so the extension does not capture or
 transmit it.
 
-`OpenSasa: Start Session` asks for the provider, model ID, and task type, then
-creates a local draft with `opensasa draft --json`. The workspace path is only
-sent to the CLI so it can derive the privacy-safe project identity hash.
+`OpenSasa: Start Session` asks for the provider, then uses quick picks for the
+model ID, tool, and task type before creating a local draft with
+`opensasa draft --json`. The workspace path is only sent to the CLI so it can
+derive the privacy-safe project identity hash.
 
-`OpenSasa: Finish Session` asks for the final outcome and finalizes the session
-created in the current editor window with `opensasa finalize --json`.
+`OpenSasa: Finish Session` uses a quick pick for the final outcome and
+finalizes the session created in the current editor window with
+`opensasa finalize --json`.

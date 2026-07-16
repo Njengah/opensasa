@@ -132,6 +132,7 @@ type VerifyOptions = StoreOptions & {
 type DraftOptions = StoreOptions & {
   provider?: string;
   modelId?: string;
+  tool?: string;
   taskType?: string;
   projectPath?: string;
   json?: boolean;
@@ -330,6 +331,7 @@ program
   .description("Start a local AI coding session draft.")
   .requiredOption("--provider <provider>", "model provider")
   .requiredOption("--model-id <model-id>", "provider model identifier")
+  .option("--tool <tool>", "AI coding tool or agent")
   .requiredOption("--task-type <task-type>", "task type enum value")
   .option("--project-path <path>", "hash a project path without storing the path")
   .option("--db-path <path>", "override local database path")
@@ -342,6 +344,7 @@ program
         timestamp: new Date().toISOString(),
         provider: options.provider,
         model_id: options.modelId,
+        tool: options.tool,
         task_type: options.taskType,
         final_outcome: "unknown",
         work_mode: "cli_wrapper",

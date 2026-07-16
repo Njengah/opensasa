@@ -18,6 +18,9 @@ const {
   pickTaskType,
   pickTool,
 } = require('../vscode-extension/src/prompts.js');
+const {
+  buildStatusBarState,
+} = require('../vscode-extension/src/status-bar.js');
 
 test('VS Code extension scaffold has valid package metadata', async () => {
   const packageJson = JSON.parse(
@@ -38,6 +41,8 @@ test('VS Code extension scaffold has an activation entry point', async () => {
     'utf8',
   );
 
+  assert.match(source, /createStatusBarItem/);
+  assert.match(source, /applyStatusBarState/);
   assert.match(source, /registerCommand\(\s*['"]opensasa\.showStatus['"]\s*,/);
   assert.match(source, /module\.exports/);
   assert.match(source, /registerCommand\(\s*['"]opensasa\.startSession['"]\s*,/);
@@ -49,6 +54,19 @@ test('VS Code extension scaffold has an activation entry point', async () => {
   assert.match(source, /registerCommand\(\s*['"]opensasa\.finishSession['"]\s*,/);
   assert.match(source, /pickFinalOutcome/);
   assert.match(source, /['"]finalize['"].*['"]--final-outcome['"].*['"]--json['"]/s);
+});
+
+test('VS Code status bar state shows idle and active session states', () => {
+  const idleState = buildStatusBarState();
+  const activeState = buildStatusBarState('session-123');
+
+  assert.equal(idleState.text, '$(circle-large-outline) OpenSasa idle');
+  assert.equal(idleState.command, 'opensasa.startSession');
+  assert.match(idleState.tooltip, /No OpenSasa session is active/);
+
+  assert.equal(activeState.text, '$(record) OpenSasa active');
+  assert.equal(activeState.command, 'opensasa.finishSession');
+  assert.match(activeState.tooltip, /session-123/);
 });
 
 test('VS Code model quick pick includes provider defaults and custom fallback', () => {

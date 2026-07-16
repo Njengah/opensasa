@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const { runOpenSasaCli } = require('./cli');
 const { pickFinalOutcome, pickModelId, pickTaskType, pickTool } = require('./prompts');
+const { applyStatusBarState } = require('./status-bar');
 
 let activeSessionId;
 
@@ -9,6 +10,9 @@ let activeSessionId;
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
+  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+  applyStatusBarState(statusBarItem, activeSessionId);
+
   const showStatus = vscode.commands.registerCommand('opensasa.showStatus', () => {
     const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
     runOpenSasaCli(['agent', 'status', '--json'], { cwd })
@@ -58,6 +62,7 @@ function activate(context) {
       .then(({ stdout }) => {
         const result = JSON.parse(stdout);
         activeSessionId = result.session.session_id;
+        applyStatusBarState(statusBarItem, activeSessionId);
         vscode.window.showInformationMessage(`OpenSasa session started: ${result.session.session_id}`);
       })
       .catch((error) => vscode.window.showErrorMessage(`OpenSasa CLI failed: ${error.message}`));
@@ -80,12 +85,13 @@ function activate(context) {
       .then(({ stdout }) => {
         const result = JSON.parse(stdout);
         activeSessionId = undefined;
+        applyStatusBarState(statusBarItem, activeSessionId);
         vscode.window.showInformationMessage(`OpenSasa session finished: ${result.session.session_id}`);
       })
       .catch((error) => vscode.window.showErrorMessage(`OpenSasa CLI failed: ${error.message}`));
   });
 
-  context.subscriptions.push(showStatus, startSession, finishSession);
+  context.subscriptions.push(statusBarItem, showStatus, startSession, finishSession);
 }
 
 function deactivate() {}

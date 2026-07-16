@@ -20,6 +20,11 @@ The extension exposes `OpenSasa: Show Status`, which invokes the local
 and command output is kept in memory so the extension does not capture or
 transmit it.
 
+The extension also shows a status bar item in the current editor window. It
+starts in an idle state, switches to active after `OpenSasa: Start Session`,
+and switches back to idle after `OpenSasa: Finish Session`. The item clicks
+through to the matching start or finish command.
+
 `OpenSasa: Start Session` asks for the provider, then uses quick picks for the
 model ID, tool, and task type before creating a local draft with
 `opensasa draft --json`. The workspace path is only sent to the CLI so it can

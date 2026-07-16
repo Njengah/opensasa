@@ -214,7 +214,7 @@ Expected PRs:
 - [x] Add start session command in VS Code. (#86)
 - [x] Add finish session command in VS Code. (#87)
 - [x] Add quick-pick fields for task type, outcome, model, and tool. (#88)
-- [ ] Add status bar item for active OpenSasa session.
+- [x] Add status bar item for active OpenSasa session. (#89)
 - [ ] Add local privacy notice in extension.
 - [ ] Add extension config for local database path.
 - [ ] Add extension command to open dashboard.

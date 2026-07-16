@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const { runOpenSasaCli } = require('./cli');
 const { pickFinalOutcome, pickModelId, pickTaskType, pickTool } = require('./prompts');
+const { maybeShowPrivacyNotice } = require('./privacy-notice');
 const { applyStatusBarState } = require('./status-bar');
 
 let activeSessionId;
@@ -12,6 +13,7 @@ let activeSessionId;
 function activate(context) {
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   applyStatusBarState(statusBarItem, activeSessionId);
+  void maybeShowPrivacyNotice(vscode.window, context.globalState);
 
   const showStatus = vscode.commands.registerCommand('opensasa.showStatus', () => {
     const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;

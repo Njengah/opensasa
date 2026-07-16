@@ -19,6 +19,11 @@ const {
   pickTool,
 } = require('../vscode-extension/src/prompts.js');
 const {
+  PRIVACY_NOTICE_KEY,
+  PRIVACY_NOTICE_MESSAGE,
+  maybeShowPrivacyNotice,
+} = require('../vscode-extension/src/privacy-notice.js');
+const {
   buildStatusBarState,
 } = require('../vscode-extension/src/status-bar.js');
 
@@ -41,6 +46,8 @@ test('VS Code extension scaffold has an activation entry point', async () => {
     'utf8',
   );
 
+  assert.match(source, /maybeShowPrivacyNotice/);
+  assert.match(source, /context\.globalState/);
   assert.match(source, /createStatusBarItem/);
   assert.match(source, /applyStatusBarState/);
   assert.match(source, /registerCommand\(\s*['"]opensasa\.showStatus['"]\s*,/);
@@ -54,6 +61,33 @@ test('VS Code extension scaffold has an activation entry point', async () => {
   assert.match(source, /registerCommand\(\s*['"]opensasa\.finishSession['"]\s*,/);
   assert.match(source, /pickFinalOutcome/);
   assert.match(source, /['"]finalize['"].*['"]--final-outcome['"].*['"]--json['"]/s);
+});
+
+test('VS Code privacy notice helper shows once and persists the acknowledgement', async () => {
+  const seen = new Map();
+  const calls = [];
+  const state = {
+    get(key) {
+      return seen.get(key);
+    },
+    async update(key, value) {
+      seen.set(key, value);
+    },
+  };
+  const ui = {
+    async showInformationMessage(message) {
+      calls.push(message);
+    },
+  };
+
+  const firstResult = await maybeShowPrivacyNotice(ui, state);
+  const secondResult = await maybeShowPrivacyNotice(ui, state);
+
+  assert.equal(firstResult, true);
+  assert.equal(secondResult, false);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0], PRIVACY_NOTICE_MESSAGE);
+  assert.equal(seen.get(PRIVACY_NOTICE_KEY), true);
 });
 
 test('VS Code status bar state shows idle and active session states', () => {

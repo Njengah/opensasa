@@ -45,6 +45,7 @@ test("builds a sanitized contribution preview", () => {
   const preview = buildContributionPreview(baseSession);
 
   assert.equal(preview.schema_version, "opensasa.metadata.v0");
+  assert.equal(preview.payload_version, "v0.2.0");
   assert.match(preview.contribution_id, /^contrib_[0-9a-f]{16}$/);
   assert.notEqual(preview.contribution_id, "session-123");
   assert.equal(preview.timestamp_bucket, "2026-06-09");
@@ -76,6 +77,7 @@ test("validates contribution preview fields", () => {
 test("flags forbidden contribution preview fields", () => {
   const validation = validateContributionPreview({
     schema_version: "opensasa.metadata.v0",
+    payload_version: "v0.2.0",
     session_id: "session-123",
     timestamp: "2026-06-09T12:34:56.000Z",
   });
@@ -118,6 +120,7 @@ test("formats contribution preview with no-upload status and excluded fields", (
   assert.match(output, /Upload enabled: no/);
   assert.match(output, /No upload will occur in this MVP/);
   assert.match(output, /Validation:/);
+  assert.match(output, /payload_version: v0.2.0/);
   assert.match(output, /status: passed/);
   assert.match(output, /forbidden_fields_present: none/);
   assert.match(output, /timestamp_bucket: 2026-06-09/);

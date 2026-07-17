@@ -441,8 +441,8 @@ node ./dist/index.js inspect <session-id> --contribution --json
 
 This generates a local preview of what a future contribution payload could
 include. The preview shows included fields, excluded fields, bucketed values,
-schema version, data source, consent status, validation status, and no-upload
-status.
+schema version, payload version, data source, consent status, validation
+status, and no-upload status.
 
 Contribution consent is stored locally as `not_granted`, `granted`, or
 `revoked`. Setting it does not enable uploads in the MVP.
@@ -465,7 +465,8 @@ This writes the sanitized contribution payload itself to a local JSON file.
 It does not upload anything. The export path must be supplied explicitly in
 this first export workflow. Export also requires the session's local
 `contribution_consent` state to already be `granted`, plus an explicit
-`--yes` confirmation when you run the command.
+`--yes` confirmation when you run the command. Exported payloads currently use
+`payload_version: "v0.2.0"`.
 
 ## Local Storage
 

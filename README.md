@@ -452,18 +452,20 @@ Uploads are not enabled in the MVP.
 ### Export A Contribution Payload
 
 ```bash
-node ./dist/index.js export <session-id> --out ./contribution.json
+node ./dist/index.js export <session-id> --out ./contribution.json --yes
 ```
 
 Use JSON output for scripting:
 
 ```bash
-node ./dist/index.js export <session-id> --out ./contribution.json --json
+node ./dist/index.js export <session-id> --out ./contribution.json --yes --json
 ```
 
 This writes the sanitized contribution payload itself to a local JSON file.
 It does not upload anything. The export path must be supplied explicitly in
-this first export workflow.
+this first export workflow. Export also requires the session's local
+`contribution_consent` state to already be `granted`, plus an explicit
+`--yes` confirmation when you run the command.
 
 ## Local Storage
 

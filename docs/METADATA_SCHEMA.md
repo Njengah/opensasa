@@ -237,7 +237,7 @@ or public aggregate views rely on them.
 
 ## Contribution Payload
 
-The contribution payload is a sanitized subset of local data. It should be generated only after explicit consent and should be inspectable before upload.
+The contribution payload is a sanitized subset of local data. It should be generated only after explicit consent, requires a local `contribution_consent = granted` session state plus explicit export confirmation, and should be inspectable before upload.
 
 ### Allowed By Default
 

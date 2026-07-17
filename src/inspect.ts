@@ -48,6 +48,47 @@ const forbiddenContributionKeys = [
   "private_notes",
 ] as const;
 
+const requiredContributionFields = [
+  "schema_version",
+  "payload_version",
+  "contribution_id",
+  "timestamp_bucket",
+  "provider",
+  "model_id",
+  "task_type",
+  "input_tokens_bucket",
+  "output_tokens_bucket",
+  "cached_tokens_bucket",
+  "estimated_cost_bucket",
+  "duration_bucket",
+  "retry_count_bucket",
+  "error_count_bucket",
+  "tests_outcome",
+  "build_outcome",
+  "lint_outcome",
+  "typecheck_outcome",
+  "final_outcome",
+  "verified_success",
+  "data_source",
+] as const;
+
+const optionalContributionFields = [
+  "model_version",
+  "tool",
+  "language",
+  "framework",
+  "repo_size_bucket",
+  "file_count_bucket",
+  "changed_file_count_bucket",
+  "lines_added_bucket",
+  "lines_removed_bucket",
+] as const;
+
+const allowedContributionFields = [
+  ...requiredContributionFields,
+  ...optionalContributionFields,
+] as const;
+
 type LocalInspection = {
   local_record: Record<string, unknown>;
   privacy_boundary: string[];
@@ -86,10 +127,21 @@ export type ContributionPreview = {
   data_source: string;
 };
 
-type ContributionValidation = {
+type ContributionValidationSummary = {
+  checked_field_count: number;
+  required_field_count: number;
+  missing_required_field_count: number;
+  forbidden_field_count: number;
+  unknown_field_count: number;
+};
+
+export type ContributionValidation = {
   status: "passed" | "failed";
   checked_fields: string[];
+  missing_required_fields: string[];
   forbidden_fields_present: string[];
+  unknown_fields_present: string[];
+  summary: ContributionValidationSummary;
 };
 
 type ContributionPreviewInspection = {
@@ -132,11 +184,22 @@ export function formatContributionPreview(session: LocalSession): string {
     "Validation:",
     `- status: ${preview.validation.status}`,
     `- checked_fields: ${preview.validation.checked_fields.length}`,
+    `- missing_required_fields: ${
+      preview.validation.missing_required_fields.length === 0
+        ? "none"
+        : preview.validation.missing_required_fields.join(", ")
+    }`,
     `- forbidden_fields_present: ${
       preview.validation.forbidden_fields_present.length === 0
         ? "none"
         : preview.validation.forbidden_fields_present.join(", ")
     }`,
+    `- unknown_fields_present: ${
+      preview.validation.unknown_fields_present.length === 0
+        ? "none"
+        : preview.validation.unknown_fields_present.join(", ")
+    }`,
+    `- checked_field_count: ${preview.validation.summary.checked_field_count}`,
     "",
     "Included fields:",
     ...formatObject(preview.included_fields),
@@ -188,14 +251,36 @@ export function validateContributionPreview(
   preview: Record<string, unknown>,
 ): ContributionValidation {
   const checkedFields = Object.keys(preview);
+  const missingRequiredFields = requiredContributionFields.filter((field) => !(field in preview));
   const forbiddenFieldsPresent = checkedFields.filter((field) =>
     (forbiddenContributionKeys as readonly string[]).includes(field),
   );
+  const unknownFieldsPresent = checkedFields.filter(
+    (field) =>
+      !(allowedContributionFields as readonly string[]).includes(field) &&
+      !(forbiddenContributionKeys as readonly string[]).includes(field),
+  );
+
+  const status =
+    missingRequiredFields.length === 0 &&
+    forbiddenFieldsPresent.length === 0 &&
+    unknownFieldsPresent.length === 0
+      ? "passed"
+      : "failed";
 
   return {
-    status: forbiddenFieldsPresent.length === 0 ? "passed" : "failed",
+    status,
     checked_fields: checkedFields,
+    missing_required_fields: missingRequiredFields,
     forbidden_fields_present: forbiddenFieldsPresent,
+    unknown_fields_present: unknownFieldsPresent,
+    summary: {
+      checked_field_count: checkedFields.length,
+      required_field_count: requiredContributionFields.length,
+      missing_required_field_count: missingRequiredFields.length,
+      forbidden_field_count: forbiddenFieldsPresent.length,
+      unknown_field_count: unknownFieldsPresent.length,
+    },
   };
 }
 

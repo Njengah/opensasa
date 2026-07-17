@@ -71,22 +71,55 @@ test("validates contribution preview fields", () => {
 
   assert.equal(validation.status, "passed");
   assert.equal(validation.checked_fields.includes("timestamp_bucket"), true);
+  assert.deepEqual(validation.missing_required_fields, []);
   assert.deepEqual(validation.forbidden_fields_present, []);
+  assert.deepEqual(validation.unknown_fields_present, []);
+  assert.equal(validation.summary.checked_field_count, validation.checked_fields.length);
+  assert.equal(validation.summary.required_field_count > 0, true);
+  assert.equal(validation.summary.missing_required_field_count, 0);
+  assert.equal(validation.summary.forbidden_field_count, 0);
+  assert.equal(validation.summary.unknown_field_count, 0);
 });
 
-test("flags forbidden contribution preview fields", () => {
+test("reports missing required, forbidden, and unknown contribution fields", () => {
   const validation = validateContributionPreview({
     schema_version: "opensasa.metadata.v0",
     payload_version: "v0.2.0",
     session_id: "session-123",
     timestamp: "2026-06-09T12:34:56.000Z",
+    extra_debug_label: "unexpected",
   });
 
   assert.equal(validation.status, "failed");
+  assert.deepEqual(validation.missing_required_fields, [
+    "contribution_id",
+    "timestamp_bucket",
+    "provider",
+    "model_id",
+    "task_type",
+    "input_tokens_bucket",
+    "output_tokens_bucket",
+    "cached_tokens_bucket",
+    "estimated_cost_bucket",
+    "duration_bucket",
+    "retry_count_bucket",
+    "error_count_bucket",
+    "tests_outcome",
+    "build_outcome",
+    "lint_outcome",
+    "typecheck_outcome",
+    "final_outcome",
+    "verified_success",
+    "data_source",
+  ]);
   assert.deepEqual(validation.forbidden_fields_present, [
     "session_id",
     "timestamp",
   ]);
+  assert.deepEqual(validation.unknown_fields_present, ["extra_debug_label"]);
+  assert.equal(validation.summary.missing_required_field_count, 19);
+  assert.equal(validation.summary.forbidden_field_count, 2);
+  assert.equal(validation.summary.unknown_field_count, 1);
 });
 
 test("formats local inspection with local record and privacy boundary", () => {
@@ -122,7 +155,10 @@ test("formats contribution preview with no-upload status and excluded fields", (
   assert.match(output, /Validation:/);
   assert.match(output, /payload_version: v0.2.0/);
   assert.match(output, /status: passed/);
+  assert.match(output, /missing_required_fields: none/);
   assert.match(output, /forbidden_fields_present: none/);
+  assert.match(output, /unknown_fields_present: none/);
+  assert.match(output, /checked_field_count:/);
   assert.match(output, /timestamp_bucket: 2026-06-09/);
   assert.match(output, /estimated_cost_bucket: under_1_usd/);
   assert.match(output, /source code/);
@@ -141,7 +177,10 @@ test("builds and formats contribution preview as JSON", () => {
   assert.equal(inspection.upload_enabled, false);
   assert.equal(inspection.destination, "none");
   assert.equal(inspection.validation.status, "passed");
+  assert.deepEqual(inspection.validation.missing_required_fields, []);
   assert.deepEqual(inspection.validation.forbidden_fields_present, []);
+  assert.deepEqual(inspection.validation.unknown_fields_present, []);
+  assert.equal(inspection.validation.summary.checked_field_count > 0, true);
   assert.equal(inspection.included_fields.timestamp_bucket, "2026-06-09");
   assert.equal(inspection.included_fields.estimated_cost_bucket, "under_1_usd");
   assert.equal(inspection.included_fields.verified_success, true);

@@ -1,5 +1,5 @@
 const vscode = require('vscode');
-const { runOpenSasaCli } = require('./cli');
+const { launchOpenSasaDashboard, runOpenSasaCli } = require('./cli');
 const { appendDbPathArgs, getExtensionDbPath } = require('./config');
 const { pickFinalOutcome, pickModelId, pickTaskType, pickTool } = require('./prompts');
 const { maybeShowPrivacyNotice } = require('./privacy-notice');
@@ -97,7 +97,21 @@ function activate(context) {
       .catch((error) => vscode.window.showErrorMessage(`OpenSasa CLI failed: ${error.message}`));
   });
 
-  context.subscriptions.push(statusBarItem, showStatus, startSession, finishSession);
+  const openDashboard = vscode.commands.registerCommand('opensasa.openDashboard', () => {
+    const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    const dbPath = getExtensionDbPath(vscode.workspace);
+
+    launchOpenSasaDashboard(appendDbPathArgs(['dashboard'], dbPath), { cwd })
+      .then(async ({ url, alreadyRunning }) => {
+        await vscode.env.openExternal(vscode.Uri.parse(url));
+        vscode.window.showInformationMessage(
+          alreadyRunning ? `OpenSasa dashboard already running: ${url}` : `OpenSasa dashboard opened: ${url}`,
+        );
+      })
+      .catch((error) => vscode.window.showErrorMessage(`OpenSasa dashboard failed: ${error.message}`));
+  });
+
+  context.subscriptions.push(statusBarItem, showStatus, startSession, finishSession, openDashboard);
 }
 
 function deactivate() {}

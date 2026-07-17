@@ -217,7 +217,7 @@ Expected PRs:
 - [x] Add status bar item for active OpenSasa session. (#89)
 - [x] Add local privacy notice in extension. (#90)
 - [x] Add extension config for local database path. (#91)
-- [ ] Add extension command to open dashboard.
+- [x] Add extension command to open dashboard. (#92)
 - [ ] Add extension tests or smoke checks.
 - [ ] Add extension install/dev docs.
 - [ ] Add release packaging workflow for extension.

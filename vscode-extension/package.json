@@ -28,6 +28,10 @@
       {
         "command": "opensasa.finishSession",
         "title": "OpenSasa: Finish Session"
+      },
+      {
+        "command": "opensasa.openDashboard",
+        "title": "OpenSasa: Open Dashboard"
       }
     ],
     "configuration": {

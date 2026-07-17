@@ -239,7 +239,7 @@ Expected PRs:
 - [x] Add contribution export command that writes a local JSON file. (#96)
 - [x] Add explicit consent confirmation for export. (#97)
 - [x] Add contribution payload version field. (#98)
-- [ ] Add contribution validation report.
+- [x] Add contribution validation report. (#99)
 - [ ] Add red-team tests for forbidden fields.
 - [ ] Add contribution bundle preview in dashboard.
 - [ ] Add local contribution history.

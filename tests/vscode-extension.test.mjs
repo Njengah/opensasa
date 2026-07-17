@@ -53,6 +53,17 @@ test('VS Code extension scaffold has valid package metadata', async () => {
   assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.openDashboard'));
   assert.equal(packageJson.contributes.configuration.title, 'OpenSasa');
   assert.equal(packageJson.contributes.configuration.properties['opensasa.dbPath'].type, 'string');
+  assert.match(packageJson.scripts.check, /src\/cli\.js/);
+  assert.match(packageJson.scripts.check, /src\/extension\.js/);
+  assert.match(packageJson.scripts.check, /src\/status-bar\.js/);
+});
+
+test('Root test script runs the VS Code extension smoke check', async () => {
+  const packageJson = JSON.parse(
+    await readFile(path.join(root, 'package.json'), 'utf8'),
+  );
+
+  assert.match(packageJson.scripts.test, /npm --prefix \.\/vscode-extension run check/);
 });
 
 test('VS Code extension scaffold has an activation entry point', async () => {

@@ -46,6 +46,6 @@
     }
   },
   "scripts": {
-    "check": "node --check src/extension.js"
+    "check": "node --check src/cli.js && node --check src/config.js && node --check src/extension.js && node --check src/privacy-notice.js && node --check src/prompts.js && node --check src/status-bar.js"
   }
 }

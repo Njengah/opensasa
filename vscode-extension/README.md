@@ -12,6 +12,9 @@ From this directory, run:
 npm run check
 ```
 
+From the repository root, `npm test` now includes this extension smoke check
+after the shared test suite.
+
 To try the extension in VS Code, open this directory as a workspace and press
 `F5` after installing the VS Code Extension Development host tools.
 

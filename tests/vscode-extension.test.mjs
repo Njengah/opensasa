@@ -4,7 +4,13 @@ import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { runOpenSasaCli } from '../vscode-extension/src/cli.js';
+import {
+  DEFAULT_DASHBOARD_URL,
+  isDashboardAlreadyRunning,
+  launchOpenSasaDashboard,
+  parseDashboardUrl,
+  runOpenSasaCli,
+} from '../vscode-extension/src/cli.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(import.meta.url);
@@ -44,6 +50,7 @@ test('VS Code extension scaffold has valid package metadata', async () => {
   assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.showStatus'));
   assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.startSession'));
   assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.finishSession'));
+  assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.openDashboard'));
   assert.equal(packageJson.contributes.configuration.title, 'OpenSasa');
   assert.equal(packageJson.contributes.configuration.properties['opensasa.dbPath'].type, 'string');
 });
@@ -71,6 +78,10 @@ test('VS Code extension scaffold has an activation entry point', async () => {
   assert.match(source, /registerCommand\(\s*['"]opensasa\.finishSession['"]\s*,/);
   assert.match(source, /pickFinalOutcome/);
   assert.match(source, /['"]finalize['"].*['"]--final-outcome['"].*['"]--json['"]/s);
+  assert.match(source, /registerCommand\(\s*['"]opensasa\.openDashboard['"]\s*,/);
+  assert.match(source, /launchOpenSasaDashboard/);
+  assert.match(source, /openExternal/);
+  assert.match(source, /['"]dashboard['"]/);
 });
 
 test('VS Code extension config helper reads a trimmed local database path', () => {
@@ -98,6 +109,40 @@ test('VS Code extension config helper appends --db-path only when configured', (
   );
   assert.deepEqual(appendDbPathArgs(baseArgs, undefined), baseArgs);
   assert.equal(EXTENSION_NAMESPACE, 'opensasa');
+});
+
+test('VS Code dashboard helper parses the local dashboard URL', () => {
+  assert.equal(
+    parseDashboardUrl('OpenSasa dashboard running at http://127.0.0.1:3210'),
+    'http://127.0.0.1:3210',
+  );
+  assert.equal(parseDashboardUrl('not a dashboard line'), undefined);
+});
+
+test('VS Code dashboard helper recognizes an already-running local dashboard', () => {
+  assert.equal(isDashboardAlreadyRunning('listen EADDRINUSE: address already in use 127.0.0.1:3210'), true);
+  assert.equal(isDashboardAlreadyRunning('another local error'), false);
+  assert.equal(DEFAULT_DASHBOARD_URL, 'http://127.0.0.1:3210');
+});
+
+test('VS Code dashboard launcher resolves the announced dashboard URL', async () => {
+  const result = await launchOpenSasaDashboard(
+    ['-e', "console.log('OpenSasa dashboard running at http://127.0.0.1:4567'); setTimeout(() => process.exit(0), 25)"],
+    { executable: process.execPath, timeoutMs: 2000 },
+  );
+
+  assert.equal(result.url, 'http://127.0.0.1:4567');
+  assert.equal(result.alreadyRunning, false);
+});
+
+test('VS Code dashboard launcher falls back when the default dashboard port is already in use', async () => {
+  const result = await launchOpenSasaDashboard(
+    ['-e', "process.stderr.write('listen EADDRINUSE: address already in use 127.0.0.1:3210'); process.exit(1)"],
+    { executable: process.execPath, timeoutMs: 2000 },
+  );
+
+  assert.equal(result.url, DEFAULT_DASHBOARD_URL);
+  assert.equal(result.alreadyRunning, true);
 });
 
 test('VS Code privacy notice helper shows once and persists the acknowledgement', async () => {

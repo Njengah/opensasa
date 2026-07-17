@@ -28,6 +28,9 @@ Set `opensasa.dbPath` in VS Code settings when the extension should use a
 specific local SQLite database instead of the CLI default path or other local
 OpenSasa config resolution.
 
+Run `OpenSasa: Open Dashboard` to start the local dashboard server through the
+CLI and open the local report UI in your browser.
+
 The extension also shows a status bar item in the current editor window. It
 starts in an idle state, switches to active after `OpenSasa: Start Session`,
 and switches back to idle after `OpenSasa: Finish Session`. The item clicks

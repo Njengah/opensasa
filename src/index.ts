@@ -111,6 +111,7 @@ type InspectOptions = StoreOptions & {
 
 type ExportOptions = StoreOptions & {
   out?: string;
+  yes?: boolean;
   json?: boolean;
 };
 
@@ -791,6 +792,7 @@ program
   .description("Write a sanitized contribution payload to a local JSON file.")
   .argument("<session-id>", "local session ID to export")
   .requiredOption("--out <path>", "local JSON file path to write")
+  .requiredOption("--yes", "confirm export of the local contribution payload")
   .option("--db-path <path>", "override local database path")
   .option("--json", "output export metadata as JSON")
   .action((sessionId: string, options: ExportOptions) => {
@@ -802,6 +804,14 @@ program
       if (!session) {
         process.exitCode = 1;
         console.error(`Session not found: ${sessionId}`);
+        return;
+      }
+
+      if (session.contribution_consent !== "granted") {
+        process.exitCode = 1;
+        console.error(
+          `Export requires contribution consent to be granted for session ${sessionId}. Update it with \`opensasa update ${sessionId} --contribution-consent granted\` before retrying.`,
+        );
         return;
       }
 

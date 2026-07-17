@@ -29,6 +29,14 @@ test("prints help with planned MVP commands", async () => {
   assert.match(stdout, /export/);
 });
 
+test("prints export help with explicit confirmation", async () => {
+  const { stdout } = await execFileAsync("node", ["./dist/index.js", "export", "--help"]);
+
+  assert.match(stdout, /--out/);
+  assert.match(stdout, /--yes/);
+  assert.match(stdout, /--json/);
+});
+
 test("prints dashboard help", async () => {
   const { stdout } = await execFileAsync("node", ["./dist/index.js", "dashboard", "--help"]);
 
@@ -2507,6 +2515,7 @@ test("exports a sanitized contribution payload to a local JSON file", async () =
     session.session_id,
     "--out",
     outputPath,
+    "--yes",
     "--db-path",
     dbPath,
   ]);
@@ -2549,6 +2558,7 @@ test("exports contribution metadata as JSON output", async () => {
     session.session_id,
     "--out",
     outputPath,
+    "--yes",
     "--json",
     "--db-path",
     dbPath,
@@ -2591,11 +2601,87 @@ test("returns an error when exporting a missing session", async () => {
       "missing-session",
       "--out",
       join(tmpRoot, "missing-export.json"),
+      "--yes",
       "--db-path",
       dbPath,
     ]),
     (error) => {
       assert.match(error.stderr, /Session not found: missing-session/);
+      return true;
+    },
+  );
+});
+
+test("requires explicit confirmation before exporting a contribution payload", async () => {
+  const dbPath = join(tmpRoot, "missing-export-confirmation.db");
+  const outputPath = join(tmpRoot, "exports", "missing-export-confirmation.json");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:34:56.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      contribution_consent: "granted",
+    });
+  } finally {
+    store.close();
+  }
+
+  await assert.rejects(
+    execFileAsync("node", [
+      "./dist/index.js",
+      "export",
+      session.session_id,
+      "--out",
+      outputPath,
+      "--db-path",
+      dbPath,
+    ]),
+    (error) => {
+      assert.match(error.stderr, /required option '--yes'/);
+      return true;
+    },
+  );
+});
+
+test("requires granted contribution consent before exporting a contribution payload", async () => {
+  const dbPath = join(tmpRoot, "missing-export-consent.db");
+  const outputPath = join(tmpRoot, "exports", "missing-export-consent.json");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:34:56.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      contribution_consent: "not_granted",
+    });
+  } finally {
+    store.close();
+  }
+
+  await assert.rejects(
+    execFileAsync("node", [
+      "./dist/index.js",
+      "export",
+      session.session_id,
+      "--out",
+      outputPath,
+      "--yes",
+      "--db-path",
+      dbPath,
+    ]),
+    (error) => {
+      assert.match(error.stderr, /contribution consent to be granted/);
       return true;
     },
   );

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
+import { writeContributionExport } from "./export.js";
 import { ZodError } from "zod";
 import { createDemoSeedSessions } from "./demo.js";
 import { createDashboardServer, listenDashboardServer } from "./dashboard.js";
@@ -105,6 +106,11 @@ type ReportOptions = StoreOptions & {
 
 type InspectOptions = StoreOptions & {
   contribution?: boolean;
+  json?: boolean;
+};
+
+type ExportOptions = StoreOptions & {
+  out?: string;
   json?: boolean;
 };
 
@@ -772,6 +778,41 @@ program
           : `${formatLocalInspection(session)}\n`;
 
       process.stdout.write(output);
+    } catch (error) {
+      process.exitCode = 1;
+      console.error(formatCliError(error));
+    } finally {
+      store?.close();
+    }
+  });
+
+program
+  .command("export")
+  .description("Write a sanitized contribution payload to a local JSON file.")
+  .argument("<session-id>", "local session ID to export")
+  .requiredOption("--out <path>", "local JSON file path to write")
+  .option("--db-path <path>", "override local database path")
+  .option("--json", "output export metadata as JSON")
+  .action((sessionId: string, options: ExportOptions) => {
+    let store;
+    try {
+      store = openStore(options.dbPath);
+      const session = store.getSession(sessionId);
+
+      if (!session) {
+        process.exitCode = 1;
+        console.error(`Session not found: ${sessionId}`);
+        return;
+      }
+
+      const result = writeContributionExport(session, options.out!);
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+        return;
+      }
+
+      console.log(`Exported contribution payload ${result.contribution_id} to ${result.path}`);
+      console.log("No upload will occur in this MVP.");
     } catch (error) {
       process.exitCode = 1;
       console.error(formatCliError(error));

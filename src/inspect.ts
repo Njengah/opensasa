@@ -52,7 +52,7 @@ type LocalInspection = {
   privacy_boundary: string[];
 };
 
-type ContributionPreview = {
+export type ContributionPreview = {
   schema_version: string;
   contribution_id: string;
   timestamp_bucket: string;

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
@@ -26,6 +26,7 @@ test("prints help with planned MVP commands", async () => {
   assert.match(stdout, /sessions/);
   assert.match(stdout, /report/);
   assert.match(stdout, /inspect/);
+  assert.match(stdout, /export/);
 });
 
 test("prints dashboard help", async () => {
@@ -2477,6 +2478,91 @@ test("previews a sanitized contribution payload as JSON without upload", async (
   assert.match(preview.excluded_fields.join("\n"), /terminal output/);
 });
 
+test("exports a sanitized contribution payload to a local JSON file", async () => {
+  const dbPath = join(tmpRoot, "contribution-export.db");
+  const outputPath = join(tmpRoot, "exports", "session-export.json");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:34:56.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      input_tokens_estimate: 1200,
+      estimated_cost_usd: 0.5,
+      contribution_consent: "granted",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "export",
+    session.session_id,
+    "--out",
+    outputPath,
+    "--db-path",
+    dbPath,
+  ]);
+  const exported = JSON.parse(readFileSync(outputPath, "utf8"));
+
+  assert.match(stdout, /Exported contribution payload contrib_[0-9a-f]{16} to /);
+  assert.match(stdout, /No upload will occur in this MVP/);
+  assert.equal(exported.schema_version, "opensasa.metadata.v0");
+  assert.equal(exported.timestamp_bucket, "2026-06-09");
+  assert.equal(exported.estimated_cost_bucket, "under_1_usd");
+  assert.equal(Object.hasOwn(exported, "session_id"), false);
+  assert.equal(Object.hasOwn(exported, "timestamp"), false);
+  assert.equal(Object.hasOwn(exported, "estimated_cost_usd"), false);
+});
+
+test("exports contribution metadata as JSON output", async () => {
+  const dbPath = join(tmpRoot, "contribution-export-json.db");
+  const outputPath = join(tmpRoot, "exports", "session-export-json.json");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:34:56.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      contribution_consent: "granted",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync("node", [
+    "./dist/index.js",
+    "export",
+    session.session_id,
+    "--out",
+    outputPath,
+    "--json",
+    "--db-path",
+    dbPath,
+  ]);
+  const result = JSON.parse(stdout);
+  const exported = JSON.parse(readFileSync(outputPath, "utf8"));
+
+  assert.equal(result.status, "exported");
+  assert.equal(result.session_id, session.session_id);
+  assert.match(result.contribution_id, /^contrib_[0-9a-f]{16}$/);
+  assert.equal(result.path, outputPath);
+  assert.equal(exported.contribution_id, result.contribution_id);
+});
+
 test("returns an error when inspecting a missing session", async () => {
   const dbPath = join(tmpRoot, "missing-inspect.db");
 
@@ -2485,6 +2571,26 @@ test("returns an error when inspecting a missing session", async () => {
       "./dist/index.js",
       "inspect",
       "missing-session",
+      "--db-path",
+      dbPath,
+    ]),
+    (error) => {
+      assert.match(error.stderr, /Session not found: missing-session/);
+      return true;
+    },
+  );
+});
+
+test("returns an error when exporting a missing session", async () => {
+  const dbPath = join(tmpRoot, "missing-export.db");
+
+  await assert.rejects(
+    execFileAsync("node", [
+      "./dist/index.js",
+      "export",
+      "missing-session",
+      "--out",
+      join(tmpRoot, "missing-export.json"),
       "--db-path",
       dbPath,
     ]),

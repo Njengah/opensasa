@@ -74,11 +74,13 @@ Implemented local commands:
 - `opensasa sessions`
 - `opensasa report`
 - `opensasa inspect`
+- `opensasa export`
 
 The current product is intentionally local-only. It can log safe AI coding
 session metadata, store records in a local SQLite database, update or delete
 local records, list previous sessions, generate a personal report, and preview
-a sanitized contribution payload. It does not upload data or publish rankings.
+a sanitized contribution payload. It can also export that sanitized payload to
+a local JSON file. It does not upload data or publish rankings.
 
 The public development and versioning approach is described in
 [Development Cycle](./docs/DEVELOPMENT_CYCLE.md). The MVP workflow is described
@@ -446,6 +448,22 @@ Contribution consent is stored locally as `not_granted`, `granted`, or
 `revoked`. Setting it does not enable uploads in the MVP.
 
 Uploads are not enabled in the MVP.
+
+### Export A Contribution Payload
+
+```bash
+node ./dist/index.js export <session-id> --out ./contribution.json
+```
+
+Use JSON output for scripting:
+
+```bash
+node ./dist/index.js export <session-id> --out ./contribution.json --json
+```
+
+This writes the sanitized contribution payload itself to a local JSON file.
+It does not upload anything. The export path must be supplied explicitly in
+this first export workflow.
 
 ## Local Storage
 

@@ -236,7 +236,7 @@ Goal:
 
 Expected PRs:
 
-- [ ] Add contribution export command that writes a local JSON file.
+- [x] Add contribution export command that writes a local JSON file. (#96)
 - [ ] Add explicit consent confirmation for export.
 - [ ] Add contribution payload version field.
 - [ ] Add contribution validation report.

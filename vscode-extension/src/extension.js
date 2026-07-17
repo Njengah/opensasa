@@ -1,5 +1,6 @@
 const vscode = require('vscode');
 const { runOpenSasaCli } = require('./cli');
+const { appendDbPathArgs, getExtensionDbPath } = require('./config');
 const { pickFinalOutcome, pickModelId, pickTaskType, pickTool } = require('./prompts');
 const { maybeShowPrivacyNotice } = require('./privacy-notice');
 const { applyStatusBarState } = require('./status-bar');
@@ -17,7 +18,8 @@ function activate(context) {
 
   const showStatus = vscode.commands.registerCommand('opensasa.showStatus', () => {
     const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    runOpenSasaCli(['agent', 'status', '--json'], { cwd })
+    const dbPath = getExtensionDbPath(vscode.workspace);
+    runOpenSasaCli(appendDbPathArgs(['agent', 'status', '--json'], dbPath), { cwd })
       .then(({ stdout }) => {
         const status = JSON.parse(stdout);
         vscode.window.showInformationMessage(
@@ -29,6 +31,7 @@ function activate(context) {
 
   const startSession = vscode.commands.registerCommand('opensasa.startSession', async () => {
     const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    const dbPath = getExtensionDbPath(vscode.workspace);
     const provider = await vscode.window.showInputBox({
       prompt: 'AI provider',
       placeHolder: 'OpenAI',
@@ -47,7 +50,7 @@ function activate(context) {
     if (!taskType) return;
 
     runOpenSasaCli(
-      [
+      appendDbPathArgs([
         'draft',
         '--provider',
         trimmedProvider,
@@ -58,7 +61,7 @@ function activate(context) {
         taskType,
         '--json',
         ...(cwd ? ['--project-path', cwd] : []),
-      ],
+      ], dbPath),
       { cwd },
     )
       .then(({ stdout }) => {
@@ -80,8 +83,9 @@ function activate(context) {
     if (!finalOutcome) return;
 
     const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    const dbPath = getExtensionDbPath(vscode.workspace);
     runOpenSasaCli(
-      ['finalize', activeSessionId, '--final-outcome', finalOutcome, '--json'],
+      appendDbPathArgs(['finalize', activeSessionId, '--final-outcome', finalOutcome, '--json'], dbPath),
       { cwd },
     )
       .then(({ stdout }) => {

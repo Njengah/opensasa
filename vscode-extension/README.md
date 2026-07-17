@@ -24,6 +24,10 @@ On first activation, the extension shows a local privacy notice: OpenSasa keeps
 session metadata in your local database and does not upload source code,
 private prompts, model responses, exact file paths, or raw terminal output.
 
+Set `opensasa.dbPath` in VS Code settings when the extension should use a
+specific local SQLite database instead of the CLI default path or other local
+OpenSasa config resolution.
+
 The extension also shows a status bar item in the current editor window. It
 starts in an idle state, switches to active after `OpenSasa: Start Session`,
 and switches back to idle after `OpenSasa: Finish Session`. The item clicks

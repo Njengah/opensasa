@@ -218,7 +218,7 @@ Expected PRs:
 - [x] Add local privacy notice in extension. (#90)
 - [x] Add extension config for local database path. (#91)
 - [x] Add extension command to open dashboard. (#92)
-- [ ] Add extension tests or smoke checks.
+- [x] Add extension tests or smoke checks. (#93)
 - [ ] Add extension install/dev docs.
 - [ ] Add release packaging workflow for extension.
 

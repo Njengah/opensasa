@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { costBucket, countBucket, durationBucket } from "./buckets.js";
 import {
+  contributionPayloadVersion,
   deriveVerifiedSuccess,
   schemaVersion,
   type LocalSession,
@@ -54,6 +55,7 @@ type LocalInspection = {
 
 export type ContributionPreview = {
   schema_version: string;
+  payload_version: string;
   contribution_id: string;
   timestamp_bucket: string;
   provider: string;
@@ -200,6 +202,7 @@ export function validateContributionPreview(
 export function buildContributionPreview(session: LocalSession): ContributionPreview {
   return removeUndefinedValues({
     schema_version: schemaVersion,
+    payload_version: contributionPayloadVersion,
     contribution_id: contributionIdFor(session),
     timestamp_bucket: timestampBucket(session.timestamp),
     provider: session.provider,

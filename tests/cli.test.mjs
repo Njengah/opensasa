@@ -2428,6 +2428,7 @@ test("previews a sanitized contribution payload without upload", async () => {
   assert.match(stdout, /Validation:/);
   assert.match(stdout, /status: passed/);
   assert.match(stdout, /forbidden_fields_present: none/);
+  assert.match(stdout, /payload_version: v0.2.0/);
   assert.match(stdout, /timestamp_bucket: 2026-06-09/);
   assert.match(stdout, /input_tokens_bucket: large/);
   assert.match(stdout, /estimated_cost_bucket: under_1_usd/);
@@ -2477,6 +2478,7 @@ test("previews a sanitized contribution payload as JSON without upload", async (
   assert.equal(preview.destination, "none");
   assert.equal(preview.validation.status, "passed");
   assert.deepEqual(preview.validation.forbidden_fields_present, []);
+  assert.equal(preview.included_fields.payload_version, "v0.2.0");
   assert.equal(preview.included_fields.timestamp_bucket, "2026-06-09");
   assert.equal(preview.included_fields.input_tokens_bucket, "large");
   assert.equal(preview.included_fields.estimated_cost_bucket, "under_1_usd");
@@ -2524,6 +2526,7 @@ test("exports a sanitized contribution payload to a local JSON file", async () =
   assert.match(stdout, /Exported contribution payload contrib_[0-9a-f]{16} to /);
   assert.match(stdout, /No upload will occur in this MVP/);
   assert.equal(exported.schema_version, "opensasa.metadata.v0");
+  assert.equal(exported.payload_version, "v0.2.0");
   assert.equal(exported.timestamp_bucket, "2026-06-09");
   assert.equal(exported.estimated_cost_bucket, "under_1_usd");
   assert.equal(Object.hasOwn(exported, "session_id"), false);
@@ -2570,6 +2573,7 @@ test("exports contribution metadata as JSON output", async () => {
   assert.equal(result.session_id, session.session_id);
   assert.match(result.contribution_id, /^contrib_[0-9a-f]{16}$/);
   assert.equal(result.path, outputPath);
+  assert.equal(exported.payload_version, "v0.2.0");
   assert.equal(exported.contribution_id, result.contribution_id);
 });
 

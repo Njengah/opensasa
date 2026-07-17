@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const schemaVersion = "opensasa.metadata.v0";
+export const contributionPayloadVersion = "v0.2.0";
 
 export const taskTypes = [
   "bug_fix",

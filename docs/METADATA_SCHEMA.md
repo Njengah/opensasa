@@ -36,6 +36,17 @@ opensasa.metadata.v0
 
 Future versions should be backward compatible where possible. Breaking changes should be documented in methodology and release notes.
 
+## Contribution Payload Version
+
+Contribution exports should also carry a payload-specific version so the
+public-sharing contract can evolve without changing the local session schema.
+
+Current draft:
+
+```text
+v0.2.0
+```
+
 ## Local Data Model
 
 Local data may be more detailed than the public contribution payload, but it must still avoid storing unnecessary private data.
@@ -246,6 +257,7 @@ The public contribution payload may include:
 | Field | Notes |
 | --- | --- |
 | `schema_version` | Required. |
+| `payload_version` | Required. Current contribution payload contract version, for example `v0.2.0`. |
 | `contribution_id` | Opaque generated ID. Must not expose local path or repo identity. |
 | `timestamp_bucket` | Example: day, week, or month bucket. |
 | `provider` | Safe model metadata. |

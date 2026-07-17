@@ -219,7 +219,7 @@ Expected PRs:
 - [x] Add extension config for local database path. (#91)
 - [x] Add extension command to open dashboard. (#92)
 - [x] Add extension tests or smoke checks. (#93)
-- [ ] Add extension install/dev docs.
+- [x] Add extension install/dev docs. (#94)
 - [ ] Add release packaging workflow for extension.
 
 Exit criteria:

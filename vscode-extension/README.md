@@ -4,7 +4,26 @@ This directory is the package scaffold for the OpenSasa VS Code extension.
 It is intentionally local-first: the extension will communicate with the
 OpenSasa CLI and its local SQLite database in later Phase 4 PRs.
 
-## Development
+## Install For Local Development
+
+Prerequisites:
+
+- VS Code `1.85.0` or newer,
+- Node.js `20.x` or newer,
+- repository dependencies installed from the project root.
+
+From the repository root, prepare the local CLI that the extension calls:
+
+```sh
+npm install
+npm run build
+npm link
+```
+
+`npm link` exposes the local `opensasa` executable on your machine so the
+extension can launch the CLI without hardcoding a repo path.
+
+## Develop And Verify
 
 From this directory, run:
 
@@ -15,8 +34,14 @@ npm run check
 From the repository root, `npm test` now includes this extension smoke check
 after the shared test suite.
 
-To try the extension in VS Code, open this directory as a workspace and press
-`F5` after installing the VS Code Extension Development host tools.
+To try the extension in VS Code:
+
+1. Open the `vscode-extension` directory in VS Code.
+2. Press `F5` to start an Extension Development Host window.
+3. In the new window, run the `OpenSasa:` commands from the Command Palette.
+
+The Extension Development Host uses the same local `opensasa` executable you
+prepared with `npm link`.
 
 The extension exposes `OpenSasa: Show Status`, which invokes the local
 `opensasa agent status --json` command. Arguments are passed without a shell,
@@ -47,3 +72,9 @@ derive the privacy-safe project identity hash.
 `OpenSasa: Finish Session` uses a quick pick for the final outcome and
 finalizes the session created in the current editor window with
 `opensasa finalize --json`.
+
+## Notes
+
+- The extension stays local-first; it talks only to your local OpenSasa CLI and database.
+- If you change the CLI code, rerun `npm run build` from the repository root before testing the extension again.
+- If you want the extension to use a non-default SQLite file, set `opensasa.dbPath` before launching the Extension Development Host.

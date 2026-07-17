@@ -89,6 +89,9 @@ Seed-only methodology examples are available in
 For a quick reminder of what currently runs and where development stopped, see
 [Project Snapshot](./docs/PROJECT_SNAPSHOT.md).
 
+VS Code extension development notes live in
+[vscode-extension/README.md](./vscode-extension/README.md).
+
 ## Local CLI Usage
 
 Install dependencies and build the CLI:

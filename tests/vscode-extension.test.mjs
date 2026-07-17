@@ -66,6 +66,29 @@ test('Root test script runs the VS Code extension smoke check', async () => {
   assert.match(packageJson.scripts.test, /npm --prefix \.\/vscode-extension run check/);
 });
 
+test('VS Code extension README documents local install and development flow', async () => {
+  const readme = await readFile(
+    path.join(root, 'vscode-extension', 'README.md'),
+    'utf8',
+  );
+
+  assert.match(readme, /## Install For Local Development/);
+  assert.match(readme, /npm install/);
+  assert.match(readme, /npm run build/);
+  assert.match(readme, /npm link/);
+  assert.match(readme, /Press `F5` to start an Extension Development Host window/);
+  assert.match(readme, /opensasa\.dbPath/);
+});
+
+test('Root README links to the VS Code extension development notes', async () => {
+  const readme = await readFile(
+    path.join(root, 'README.md'),
+    'utf8',
+  );
+
+  assert.match(readme, /\[vscode-extension\/README\.md\]\(\.\/vscode-extension\/README\.md\)/);
+});
+
 test('VS Code extension scaffold has an activation entry point', async () => {
   const source = await readFile(
     path.join(root, 'vscode-extension', 'src', 'extension.js'),

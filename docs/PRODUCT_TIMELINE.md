@@ -220,7 +220,7 @@ Expected PRs:
 - [x] Add extension command to open dashboard. (#92)
 - [x] Add extension tests or smoke checks. (#93)
 - [x] Add extension install/dev docs. (#94)
-- [ ] Add release packaging workflow for extension.
+- [x] Add release packaging workflow for extension. (#95)
 
 Exit criteria:
 

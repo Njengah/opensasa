@@ -51,9 +51,14 @@ test('VS Code extension scaffold has valid package metadata', async () => {
   assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.startSession'));
   assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.finishSession'));
   assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.openDashboard'));
+  assert.equal(packageJson.repository.url, 'https://github.com/Njengah/opensasa.git');
   assert.equal(packageJson.contributes.configuration.title, 'OpenSasa');
   assert.equal(packageJson.contributes.configuration.properties['opensasa.dbPath'].type, 'string');
+  assert.ok(packageJson.files.includes('src'));
+  assert.ok(packageJson.files.includes('README.md'));
+  assert.ok(packageJson.files.includes('LICENSE'));
   assert.match(packageJson.scripts.check, /src\/cli\.js/);
+  assert.match(packageJson.scripts['package:vsix'], /@vscode\/vsce package/);
   assert.match(packageJson.scripts.check, /src\/extension\.js/);
   assert.match(packageJson.scripts.check, /src\/status-bar\.js/);
 });
@@ -78,6 +83,9 @@ test('VS Code extension README documents local install and development flow', as
   assert.match(readme, /npm link/);
   assert.match(readme, /Press `F5` to start an Extension Development Host window/);
   assert.match(readme, /opensasa\.dbPath/);
+  assert.match(readme, /npm --prefix \.\/vscode-extension run package:vsix/);
+  assert.match(readme, /Install\s+from VSIX/);
+  assert.match(readme, /\.github\/workflows\/vscode-extension-package\.yml/);
 });
 
 test('Root README links to the VS Code extension development notes', async () => {
@@ -87,6 +95,21 @@ test('Root README links to the VS Code extension development notes', async () =>
   );
 
   assert.match(readme, /\[vscode-extension\/README\.md\]\(\.\/vscode-extension\/README\.md\)/);
+});
+
+test('GitHub workflow packages the VS Code extension as a VSIX artifact', async () => {
+  const workflow = await readFile(
+    path.join(root, '.github', 'workflows', 'vscode-extension-package.yml'),
+    'utf8',
+  );
+
+  assert.match(workflow, /workflow_dispatch:/);
+  assert.match(workflow, /vscode-extension-v\*/);
+  assert.match(workflow, /npm test/);
+  assert.match(workflow, /npm install -g @vscode\/vsce/);
+  assert.match(workflow, /working-directory: vscode-extension/);
+  assert.match(workflow, /vsce package/);
+  assert.match(workflow, /actions\/upload-artifact@v4/);
 });
 
 test('VS Code extension scaffold has an activation entry point', async () => {

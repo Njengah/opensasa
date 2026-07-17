@@ -29,10 +29,14 @@ From this directory, run:
 
 ```sh
 npm run check
+npm run package:vsix
 ```
 
 From the repository root, `npm test` now includes this extension smoke check
 after the shared test suite.
+
+`npm run package:vsix` creates an installable `.vsix` package in the
+`vscode-extension` directory using the official `@vscode/vsce` packaging tool.
 
 To try the extension in VS Code:
 
@@ -78,3 +82,20 @@ finalizes the session created in the current editor window with
 - The extension stays local-first; it talks only to your local OpenSasa CLI and database.
 - If you change the CLI code, rerun `npm run build` from the repository root before testing the extension again.
 - If you want the extension to use a non-default SQLite file, set `opensasa.dbPath` before launching the Extension Development Host.
+
+## Release Packaging
+
+Package the extension locally with:
+
+```sh
+npm --prefix ./vscode-extension run package:vsix
+```
+
+The generated `.vsix` file can be installed in VS Code with `Extensions: Install
+from VSIX...`.
+
+GitHub Actions also includes a release packaging workflow at
+`.github/workflows/vscode-extension-package.yml`. It can be run manually with
+`workflow_dispatch` or by pushing a tag that matches `vscode-extension-v*`.
+The workflow verifies the repository, packages the extension on Linux, and
+uploads the `.vsix` file as a build artifact.

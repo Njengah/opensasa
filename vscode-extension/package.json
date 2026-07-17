@@ -29,7 +29,17 @@
         "command": "opensasa.finishSession",
         "title": "OpenSasa: Finish Session"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "OpenSasa",
+      "properties": {
+        "opensasa.dbPath": {
+          "type": "string",
+          "description": "Override the local OpenSasa SQLite database path used by extension commands.",
+          "scope": "machine-overridable"
+        }
+      }
+    }
   },
   "scripts": {
     "check": "node --check src/extension.js"

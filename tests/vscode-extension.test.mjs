@@ -9,6 +9,12 @@ import { runOpenSasaCli } from '../vscode-extension/src/cli.js';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(import.meta.url);
 const {
+  appendDbPathArgs,
+  DB_PATH_SETTING,
+  EXTENSION_NAMESPACE,
+  readConfiguredDbPath,
+} = require('../vscode-extension/src/config.js');
+const {
   CUSTOM_MODEL_VALUE,
   CUSTOM_TOOL_VALUE,
   OMIT_TOOL_VALUE,
@@ -38,6 +44,8 @@ test('VS Code extension scaffold has valid package metadata', async () => {
   assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.showStatus'));
   assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.startSession'));
   assert.ok(packageJson.contributes.commands.some((command) => command.command === 'opensasa.finishSession'));
+  assert.equal(packageJson.contributes.configuration.title, 'OpenSasa');
+  assert.equal(packageJson.contributes.configuration.properties['opensasa.dbPath'].type, 'string');
 });
 
 test('VS Code extension scaffold has an activation entry point', async () => {
@@ -48,6 +56,8 @@ test('VS Code extension scaffold has an activation entry point', async () => {
 
   assert.match(source, /maybeShowPrivacyNotice/);
   assert.match(source, /context\.globalState/);
+  assert.match(source, /getExtensionDbPath/);
+  assert.match(source, /appendDbPathArgs/);
   assert.match(source, /createStatusBarItem/);
   assert.match(source, /applyStatusBarState/);
   assert.match(source, /registerCommand\(\s*['"]opensasa\.showStatus['"]\s*,/);
@@ -61,6 +71,33 @@ test('VS Code extension scaffold has an activation entry point', async () => {
   assert.match(source, /registerCommand\(\s*['"]opensasa\.finishSession['"]\s*,/);
   assert.match(source, /pickFinalOutcome/);
   assert.match(source, /['"]finalize['"].*['"]--final-outcome['"].*['"]--json['"]/s);
+});
+
+test('VS Code extension config helper reads a trimmed local database path', () => {
+  const config = {
+    get(key) {
+      assert.equal(key, DB_PATH_SETTING);
+      return ' C:/Users/User/.opensasa/custom.db ';
+    },
+  };
+
+  assert.equal(readConfiguredDbPath(config), 'C:/Users/User/.opensasa/custom.db');
+});
+
+test('VS Code extension config helper ignores missing database path values', () => {
+  assert.equal(readConfiguredDbPath({ get: () => undefined }), undefined);
+  assert.equal(readConfiguredDbPath({ get: () => '   ' }), undefined);
+});
+
+test('VS Code extension config helper appends --db-path only when configured', () => {
+  const baseArgs = ['agent', 'status', '--json'];
+
+  assert.deepEqual(
+    appendDbPathArgs(baseArgs, 'C:/Users/User/.opensasa/custom.db'),
+    ['agent', 'status', '--json', '--db-path', 'C:/Users/User/.opensasa/custom.db'],
+  );
+  assert.deepEqual(appendDbPathArgs(baseArgs, undefined), baseArgs);
+  assert.equal(EXTENSION_NAMESPACE, 'opensasa');
 });
 
 test('VS Code privacy notice helper shows once and persists the acknowledgement', async () => {

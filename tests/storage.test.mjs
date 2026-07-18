@@ -148,6 +148,49 @@ test("records and lists local contribution history newest first", () => {
     ]);
     assert.equal(history[0].provider, "Anthropic");
     assert.equal(history[1].output_path, "C:\\exports\\older.json");
+    assert.equal(history[0].current_consent_state, "granted");
+    assert.equal(history[0].is_revoked, false);
+    assert.equal(history[0].consent_active, true);
+  } finally {
+    store.close();
+  }
+});
+
+test("marks contribution history as revoked when local consent is later revoked", () => {
+  const store = openStore(join(tmpRoot, "contribution-history-revoked.db"));
+
+  try {
+    const session = store.createSession({
+      ...baseSession,
+      contribution_consent: "granted",
+    });
+    store.recordContributionHistory({
+      exported_at: "2026-06-10T12:00:00.000Z",
+      session_id: session.session_id,
+      contribution_id: "contrib_revoked",
+      payload_version: "v0.2.0",
+      output_path: "C:\\exports\\revoked.json",
+      provider: session.provider,
+      model_id: session.model_id,
+      tool: session.tool,
+      language: session.language,
+      framework: session.framework,
+      task_type: session.task_type,
+      final_outcome: session.final_outcome,
+      consent_state: "granted",
+      validation_status: "passed",
+    });
+
+    store.updateSession(session.session_id, {
+      contribution_consent: "revoked",
+    });
+
+    const [history] = store.listContributionHistory();
+
+    assert.equal(history.consent_state, "granted");
+    assert.equal(history.current_consent_state, "revoked");
+    assert.equal(history.is_revoked, true);
+    assert.equal(history.consent_active, false);
   } finally {
     store.close();
   }

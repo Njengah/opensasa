@@ -7,6 +7,7 @@ import { resolveDatabasePath } from "./config.js";
 import {
   bucketValues,
   contributionConsentStates,
+  contributionHistoryEntrySchema,
   contributionHistorySchema,
   contributionValidationStatuses,
   costSources,
@@ -20,6 +21,7 @@ import {
   type LocalSession,
   type ActivityHeartbeat,
   type ContributionHistoryEntry,
+  type ContributionHistoryRecord,
 } from "./schema.js";
 
 const createSessionsMigration = "001_create_sessions";
@@ -87,6 +89,9 @@ const contributionHistoryColumns = [
 ] as const;
 type ContributionHistoryColumn = (typeof contributionHistoryColumns)[number];
 type ContributionHistoryRow = Record<ContributionHistoryColumn, unknown>;
+type ContributionHistoryListRow = ContributionHistoryRow & {
+  current_consent_state: unknown;
+};
 type ListSessionsOptions = {
   limit?: number;
   provider?: string;
@@ -220,7 +225,7 @@ export class OpenSasaStore {
     }));
   }
 
-  recordContributionHistory(input: unknown): ContributionHistoryEntry {
+  recordContributionHistory(input: unknown): ContributionHistoryRecord {
     const record =
       input && typeof input === "object" && !Array.isArray(input)
         ? (input as Record<string, unknown>)
@@ -245,37 +250,37 @@ export class OpenSasaStore {
     const parameters: Record<string, string | number> = {};
 
     if (options.provider !== undefined) {
-      filters.push("provider = @provider");
+      filters.push("contribution_history.provider = @provider");
       parameters.provider = options.provider;
     }
 
     if (options.modelId !== undefined) {
-      filters.push("model_id = @modelId");
+      filters.push("contribution_history.model_id = @modelId");
       parameters.modelId = options.modelId;
     }
 
     if (options.tool !== undefined) {
-      filters.push("tool = @tool");
+      filters.push("contribution_history.tool = @tool");
       parameters.tool = options.tool;
     }
 
     if (options.language !== undefined) {
-      filters.push("language = @language");
+      filters.push("contribution_history.language = @language");
       parameters.language = options.language;
     }
 
     if (options.framework !== undefined) {
-      filters.push("framework = @framework");
+      filters.push("contribution_history.framework = @framework");
       parameters.framework = options.framework;
     }
 
     if (options.taskType !== undefined) {
-      filters.push("task_type = @taskType");
+      filters.push("contribution_history.task_type = @taskType");
       parameters.taskType = options.taskType;
     }
 
     if (options.finalOutcome !== undefined) {
-      filters.push("final_outcome = @finalOutcome");
+      filters.push("contribution_history.final_outcome = @finalOutcome");
       parameters.finalOutcome = options.finalOutcome;
     }
 
@@ -287,12 +292,15 @@ export class OpenSasaStore {
     const limitClause = options.limit === undefined ? "" : " LIMIT @limit";
     const rows = this.database
       .prepare(
-        `SELECT ${contributionHistoryColumns.join(", ")} FROM contribution_history${whereClause}
+        `SELECT ${contributionHistoryColumns.map((column) => `contribution_history.${column}`).join(", ")},
+                COALESCE(sessions.contribution_consent, contribution_history.consent_state) AS current_consent_state
+         FROM contribution_history
+         LEFT JOIN sessions ON sessions.session_id = contribution_history.session_id${whereClause}
          ORDER BY datetime(exported_at) DESC, history_id DESC${limitClause}`,
       )
-      .all(parameters) as ContributionHistoryRow[];
+      .all(parameters) as ContributionHistoryListRow[];
 
-    return rows.map(parseContributionHistoryRow);
+    return rows.map(parseContributionHistoryEntryRow);
   }
 
   deleteSession(sessionId: string): boolean {
@@ -579,7 +587,7 @@ function parseSessionRow(row: SessionRow): LocalSession {
   return localSessionSchema.parse(withoutNulls);
 }
 
-function parseContributionHistoryRow(row: ContributionHistoryRow): ContributionHistoryEntry {
+function parseContributionHistoryRecordRow(row: ContributionHistoryRow): ContributionHistoryRecord {
   const withoutNulls = Object.fromEntries(
     contributionHistoryColumns
       .map((column) => [column, row[column]] as const)
@@ -587,6 +595,22 @@ function parseContributionHistoryRow(row: ContributionHistoryRow): ContributionH
   );
 
   return contributionHistorySchema.parse(withoutNulls);
+}
+
+function parseContributionHistoryEntryRow(row: ContributionHistoryListRow): ContributionHistoryEntry {
+  const record = parseContributionHistoryRecordRow(row);
+  const currentConsentState = contributionConsentStates.includes(
+    row.current_consent_state as (typeof contributionConsentStates)[number],
+  )
+    ? row.current_consent_state
+    : record.consent_state;
+
+  return contributionHistoryEntrySchema.parse({
+    ...record,
+    current_consent_state: currentConsentState,
+    is_revoked: currentConsentState === "revoked",
+    consent_active: currentConsentState === "granted",
+  });
 }
 
 function sqlStringList(values: readonly string[]): string {

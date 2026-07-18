@@ -471,7 +471,9 @@ this first export workflow. Export also requires the session's local
 `payload_version: "v0.2.0"`. The export command also reports local validation
 results, and `--json` includes the full validation report metadata alongside
 the export path and contribution ID. Successful exports are also recorded in
-local contribution history for later inspection in the dashboard.
+local contribution history for later inspection in the dashboard. That history
+keeps the original export record immutable and shows the current local consent
+state, so later revocations remain visible during review.
 
 ## Local Storage
 

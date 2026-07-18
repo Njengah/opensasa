@@ -152,8 +152,17 @@ export const contributionHistorySchema = z
   })
   .strict();
 
+export const contributionHistoryEntrySchema = contributionHistorySchema
+  .extend({
+    current_consent_state: z.enum(contributionConsentStates),
+    is_revoked: z.boolean(),
+    consent_active: z.boolean(),
+  })
+  .strict();
+
 export type ActivityHeartbeat = z.infer<typeof activityHeartbeatSchema>;
-export type ContributionHistoryEntry = z.infer<typeof contributionHistorySchema>;
+export type ContributionHistoryRecord = z.infer<typeof contributionHistorySchema>;
+export type ContributionHistoryEntry = z.infer<typeof contributionHistoryEntrySchema>;
 
 export type LocalSession = z.infer<typeof localSessionSchema>;
 export type FinalOutcome = (typeof finalOutcomes)[number];

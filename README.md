@@ -474,6 +474,8 @@ the export path and contribution ID. Successful exports are also recorded in
 local contribution history for later inspection in the dashboard. That history
 keeps the original export record immutable and shows the current local consent
 state, so later revocations remain visible during review.
+For a checked-in synthetic example of the exported JSON shape, see
+[docs/examples/sample-contribution-payload.json](./docs/examples/sample-contribution-payload.json).
 
 ## Local Storage
 

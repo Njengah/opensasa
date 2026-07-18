@@ -144,7 +144,7 @@ export type ContributionValidation = {
   summary: ContributionValidationSummary;
 };
 
-type ContributionPreviewInspection = {
+export type ContributionPreviewInspection = {
   status: "preview only";
   consent: ContributionConsentState;
   upload_enabled: false;
@@ -152,6 +152,29 @@ type ContributionPreviewInspection = {
   no_upload_notice: string;
   validation: ContributionValidation;
   included_fields: ContributionPreview;
+  excluded_fields: string[];
+};
+
+export type ContributionBundlePreview = {
+  status: "preview only";
+  upload_enabled: false;
+  destination: "none";
+  no_upload_notice: string;
+  consent_summary: Record<ContributionConsentState, number>;
+  included_session_count: number;
+  validation_summary: {
+    status: "passed" | "failed";
+    payload_count: number;
+    passed_count: number;
+    failed_count: number;
+    missing_required_field_count: number;
+    forbidden_field_count: number;
+    unknown_field_count: number;
+  };
+  included_payloads: Array<{
+    payload: ContributionPreview;
+    validation: ContributionValidation;
+  }>;
   excluded_fields: string[];
 };
 
@@ -243,6 +266,69 @@ export function buildContributionPreviewInspection(
     consent: session.contribution_consent,
     validation: validateContributionPreview(includedFields),
     included_fields: includedFields,
+    excluded_fields: [...excludedContributionFields],
+  };
+}
+
+export function buildContributionBundlePreview(
+  sessions: LocalSession[],
+): ContributionBundlePreview {
+  const consentSummary: Record<ContributionConsentState, number> = {
+    not_granted: 0,
+    granted: 0,
+    revoked: 0,
+  };
+
+  const includedPayloads = sessions
+    .filter((session) => {
+      consentSummary[session.contribution_consent] += 1;
+      return session.contribution_consent === "granted";
+    })
+    .map((session) => {
+      const payload = buildContributionPreview(session);
+      return {
+        payload,
+        validation: validateContributionPreview(payload),
+      };
+    });
+
+  const validationSummary: ContributionBundlePreview["validation_summary"] = includedPayloads.reduce(
+    (summary, item) => {
+      summary.payload_count += 1;
+      if (item.validation.status === "passed") {
+        summary.passed_count += 1;
+      } else {
+        summary.failed_count += 1;
+      }
+      summary.missing_required_field_count += item.validation.summary.missing_required_field_count;
+      summary.forbidden_field_count += item.validation.summary.forbidden_field_count;
+      summary.unknown_field_count += item.validation.summary.unknown_field_count;
+      return summary;
+    },
+    {
+      status: "passed",
+      payload_count: 0,
+      passed_count: 0,
+      failed_count: 0,
+      missing_required_field_count: 0,
+      forbidden_field_count: 0,
+      unknown_field_count: 0,
+    },
+  );
+
+  if (validationSummary.failed_count > 0) {
+    validationSummary.status = "failed";
+  }
+
+  return {
+    status: "preview only",
+    upload_enabled: false,
+    destination: "none",
+    no_upload_notice: "No upload will occur in this MVP.",
+    consent_summary: consentSummary,
+    included_session_count: includedPayloads.length,
+    validation_summary: validationSummary,
+    included_payloads: includedPayloads,
     excluded_fields: [...excludedContributionFields],
   };
 }

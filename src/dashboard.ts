@@ -1,4 +1,5 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import { buildContributionBundlePreview } from "./inspect.js";
 import { calculateLocalReport, formatLocalReportJson } from "./report.js";
 import { isUsefulOutcome, type LocalSession } from "./schema.js";
 import { openStore } from "./storage.js";
@@ -71,21 +72,29 @@ function handleDashboardRequest(
     let store;
     try {
       store = openStore(dbPath);
-      const sessions = store.listSessions({
-        provider: url.searchParams.get("provider") ?? undefined,
-        modelId: url.searchParams.get("model") ?? undefined,
-        tool: url.searchParams.get("tool") ?? undefined,
-        language: url.searchParams.get("language") ?? undefined,
-        framework: url.searchParams.get("framework") ?? undefined,
-        taskType: url.searchParams.get("taskType") ?? undefined,
-        finalOutcome: url.searchParams.get("outcome") ?? undefined,
-      });
+      const sessions = listDashboardSessions(store, url);
       sendJson(response, 200, {
         ...JSON.parse(formatLocalReportJson(calculateLocalReport(sessions))),
         trendByDay: calculateDashboardTrend(sessions),
       });
     } catch (error) {
       sendJson(response, 500, { error: error instanceof Error ? error.message : "Unable to read local report." });
+    } finally {
+      store?.close();
+    }
+    return;
+  }
+
+  if (url.pathname === "/api/contribution-bundle") {
+    let store;
+    try {
+      store = openStore(dbPath);
+      const sessions = listDashboardSessions(store, url);
+      sendJson(response, 200, buildContributionBundlePreview(sessions));
+    } catch (error) {
+      sendJson(response, 500, {
+        error: error instanceof Error ? error.message : "Unable to build contribution bundle preview.",
+      });
     } finally {
       store?.close();
     }
@@ -135,6 +144,21 @@ function sendJson(response: ServerResponse, statusCode: number, value: unknown):
   response.end(JSON.stringify(value));
 }
 
+function listDashboardSessions(
+  store: ReturnType<typeof openStore>,
+  url: URL,
+): LocalSession[] {
+  return store.listSessions({
+    provider: url.searchParams.get("provider") ?? undefined,
+    modelId: url.searchParams.get("model") ?? undefined,
+    tool: url.searchParams.get("tool") ?? undefined,
+    language: url.searchParams.get("language") ?? undefined,
+    framework: url.searchParams.get("framework") ?? undefined,
+    taskType: url.searchParams.get("taskType") ?? undefined,
+    finalOutcome: url.searchParams.get("outcome") ?? undefined,
+  });
+}
+
 function dashboardHtml(): string {
   return `<!doctype html>
 <html lang="en">
@@ -161,6 +185,12 @@ function dashboardHtml(): string {
       .trend-row { align-items: center; display: grid; gap: 10px; grid-template-columns: 100px 1fr 80px; margin: 10px 0; }
       .cost-bar { background: #d8f0df; border-radius: 4px; min-width: 2px; height: 18px; }
       .empty-state { background: #fffaf0; border: 1px solid #f0d9a3; border-radius: 10px; padding: 16px; }
+      .bundle-summary { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin: 16px 0; }
+      .bundle-list { display: grid; gap: 10px; }
+      .bundle-item { background: #f8fafb; border: 1px solid #dfe4e8; border-radius: 10px; padding: 12px; }
+      .bundle-meta { color: #5f6b76; font-size: 0.95rem; }
+      .pill { background: #e7f1ff; border-radius: 999px; display: inline-block; margin-right: 8px; padding: 4px 10px; }
+      .field-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
       code { background: #eef1f4; border-radius: 4px; padding: 2px 5px; }
       a { color: #1459a6; }
     </style>
@@ -220,8 +250,18 @@ function dashboardHtml(): string {
         <h2>Verification</h2>
         <div id="verification-chart"><p class="muted">Loading…</p></div>
       </section>
+      <section class="comparison" aria-labelledby="contribution-bundle-title">
+        <h2 id="contribution-bundle-title">Contribution bundle preview</h2>
+        <p class="muted">This local-only preview shows which consent-granted sessions would be included in a future privacy-safe contribution bundle.</p>
+        <div id="contribution-bundle-summary" class="bundle-summary"><p class="muted">Loading…</p></div>
+        <p id="contribution-bundle-status" class="muted">Loading…</p>
+        <div id="contribution-bundle-list" class="bundle-list"><p class="muted">Loading…</p></div>
+        <h3>Excluded fields</h3>
+        <div id="contribution-bundle-excluded-fields" class="field-list"><p class="muted">Loading…</p></div>
+      </section>
       <p id="status" class="muted">Loading your local report…</p>
       <p><a href="/api/report">View local report JSON</a></p>
+      <p><a href="/api/contribution-bundle">View contribution bundle JSON</a></p>
     </main>
     <script>
       const formatRate = (metric) => metric.rate === null ? "unknown" : (metric.rate * 100).toFixed(1) + "%";
@@ -256,48 +296,82 @@ function dashboardHtml(): string {
         const rows = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
         const element = document.querySelector("#" + elementId);
         element.innerHTML = rows.length === 0
-          ? "<tr><td colspan=\"3\">No sessions recorded.</td></tr>"
-          : rows.map(([name, count]) => "<tr><td>" + name + "</td><td>" + count + "</td><td>" + formatCost(costs[name] ?? null) + "</td></tr>").join("");
+          ? '<tr><td colspan="3">No sessions recorded.</td></tr>'
+          : rows.map(([name, count]) => '<tr><td>' + name + '</td><td>' + count + '</td><td>' + formatCost(costs[name] ?? null) + '</td></tr>').join("");
       };
       const renderTrend = (points) => {
         const element = document.querySelector("#daily-trend");
-        if (points.length === 0) { element.innerHTML = "<p class=\"muted\">No sessions recorded.</p>"; return; }
+        if (points.length === 0) { element.innerHTML = '<p class="muted">No sessions recorded.</p>'; return; }
         const maximum = Math.max(...points.map((point) => point.sessions));
         element.innerHTML = points.map((point) => {
           const width = Math.max(2, (point.sessions / maximum) * 100);
-          return "<div class=\"trend-row\"><span>" + point.date + "</span><div class=\"trend-bar\" style=\"width:" + width + "%\" title=\"" + point.sessions + " sessions\"></div><span>" + point.usefulSessions + "/" + point.sessions + " useful</span></div>";
+          return '<div class="trend-row"><span>' + point.date + '</span><div class="trend-bar" style="width:' + width + '%" title="' + point.sessions + ' sessions"></div><span>' + point.usefulSessions + '/' + point.sessions + ' useful</span></div>';
         }).join("");
       };
       const renderCostChart = (elementId, costs) => {
         const rows = Object.entries(costs).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
         const element = document.querySelector("#" + elementId);
-        if (rows.length === 0) { element.innerHTML = "<p class=\"muted\">No cost data recorded.</p>"; return; }
+        if (rows.length === 0) { element.innerHTML = '<p class="muted">No cost data recorded.</p>'; return; }
         const maximum = Math.max(...rows.map((row) => row[1]));
         element.innerHTML = rows.map(([name, cost]) => {
           const width = Math.max(2, (cost / maximum) * 100);
-          return "<div class=\"trend-row\"><span>" + name + "</span><div class=\"cost-bar\" style=\"width:" + width + "%\" title=\"" + formatCost(cost) + "\"></div><span>" + formatCost(cost) + "</span></div>";
+          return '<div class="trend-row"><span>' + name + '</span><div class="cost-bar" style="width:' + width + '%" title="' + formatCost(cost) + '"></div><span>' + formatCost(cost) + '</span></div>';
         }).join("");
       };
       const renderCountChart = (elementId, counts) => {
         const rows = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
         const element = document.querySelector("#" + elementId);
-        if (rows.length === 0) { element.innerHTML = "<p class=\"muted\">No verification data recorded.</p>"; return; }
+        if (rows.length === 0) { element.innerHTML = '<p class="muted">No verification data recorded.</p>'; return; }
         const maximum = Math.max(...rows.map((row) => row[1]));
         element.innerHTML = rows.map(([name, count]) => {
           const width = Math.max(2, (count / maximum) * 100);
-          return "<div class=\"trend-row\"><span>" + name + "</span><div class=\"trend-bar\" style=\"width:" + width + "%\" title=\"" + count + " sessions\"></div><span>" + count + "</span></div>";
+          return '<div class="trend-row"><span>' + name + '</span><div class="trend-bar" style="width:' + width + '%" title="' + count + ' sessions"></div><span>' + count + '</span></div>';
         }).join("");
       };
       const renderVerification = (summary) => {
         const element = document.querySelector("#verification-chart");
         element.innerHTML = Object.entries(summary).map(([field, counts]) => {
           const recorded = Object.entries(counts).filter(([outcome]) => outcome !== "unknown").reduce((total, [, count]) => total + count, 0);
-          return "<div class=\"trend-row\"><span>" + field.replace("_outcome", "") + "</span><div class=\"trend-bar\" style=\"width:" + Math.min(100, recorded * 10) + "%\" title=\"" + recorded + " recorded\"></div><span>" + recorded + " recorded</span></div>";
+          return '<div class="trend-row"><span>' + field.replace("_outcome", "") + '</span><div class="trend-bar" style="width:' + Math.min(100, recorded * 10) + '%" title="' + recorded + ' recorded"></div><span>' + recorded + ' recorded</span></div>';
         }).join("");
       };
-      fetch("/api/report")
-        .then((response) => response.ok ? response.json() : Promise.reject(new Error("Report unavailable")))
-        .then((report) => {
+      const renderContributionBundle = (bundle) => {
+        const summary = document.querySelector("#contribution-bundle-summary");
+        summary.innerHTML = [
+          ["Included payloads", bundle.included_session_count],
+          ["Consent granted", bundle.consent_summary.granted],
+          ["Consent pending", bundle.consent_summary.not_granted],
+          ["Consent revoked", bundle.consent_summary.revoked],
+        ].map(([label, value]) => '<article class="card"><span class="muted">' + label + '</span><strong>' + value + '</strong></article>').join("");
+        document.querySelector("#contribution-bundle-status").textContent =
+          "Bundle " + bundle.validation_summary.status + ": " +
+          bundle.validation_summary.payload_count + " payloads, " +
+          bundle.validation_summary.failed_count + " failed validation, " +
+          bundle.validation_summary.forbidden_field_count + " forbidden fields, " +
+          bundle.validation_summary.unknown_field_count + " unknown fields.";
+        const list = document.querySelector("#contribution-bundle-list");
+        list.innerHTML = bundle.included_payloads.length === 0
+          ? '<p class="muted">No consent-granted sessions match the current filters.</p>'
+          : bundle.included_payloads.map((item) =>
+              '<article class="bundle-item">' +
+              '<strong>' + item.payload.contribution_id + '</strong>' +
+              '<div class="bundle-meta">' + item.payload.provider + ' / ' + item.payload.model_id + ' · ' + item.payload.task_type + ' · ' + item.payload.timestamp_bucket + '</div>' +
+              '<div class="field-list">' +
+              '<span class="pill">validation: ' + item.validation.status + '</span>' +
+              '<span class="pill">verified_success: ' + item.payload.verified_success + '</span>' +
+              '<span class="pill">payload_version: ' + item.payload.payload_version + '</span>' +
+              '</div>' +
+              '</article>'
+            ).join("");
+        const excluded = document.querySelector("#contribution-bundle-excluded-fields");
+        excluded.innerHTML = bundle.excluded_fields.map((field) => '<span class="pill">' + field + '</span>').join("");
+      };
+      const queryString = window.location.search;
+      Promise.all([
+        fetch("/api/report" + queryString).then((response) => response.ok ? response.json() : Promise.reject(new Error("Report unavailable"))),
+        fetch("/api/contribution-bundle" + queryString).then((response) => response.ok ? response.json() : Promise.reject(new Error("Contribution bundle unavailable"))),
+      ])
+        .then(([report, bundle]) => {
           setFilterOptions(report);
           document.querySelector("#empty-state").hidden = report.totalSessions !== 0;
           document.querySelector("#total-sessions").textContent = report.totalSessions;
@@ -312,6 +386,7 @@ function dashboardHtml(): string {
           renderCostChart("tool-cost-chart", report.costByToolUsd);
           renderCountChart("outcome-chart", { accepted: report.acceptedOrPartiallyAcceptedCount, rejected: report.rejectedCount, unknown: report.unknownOutcomeCount });
           renderVerification(report.verificationOutcomeSummary);
+          renderContributionBundle(bundle);
           document.querySelector("#status").textContent = "Report loaded from local storage.";
         })
         .catch(() => { document.querySelector("#status").textContent = "Unable to load the local report."; });

@@ -111,6 +111,8 @@ type InspectOptions = StoreOptions & {
 
 type ExportOptions = StoreOptions & {
   out?: string;
+  metadataOut?: string;
+  signingKeyEnv?: string;
   yes?: boolean;
   json?: boolean;
 };
@@ -792,6 +794,8 @@ program
   .description("Write a sanitized contribution payload to a local JSON file.")
   .argument("<session-id>", "local session ID to export")
   .requiredOption("--out <path>", "local JSON file path to write")
+  .option("--metadata-out <path>", "optional local JSON file path for export metadata sidecar")
+  .option("--signing-key-env <name>", "environment variable containing an HMAC signing key for export metadata")
   .requiredOption("--yes", "confirm export of the local contribution payload")
   .option("--db-path <path>", "override local database path")
   .option("--json", "output export metadata as JSON")
@@ -815,7 +819,29 @@ program
         return;
       }
 
-      const result = writeContributionExport(session, options.out!);
+      if (options.signingKeyEnv && !options.metadataOut) {
+        process.exitCode = 1;
+        console.error("`--signing-key-env` requires `--metadata-out`.");
+        return;
+      }
+
+      const signingSecret = options.signingKeyEnv
+        ? process.env[options.signingKeyEnv]
+        : undefined;
+
+      if (options.signingKeyEnv && !signingSecret) {
+        process.exitCode = 1;
+        console.error(
+          `Environment variable ${options.signingKeyEnv} is required when using \`--signing-key-env\`.`,
+        );
+        return;
+      }
+
+      const result = writeContributionExport(session, options.out!, {
+        metadataPath: options.metadataOut,
+        signingSecret,
+        signingKeySource: options.signingKeyEnv ? `env:${options.signingKeyEnv}` : undefined,
+      });
       const history = store.recordContributionHistory({
         exported_at: new Date().toISOString(),
         session_id: session.session_id,
@@ -838,6 +864,11 @@ program
       }
 
       console.log(`Exported contribution payload ${result.contribution_id} to ${result.path}`);
+      if (result.metadata) {
+        console.log(
+          `${result.metadata.document.signature ? "Signed" : "Wrote"} export metadata to ${result.metadata.path}`,
+        );
+      }
       console.log(`Recorded local contribution history ${history.history_id}.`);
       console.log(
         `Validation ${result.validation.status}: ${result.validation.summary.checked_field_count} fields checked, ${result.validation.summary.missing_required_field_count} missing required, ${result.validation.summary.forbidden_field_count} forbidden, ${result.validation.summary.unknown_field_count} unknown.`,

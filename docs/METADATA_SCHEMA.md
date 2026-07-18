@@ -252,6 +252,29 @@ The contribution payload is a sanitized subset of local data. It should be gener
 A synthetic checked-in example is available at
 [`docs/examples/sample-contribution-payload.json`](./examples/sample-contribution-payload.json).
 
+### Optional Export Metadata Sidecar
+
+Exports may also include a detached local metadata file when `--metadata-out`
+is supplied. This sidecar is not required for the payload itself, but it can
+capture local provenance details for manual sharing workflows.
+
+| Field | Notes |
+| --- | --- |
+| `schema_version` | Required. Current value: `opensasa.export-metadata.v0`. |
+| `exported_at` | Required ISO timestamp for when the payload was written. |
+| `contribution_id` | Required. Must match the exported payload. |
+| `payload_version` | Required. Must match the exported payload contract. |
+| `payload_sha256` | Required detached SHA-256 hash of the exported JSON payload bytes. |
+| `payload_bytes` | Required byte size of the exported payload file. |
+| `validation_status` | Required validation result for the payload at export time. |
+| `signature` | Optional HMAC metadata signature block when `--signing-key-env` is used. |
+
+If signing is enabled, the `signature` object should include:
+
+- `algorithm`: `hmac-sha256`
+- `key_source`: local key source label such as `env:OPENSASA_SIGNING_KEY`
+- `value`: lowercase hex HMAC over the unsigned metadata document
+
 ### Allowed By Default
 
 The public contribution payload may include:

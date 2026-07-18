@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash, createHmac } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -81,4 +82,39 @@ test("exported payload excludes every forbidden contribution field", () => {
   for (const key of forbiddenContributionKeys) {
     assert.equal(Object.hasOwn(payload, key), false);
   }
+});
+
+test("writes optional signed export metadata sidecar", () => {
+  const outputPath = join(tmpRoot, "nested", "contribution-signed.json");
+  const metadataPath = join(tmpRoot, "nested", "contribution-signed.metadata.json");
+  const exportedAt = "2026-07-18T09:00:00.000Z";
+  const result = writeContributionExport(baseSession, outputPath, {
+    metadataPath,
+    exportedAt,
+    signingSecret: "local-signing-secret",
+    signingKeySource: "env:OPENSASA_SIGNING_KEY",
+  });
+  const payloadBytes = readFileSync(outputPath);
+  const metadata = JSON.parse(readFileSync(metadataPath, "utf8"));
+  const unsignedMetadata = {
+    schema_version: "opensasa.export-metadata.v0",
+    exported_at: exportedAt,
+    contribution_id: result.contribution_id,
+    payload_version: "v0.2.0",
+    payload_sha256: createHash("sha256").update(payloadBytes).digest("hex"),
+    payload_bytes: payloadBytes.byteLength,
+    validation_status: "passed",
+  };
+
+  assert.equal(result.metadata.path, metadataPath);
+  assert.deepEqual(metadata, {
+    ...unsignedMetadata,
+    signature: {
+      algorithm: "hmac-sha256",
+      key_source: "env:OPENSASA_SIGNING_KEY",
+      value: createHmac("sha256", "local-signing-secret")
+        .update(JSON.stringify(unsignedMetadata))
+        .digest("hex"),
+    },
+  });
 });

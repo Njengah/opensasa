@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const schemaVersion = "opensasa.metadata.v0";
 export const contributionPayloadVersion = "v0.2.0";
+export const exportMetadataSchemaVersion = "opensasa.export-metadata.v0";
 
 export const taskTypes = [
   "bug_fix",
@@ -69,6 +70,9 @@ export const contributionConsentStates = [
 export const contributionValidationStatuses = [
   "passed",
   "failed",
+] as const;
+export const exportSignatureAlgorithms = [
+  "hmac-sha256",
 ] as const;
 
 const nonEmptyString = z.string().trim().min(1);
@@ -160,9 +164,31 @@ export const contributionHistoryEntrySchema = contributionHistorySchema
   })
   .strict();
 
+export const contributionExportSignatureSchema = z
+  .object({
+    algorithm: z.enum(exportSignatureAlgorithms),
+    key_source: nonEmptyString,
+    value: z.string().regex(/^[a-f0-9]{64}$/),
+  })
+  .strict();
+
+export const contributionExportMetadataSchema = z
+  .object({
+    schema_version: z.literal(exportMetadataSchemaVersion).default(exportMetadataSchemaVersion),
+    exported_at: isoTimestampSchema,
+    contribution_id: nonEmptyString,
+    payload_version: nonEmptyString,
+    payload_sha256: z.string().regex(/^[a-f0-9]{64}$/),
+    payload_bytes: nonNegativeInteger,
+    validation_status: z.enum(contributionValidationStatuses),
+    signature: contributionExportSignatureSchema.optional(),
+  })
+  .strict();
+
 export type ActivityHeartbeat = z.infer<typeof activityHeartbeatSchema>;
 export type ContributionHistoryRecord = z.infer<typeof contributionHistorySchema>;
 export type ContributionHistoryEntry = z.infer<typeof contributionHistoryEntrySchema>;
+export type ContributionExportMetadata = z.infer<typeof contributionExportMetadataSchema>;
 
 export type LocalSession = z.infer<typeof localSessionSchema>;
 export type FinalOutcome = (typeof finalOutcomes)[number];

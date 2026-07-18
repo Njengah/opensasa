@@ -325,7 +325,8 @@ node ./dist/index.js dashboard
 The server binds to `127.0.0.1` by default and prints its local URL. You can
 override the interface, port, or database path with `--host`, `--port`, and
 `--db-path`. The dashboard reads local SQLite data only; it does not upload
-sessions or send telemetry.
+sessions or send telemetry. It also includes a local-only contribution bundle
+preview for consent-granted sessions alongside the personal report views.
 
 Run the dashboard smoke tests independently with:
 

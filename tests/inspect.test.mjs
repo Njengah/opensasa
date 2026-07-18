@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  buildContributionBundlePreview,
   buildContributionPreviewInspection,
   buildLocalInspection,
   buildContributionPreview,
@@ -237,4 +238,40 @@ test("generated contribution preview excludes every forbidden contribution field
 
   const validation = validateContributionPreview(preview);
   assert.deepEqual(validation.forbidden_fields_present, []);
+});
+
+test("builds a contribution bundle preview from consent-granted sessions", () => {
+  const bundle = buildContributionBundlePreview([
+    baseSession,
+    localSessionSchema.parse({
+      ...baseSession,
+      session_id: "session-456",
+      timestamp: "2026-06-10T12:34:56.000Z",
+      contribution_consent: "not_granted",
+    }),
+    localSessionSchema.parse({
+      ...baseSession,
+      session_id: "session-789",
+      timestamp: "2026-06-11T12:34:56.000Z",
+      contribution_consent: "revoked",
+    }),
+  ]);
+
+  assert.equal(bundle.status, "preview only");
+  assert.equal(bundle.upload_enabled, false);
+  assert.equal(bundle.destination, "none");
+  assert.equal(bundle.included_session_count, 1);
+  assert.deepEqual(bundle.consent_summary, {
+    granted: 1,
+    not_granted: 1,
+    revoked: 1,
+  });
+  assert.equal(bundle.validation_summary.status, "passed");
+  assert.equal(bundle.validation_summary.payload_count, 1);
+  assert.equal(bundle.validation_summary.passed_count, 1);
+  assert.equal(bundle.validation_summary.failed_count, 0);
+  assert.equal(bundle.included_payloads.length, 1);
+  assert.equal(bundle.included_payloads[0].payload.provider, "OpenAI");
+  assert.equal(bundle.included_payloads[0].validation.status, "passed");
+  assert.match(bundle.excluded_fields.join("\n"), /terminal output/);
 });

@@ -19,6 +19,16 @@ test("serves a local dashboard and report API", async () => {
     work_mode: "manual_log",
     tests_outcome: "passed",
     estimated_cost_usd: 0.5,
+    contribution_consent: "granted",
+  });
+  store.createSession({
+    timestamp: "2026-07-12T12:00:00.000Z",
+    provider: "Anthropic",
+    model_id: "claude-sonnet-4.5",
+    task_type: "feature",
+    final_outcome: "accepted",
+    work_mode: "manual_log",
+    contribution_consent: "not_granted",
   });
   store.close();
 
@@ -33,7 +43,7 @@ test("serves a local dashboard and report API", async () => {
     assert.match(pageHtml, /No data is uploaded/);
     assert.match(pageHtml, /total-sessions/);
     assert.match(pageHtml, /useful-rate/);
-    assert.match(pageHtml, /fetch\("\/api\/report"\)/);
+    assert.match(pageHtml, /fetch\("\/api\/report" \+ queryString\)/);
     assert.match(pageHtml, /model-comparison/);
     assert.match(pageHtml, /tool-comparison/);
     assert.match(pageHtml, /renderComparison/);
@@ -47,21 +57,57 @@ test("serves a local dashboard and report API", async () => {
     assert.match(pageHtml, /id="outcome-chart"/);
     assert.match(pageHtml, /id="verification-chart"/);
     assert.match(pageHtml, /renderVerification/);
+    assert.match(pageHtml, /Contribution bundle preview/);
+    assert.match(pageHtml, /fetch\("\/api\/contribution-bundle" \+ queryString\)/);
+    assert.match(pageHtml, /contribution-bundle-list/);
+    assert.match(pageHtml, /renderContributionBundle/);
 
     const reportResponse = await fetch(`http://${address.host}:${address.port}/api/report`);
     assert.equal(reportResponse.status, 200);
     const report = await reportResponse.json();
-    assert.equal(report.totalSessions, 1);
+    assert.equal(report.totalSessions, 2);
     assert.equal(report.estimatedTotalCostUsd, 0.5);
-    assert.deepEqual(report.trendByDay, [{
-      date: "2026-07-11",
-      sessions: 1,
-      usefulSessions: 1,
-      estimatedCostUsd: 0.5,
-    }]);
+    assert.deepEqual(report.trendByDay, [
+      {
+        date: "2026-07-11",
+        sessions: 1,
+        usefulSessions: 1,
+        estimatedCostUsd: 0.5,
+      },
+      {
+        date: "2026-07-12",
+        sessions: 1,
+        usefulSessions: 1,
+        estimatedCostUsd: null,
+      },
+    ]);
+
+    const bundleResponse = await fetch(`http://${address.host}:${address.port}/api/contribution-bundle`);
+    assert.equal(bundleResponse.status, 200);
+    const bundle = await bundleResponse.json();
+    assert.equal(bundle.included_session_count, 1);
+    assert.deepEqual(bundle.consent_summary, {
+      granted: 1,
+      not_granted: 1,
+      revoked: 0,
+    });
+    assert.equal(bundle.validation_summary.status, "passed");
+    assert.equal(bundle.validation_summary.payload_count, 1);
+    assert.equal(bundle.included_payloads.length, 1);
+    assert.equal(bundle.included_payloads[0].payload.provider, "OpenAI");
+    assert.match(bundle.excluded_fields.join("\n"), /terminal output/);
 
     const filteredResponse = await fetch(`http://${address.host}:${address.port}/api/report?provider=Anthropic`);
-    assert.equal((await filteredResponse.json()).totalSessions, 0);
+    assert.equal((await filteredResponse.json()).totalSessions, 1);
+
+    const filteredBundleResponse = await fetch(`http://${address.host}:${address.port}/api/contribution-bundle?provider=Anthropic`);
+    const filteredBundle = await filteredBundleResponse.json();
+    assert.equal(filteredBundle.included_session_count, 0);
+    assert.deepEqual(filteredBundle.consent_summary, {
+      granted: 0,
+      not_granted: 1,
+      revoked: 0,
+    });
 
     const missingResponse = await fetch(`http://${address.host}:${address.port}/missing`);
     assert.equal(missingResponse.status, 404);

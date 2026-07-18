@@ -12,6 +12,30 @@ import {
 } from "../dist/inspect.js";
 import { localSessionSchema } from "../dist/schema.js";
 
+const forbiddenContributionKeys = [
+  "session_id",
+  "timestamp",
+  "estimated_cost_usd",
+  "duration_seconds",
+  "retry_count",
+  "error_count",
+  "input_tokens_estimate",
+  "output_tokens_estimate",
+  "cached_tokens_estimate",
+  "prompt",
+  "source_code",
+  "model_response",
+  "terminal_output",
+  "file_path",
+  "repository_name",
+  "organization_name",
+  "company_name",
+  "customer_name",
+  "secret",
+  "api_key",
+  "private_notes",
+];
+
 const baseSession = localSessionSchema.parse({
   session_id: "session-123",
   timestamp: "2026-06-09T12:34:56.000Z",
@@ -122,6 +146,21 @@ test("reports missing required, forbidden, and unknown contribution fields", () 
   assert.equal(validation.summary.unknown_field_count, 1);
 });
 
+test("red-teams every forbidden contribution field", () => {
+  const preview = buildContributionPreview(baseSession);
+
+  for (const key of forbiddenContributionKeys) {
+    const validation = validateContributionPreview({
+      ...preview,
+      [key]: "sensitive",
+    });
+
+    assert.equal(validation.status, "failed");
+    assert.equal(validation.forbidden_fields_present.includes(key), true);
+    assert.equal(validation.unknown_fields_present.includes(key), false);
+  }
+});
+
 test("formats local inspection with local record and privacy boundary", () => {
   const output = formatLocalInspection(baseSession);
 
@@ -187,4 +226,15 @@ test("builds and formats contribution preview as JSON", () => {
   assert.equal(Object.hasOwn(inspection.included_fields, "session_id"), false);
   assert.deepEqual(parsed, inspection);
   assert.match(parsed.excluded_fields.join("\n"), /source code/);
+});
+
+test("generated contribution preview excludes every forbidden contribution field", () => {
+  const preview = buildContributionPreview(baseSession);
+
+  for (const key of forbiddenContributionKeys) {
+    assert.equal(Object.hasOwn(preview, key), false);
+  }
+
+  const validation = validateContributionPreview(preview);
+  assert.deepEqual(validation.forbidden_fields_present, []);
 });

@@ -30,6 +30,35 @@ test("serves a local dashboard and report API", async () => {
     work_mode: "manual_log",
     contribution_consent: "not_granted",
   });
+  store.recordContributionHistory({
+    exported_at: "2026-07-12T15:00:00.000Z",
+    session_id: "session-export-openai",
+    contribution_id: "contrib_dashboard_openai",
+    payload_version: "v0.2.0",
+    output_path: "C:\\exports\\openai.json",
+    provider: "OpenAI",
+    model_id: "gpt-5",
+    tool: "Codex",
+    language: "TypeScript",
+    framework: "Node.js",
+    task_type: "bug_fix",
+    final_outcome: "accepted",
+    consent_state: "granted",
+    validation_status: "passed",
+  });
+  store.recordContributionHistory({
+    exported_at: "2026-07-12T16:00:00.000Z",
+    session_id: "session-export-anthropic",
+    contribution_id: "contrib_dashboard_anthropic",
+    payload_version: "v0.2.0",
+    output_path: "C:\\exports\\anthropic.json",
+    provider: "Anthropic",
+    model_id: "claude-sonnet-4.5",
+    task_type: "feature",
+    final_outcome: "accepted",
+    consent_state: "not_granted",
+    validation_status: "passed",
+  });
   store.close();
 
   const server = createDashboardServer({ dbPath });
@@ -61,6 +90,9 @@ test("serves a local dashboard and report API", async () => {
     assert.match(pageHtml, /fetch\("\/api\/contribution-bundle" \+ queryString\)/);
     assert.match(pageHtml, /contribution-bundle-list/);
     assert.match(pageHtml, /renderContributionBundle/);
+    assert.match(pageHtml, /Contribution history/);
+    assert.match(pageHtml, /fetch\("\/api\/contribution-history" \+ queryString\)/);
+    assert.match(pageHtml, /renderContributionHistory/);
 
     const reportResponse = await fetch(`http://${address.host}:${address.port}/api/report`);
     assert.equal(reportResponse.status, 200);
@@ -97,6 +129,14 @@ test("serves a local dashboard and report API", async () => {
     assert.equal(bundle.included_payloads[0].payload.provider, "OpenAI");
     assert.match(bundle.excluded_fields.join("\n"), /terminal output/);
 
+    const historyResponse = await fetch(`http://${address.host}:${address.port}/api/contribution-history`);
+    assert.equal(historyResponse.status, 200);
+    const history = await historyResponse.json();
+    assert.equal(history.length, 2);
+    assert.equal(history[0].contribution_id, "contrib_dashboard_anthropic");
+    assert.equal(history[1].contribution_id, "contrib_dashboard_openai");
+    assert.equal(history[0].output_path, "C:\\exports\\anthropic.json");
+
     const filteredResponse = await fetch(`http://${address.host}:${address.port}/api/report?provider=Anthropic`);
     assert.equal((await filteredResponse.json()).totalSessions, 1);
 
@@ -108,6 +148,11 @@ test("serves a local dashboard and report API", async () => {
       not_granted: 1,
       revoked: 0,
     });
+
+    const filteredHistoryResponse = await fetch(`http://${address.host}:${address.port}/api/contribution-history?provider=Anthropic`);
+    const filteredHistory = await filteredHistoryResponse.json();
+    assert.equal(filteredHistory.length, 1);
+    assert.equal(filteredHistory[0].contribution_id, "contrib_dashboard_anthropic");
 
     const missingResponse = await fetch(`http://${address.host}:${address.port}/missing`);
     assert.equal(missingResponse.status, 404);

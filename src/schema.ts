@@ -66,6 +66,11 @@ export const contributionConsentStates = [
   "revoked",
 ] as const;
 
+export const contributionValidationStatuses = [
+  "passed",
+  "failed",
+] as const;
+
 const nonEmptyString = z.string().trim().min(1);
 const nonNegativeInteger = z.number().int().min(0);
 const nonNegativeNumber = z.number().min(0);
@@ -127,7 +132,28 @@ export const activityHeartbeatSchema = z
   })
   .strict();
 
+export const contributionHistorySchema = z
+  .object({
+    history_id: nonEmptyString,
+    exported_at: isoTimestampSchema,
+    session_id: nonEmptyString,
+    contribution_id: nonEmptyString,
+    payload_version: nonEmptyString,
+    output_path: nonEmptyString,
+    provider: nonEmptyString,
+    model_id: nonEmptyString,
+    tool: nonEmptyString.optional(),
+    language: nonEmptyString.optional(),
+    framework: nonEmptyString.optional(),
+    task_type: z.enum(taskTypes),
+    final_outcome: z.enum(finalOutcomes),
+    consent_state: z.enum(contributionConsentStates),
+    validation_status: z.enum(contributionValidationStatuses),
+  })
+  .strict();
+
 export type ActivityHeartbeat = z.infer<typeof activityHeartbeatSchema>;
+export type ContributionHistoryEntry = z.infer<typeof contributionHistorySchema>;
 
 export type LocalSession = z.infer<typeof localSessionSchema>;
 export type FinalOutcome = (typeof finalOutcomes)[number];

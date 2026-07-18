@@ -7,6 +7,8 @@ import { resolveDatabasePath } from "./config.js";
 import {
   bucketValues,
   contributionConsentStates,
+  contributionHistorySchema,
+  contributionValidationStatuses,
   costSources,
   finalOutcomes,
   localSessionSchema,
@@ -17,6 +19,7 @@ import {
   workModes,
   type LocalSession,
   type ActivityHeartbeat,
+  type ContributionHistoryEntry,
 } from "./schema.js";
 
 const createSessionsMigration = "001_create_sessions";
@@ -24,6 +27,7 @@ const contributionConsentMigration = "002_add_contribution_consent";
 const projectIdentityMigration = "003_add_project_identity_hash";
 const activityHeartbeatMigration = "004_add_activity_heartbeats";
 const importProvenanceMigration = "005_add_import_provenance";
+const contributionHistoryMigration = "006_add_contribution_history";
 
 const sessionColumns = [
   "schema_version",
@@ -64,6 +68,25 @@ const sessionColumns = [
 
 type SessionColumn = (typeof sessionColumns)[number];
 type SessionRow = Record<SessionColumn, unknown>;
+const contributionHistoryColumns = [
+  "history_id",
+  "exported_at",
+  "session_id",
+  "contribution_id",
+  "payload_version",
+  "output_path",
+  "provider",
+  "model_id",
+  "tool",
+  "language",
+  "framework",
+  "task_type",
+  "final_outcome",
+  "consent_state",
+  "validation_status",
+] as const;
+type ContributionHistoryColumn = (typeof contributionHistoryColumns)[number];
+type ContributionHistoryRow = Record<ContributionHistoryColumn, unknown>;
 type ListSessionsOptions = {
   limit?: number;
   provider?: string;
@@ -76,6 +99,16 @@ type ListSessionsOptions = {
   finalOutcome?: string;
   since?: string;
   until?: string;
+};
+type ListContributionHistoryOptions = {
+  limit?: number;
+  provider?: string;
+  modelId?: string;
+  tool?: string;
+  language?: string;
+  framework?: string;
+  taskType?: string;
+  finalOutcome?: string;
 };
 
 export function getDefaultDatabasePath(): string {
@@ -187,6 +220,81 @@ export class OpenSasaStore {
     }));
   }
 
+  recordContributionHistory(input: unknown): ContributionHistoryEntry {
+    const record =
+      input && typeof input === "object" && !Array.isArray(input)
+        ? (input as Record<string, unknown>)
+        : {};
+    const history = contributionHistorySchema.parse({
+      ...record,
+      history_id: record.history_id ?? randomUUID(),
+    });
+    this.database
+      .prepare(
+        `INSERT INTO contribution_history (${contributionHistoryColumns.join(", ")})
+         VALUES (${contributionHistoryColumns.map((column) => `@${column}`).join(", ")})`,
+      )
+      .run(
+        Object.fromEntries(contributionHistoryColumns.map((column) => [column, history[column] ?? null])),
+      );
+    return history;
+  }
+
+  listContributionHistory(options: ListContributionHistoryOptions = {}): ContributionHistoryEntry[] {
+    const filters: string[] = [];
+    const parameters: Record<string, string | number> = {};
+
+    if (options.provider !== undefined) {
+      filters.push("provider = @provider");
+      parameters.provider = options.provider;
+    }
+
+    if (options.modelId !== undefined) {
+      filters.push("model_id = @modelId");
+      parameters.modelId = options.modelId;
+    }
+
+    if (options.tool !== undefined) {
+      filters.push("tool = @tool");
+      parameters.tool = options.tool;
+    }
+
+    if (options.language !== undefined) {
+      filters.push("language = @language");
+      parameters.language = options.language;
+    }
+
+    if (options.framework !== undefined) {
+      filters.push("framework = @framework");
+      parameters.framework = options.framework;
+    }
+
+    if (options.taskType !== undefined) {
+      filters.push("task_type = @taskType");
+      parameters.taskType = options.taskType;
+    }
+
+    if (options.finalOutcome !== undefined) {
+      filters.push("final_outcome = @finalOutcome");
+      parameters.finalOutcome = options.finalOutcome;
+    }
+
+    if (options.limit !== undefined) {
+      parameters.limit = options.limit;
+    }
+
+    const whereClause = filters.length > 0 ? ` WHERE ${filters.join(" AND ")}` : "";
+    const limitClause = options.limit === undefined ? "" : " LIMIT @limit";
+    const rows = this.database
+      .prepare(
+        `SELECT ${contributionHistoryColumns.join(", ")} FROM contribution_history${whereClause}
+         ORDER BY datetime(exported_at) DESC, history_id DESC${limitClause}`,
+      )
+      .all(parameters) as ContributionHistoryRow[];
+
+    return rows.map(parseContributionHistoryRow);
+  }
+
   deleteSession(sessionId: string): boolean {
     const result = this.database
       .prepare("DELETE FROM sessions WHERE session_id = ?")
@@ -277,6 +385,7 @@ function runMigrations(database: Database.Database): void {
   const bucketValueValues = sqlStringList(bucketValues);
   const costSourceValues = sqlStringList(costSources);
   const contributionConsentValues = sqlStringList(contributionConsentStates);
+  const contributionValidationValueList = sqlStringList(contributionValidationStatuses);
 
   database.exec(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -414,6 +523,38 @@ function runMigrations(database: Database.Database): void {
     });
     applyProvenanceMigration();
   }
+
+  const historyMigration = database
+    .prepare("SELECT name FROM schema_migrations WHERE name = ?")
+    .get(contributionHistoryMigration);
+
+  if (!historyMigration) {
+    const applyHistoryMigration = database.transaction(() => {
+      database.exec(`
+        CREATE TABLE IF NOT EXISTS contribution_history (
+          history_id TEXT PRIMARY KEY CHECK (length(trim(history_id)) > 0),
+          exported_at TEXT NOT NULL CHECK (length(trim(exported_at)) > 0),
+          session_id TEXT NOT NULL CHECK (length(trim(session_id)) > 0),
+          contribution_id TEXT NOT NULL CHECK (length(trim(contribution_id)) > 0),
+          payload_version TEXT NOT NULL CHECK (length(trim(payload_version)) > 0),
+          output_path TEXT NOT NULL CHECK (length(trim(output_path)) > 0),
+          provider TEXT NOT NULL CHECK (length(trim(provider)) > 0),
+          model_id TEXT NOT NULL CHECK (length(trim(model_id)) > 0),
+          tool TEXT,
+          language TEXT,
+          framework TEXT,
+          task_type TEXT NOT NULL CHECK (task_type IN (${taskTypeValues})),
+          final_outcome TEXT NOT NULL CHECK (final_outcome IN (${finalOutcomeValues})),
+          consent_state TEXT NOT NULL CHECK (consent_state IN (${contributionConsentValues})),
+          validation_status TEXT NOT NULL CHECK (validation_status IN (${contributionValidationValueList}))
+        );
+      `);
+      database
+        .prepare("INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)")
+        .run(contributionHistoryMigration, new Date().toISOString());
+    });
+    applyHistoryMigration();
+  }
 }
 
 function parseSessionWithGeneratedId(input: unknown): LocalSession {
@@ -436,6 +577,16 @@ function parseSessionRow(row: SessionRow): LocalSession {
   );
 
   return localSessionSchema.parse(withoutNulls);
+}
+
+function parseContributionHistoryRow(row: ContributionHistoryRow): ContributionHistoryEntry {
+  const withoutNulls = Object.fromEntries(
+    contributionHistoryColumns
+      .map((column) => [column, row[column]] as const)
+      .filter(([, value]) => value !== null),
+  );
+
+  return contributionHistorySchema.parse(withoutNulls);
 }
 
 function sqlStringList(values: readonly string[]): string {

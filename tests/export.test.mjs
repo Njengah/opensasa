@@ -59,6 +59,7 @@ test("writes a sanitized contribution payload JSON file", () => {
   assert.equal(result.status, "exported");
   assert.equal(result.session_id, "session-export-123");
   assert.match(result.contribution_id, /^contrib_[0-9a-f]{16}$/);
+  assert.equal(result.payload_version, "v0.2.0");
   assert.equal(result.path, outputPath);
   assert.equal(result.validation.status, "passed");
   assert.deepEqual(result.validation.missing_required_fields, []);

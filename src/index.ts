@@ -816,12 +816,29 @@ program
       }
 
       const result = writeContributionExport(session, options.out!);
+      const history = store.recordContributionHistory({
+        exported_at: new Date().toISOString(),
+        session_id: session.session_id,
+        contribution_id: result.contribution_id,
+        payload_version: result.payload_version,
+        output_path: result.path,
+        provider: session.provider,
+        model_id: session.model_id,
+        tool: session.tool,
+        language: session.language,
+        framework: session.framework,
+        task_type: session.task_type,
+        final_outcome: session.final_outcome,
+        consent_state: session.contribution_consent,
+        validation_status: result.validation.status,
+      });
       if (options.json) {
-        process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+        process.stdout.write(`${JSON.stringify({ ...result, history }, null, 2)}\n`);
         return;
       }
 
       console.log(`Exported contribution payload ${result.contribution_id} to ${result.path}`);
+      console.log(`Recorded local contribution history ${history.history_id}.`);
       console.log(
         `Validation ${result.validation.status}: ${result.validation.summary.checked_field_count} fields checked, ${result.validation.summary.missing_required_field_count} missing required, ${result.validation.summary.forbidden_field_count} forbidden, ${result.validation.summary.unknown_field_count} unknown.`,
       );

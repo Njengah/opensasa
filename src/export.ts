@@ -12,6 +12,7 @@ export type ContributionExportResult = {
   status: "exported";
   session_id: string;
   contribution_id: string;
+  payload_version: string;
   path: string;
   validation: ContributionValidation;
 };
@@ -30,6 +31,7 @@ export function writeContributionExport(
     status: "exported",
     session_id: session.session_id ?? "unknown",
     contribution_id: payload.contribution_id,
+    payload_version: payload.payload_version,
     path: resolvedPath,
     validation,
   };

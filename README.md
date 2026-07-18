@@ -326,7 +326,8 @@ The server binds to `127.0.0.1` by default and prints its local URL. You can
 override the interface, port, or database path with `--host`, `--port`, and
 `--db-path`. The dashboard reads local SQLite data only; it does not upload
 sessions or send telemetry. It also includes a local-only contribution bundle
-preview for consent-granted sessions alongside the personal report views.
+preview for consent-granted sessions alongside the personal report views, plus
+local contribution history for previous exports.
 
 Run the dashboard smoke tests independently with:
 
@@ -469,7 +470,8 @@ this first export workflow. Export also requires the session's local
 `--yes` confirmation when you run the command. Exported payloads currently use
 `payload_version: "v0.2.0"`. The export command also reports local validation
 results, and `--json` includes the full validation report metadata alongside
-the export path and contribution ID.
+the export path and contribution ID. Successful exports are also recorded in
+local contribution history for later inspection in the dashboard.
 
 ## Local Storage
 

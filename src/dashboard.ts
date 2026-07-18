@@ -101,6 +101,30 @@ function handleDashboardRequest(
     return;
   }
 
+  if (url.pathname === "/api/contribution-history") {
+    let store;
+    try {
+      store = openStore(dbPath);
+      sendJson(response, 200, store.listContributionHistory({
+        provider: url.searchParams.get("provider") ?? undefined,
+        modelId: url.searchParams.get("model") ?? undefined,
+        tool: url.searchParams.get("tool") ?? undefined,
+        language: url.searchParams.get("language") ?? undefined,
+        framework: url.searchParams.get("framework") ?? undefined,
+        taskType: url.searchParams.get("taskType") ?? undefined,
+        finalOutcome: url.searchParams.get("outcome") ?? undefined,
+        limit: 12,
+      }));
+    } catch (error) {
+      sendJson(response, 500, {
+        error: error instanceof Error ? error.message : "Unable to read contribution history.",
+      });
+    } finally {
+      store?.close();
+    }
+    return;
+  }
+
   sendJson(response, 404, { error: "Not found." });
 }
 
@@ -259,9 +283,15 @@ function dashboardHtml(): string {
         <h3>Excluded fields</h3>
         <div id="contribution-bundle-excluded-fields" class="field-list"><p class="muted">Loading…</p></div>
       </section>
+      <section class="comparison" aria-labelledby="contribution-history-title">
+        <h2 id="contribution-history-title">Contribution history</h2>
+        <p class="muted">Recent local exports recorded on this machine. This is local bookkeeping only; no upload destination exists in the MVP.</p>
+        <div id="contribution-history-list" class="bundle-list"><p class="muted">Loading…</p></div>
+      </section>
       <p id="status" class="muted">Loading your local report…</p>
       <p><a href="/api/report">View local report JSON</a></p>
       <p><a href="/api/contribution-bundle">View contribution bundle JSON</a></p>
+      <p><a href="/api/contribution-history">View contribution history JSON</a></p>
     </main>
     <script>
       const formatRate = (metric) => metric.rate === null ? "unknown" : (metric.rate * 100).toFixed(1) + "%";
@@ -366,12 +396,30 @@ function dashboardHtml(): string {
         const excluded = document.querySelector("#contribution-bundle-excluded-fields");
         excluded.innerHTML = bundle.excluded_fields.map((field) => '<span class="pill">' + field + '</span>').join("");
       };
+      const renderContributionHistory = (history) => {
+        const list = document.querySelector("#contribution-history-list");
+        list.innerHTML = history.length === 0
+          ? '<p class="muted">No local contribution exports have been recorded yet.</p>'
+          : history.map((entry) =>
+              '<article class="bundle-item">' +
+              '<strong>' + entry.contribution_id + '</strong>' +
+              '<div class="bundle-meta">' + entry.provider + ' / ' + entry.model_id + ' · ' + entry.task_type + ' · exported ' + entry.exported_at.slice(0, 19).replace("T", " ") + '</div>' +
+              '<div class="field-list">' +
+              '<span class="pill">validation: ' + entry.validation_status + '</span>' +
+              '<span class="pill">consent: ' + entry.consent_state + '</span>' +
+              '<span class="pill">payload_version: ' + entry.payload_version + '</span>' +
+              '</div>' +
+              '<div class="bundle-meta">' + entry.output_path + '</div>' +
+              '</article>'
+            ).join("");
+      };
       const queryString = window.location.search;
       Promise.all([
         fetch("/api/report" + queryString).then((response) => response.ok ? response.json() : Promise.reject(new Error("Report unavailable"))),
         fetch("/api/contribution-bundle" + queryString).then((response) => response.ok ? response.json() : Promise.reject(new Error("Contribution bundle unavailable"))),
+        fetch("/api/contribution-history" + queryString).then((response) => response.ok ? response.json() : Promise.reject(new Error("Contribution history unavailable"))),
       ])
-        .then(([report, bundle]) => {
+        .then(([report, bundle, history]) => {
           setFilterOptions(report);
           document.querySelector("#empty-state").hidden = report.totalSessions !== 0;
           document.querySelector("#total-sessions").textContent = report.totalSessions;
@@ -387,6 +435,7 @@ function dashboardHtml(): string {
           renderCountChart("outcome-chart", { accepted: report.acceptedOrPartiallyAcceptedCount, rejected: report.rejectedCount, unknown: report.unknownOutcomeCount });
           renderVerification(report.verificationOutcomeSummary);
           renderContributionBundle(bundle);
+          renderContributionHistory(history);
           document.querySelector("#status").textContent = "Report loaded from local storage.";
         })
         .catch(() => { document.querySelector("#status").textContent = "Unable to load the local report."; });

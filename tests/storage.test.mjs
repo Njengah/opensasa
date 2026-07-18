@@ -39,7 +39,7 @@ test("initializes a local SQLite database at an override path", () => {
         .prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name")
         .all()
         .map((row) => row.name),
-      ["activity_heartbeats", "schema_migrations", "sessions"],
+      ["activity_heartbeats", "contribution_history", "schema_migrations", "sessions"],
     );
   } finally {
     database.close();
@@ -102,6 +102,54 @@ test("persists sessions across store reopen", () => {
     assert.deepEqual(secondStore.getSession(created.session_id), created);
   } finally {
     secondStore.close();
+  }
+});
+
+test("records and lists local contribution history newest first", () => {
+  const store = openStore(join(tmpRoot, "contribution-history.db"));
+
+  try {
+    store.recordContributionHistory({
+      exported_at: "2026-06-09T12:00:00.000Z",
+      session_id: "session-older",
+      contribution_id: "contrib_older",
+      payload_version: "v0.2.0",
+      output_path: "C:\\exports\\older.json",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      tool: "Codex",
+      language: "TypeScript",
+      framework: "Node.js",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      consent_state: "granted",
+      validation_status: "passed",
+    });
+    const newer = store.recordContributionHistory({
+      exported_at: "2026-06-10T12:00:00.000Z",
+      session_id: "session-newer",
+      contribution_id: "contrib_newer",
+      payload_version: "v0.2.0",
+      output_path: "C:\\exports\\newer.json",
+      provider: "Anthropic",
+      model_id: "claude-sonnet-4.5",
+      task_type: "feature",
+      final_outcome: "accepted",
+      consent_state: "granted",
+      validation_status: "passed",
+    });
+
+    const history = store.listContributionHistory();
+
+    assert.match(newer.history_id, /^[0-9a-f-]{36}$/);
+    assert.deepEqual(history.map((entry) => entry.contribution_id), [
+      "contrib_newer",
+      "contrib_older",
+    ]);
+    assert.equal(history[0].provider, "Anthropic");
+    assert.equal(history[1].output_path, "C:\\exports\\older.json");
+  } finally {
+    store.close();
   }
 });
 
@@ -624,8 +672,23 @@ test("migrates existing databases with default contribution consent", () => {
 
   try {
     const migrated = store.getSession("legacy-session");
+    const history = store.recordContributionHistory({
+      exported_at: "2026-06-10T12:00:00.000Z",
+      session_id: "legacy-session",
+      contribution_id: "contrib_legacy",
+      payload_version: "v0.2.0",
+      output_path: "C:\\exports\\legacy.json",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      consent_state: "not_granted",
+      validation_status: "passed",
+    });
 
     assert.equal(migrated.contribution_consent, "not_granted");
+    assert.equal(history.contribution_id, "contrib_legacy");
+    assert.equal(store.listContributionHistory().length, 1);
   } finally {
     store.close();
   }

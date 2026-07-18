@@ -2530,8 +2530,12 @@ test("exports a sanitized contribution payload to a local JSON file", async () =
     dbPath,
   ]);
   const exported = JSON.parse(readFileSync(outputPath, "utf8"));
+  const historyStore = openStore(dbPath);
+  const history = historyStore.listContributionHistory();
+  historyStore.close();
 
   assert.match(stdout, /Exported contribution payload contrib_[0-9a-f]{16} to /);
+  assert.match(stdout, /Recorded local contribution history [0-9a-f-]{36}\./);
   assert.match(stdout, /Validation passed: \d+ fields checked, 0 missing required, 0 forbidden, 0 unknown\./);
   assert.match(stdout, /No upload will occur in this MVP/);
   assert.equal(exported.schema_version, "opensasa.metadata.v0");
@@ -2541,6 +2545,10 @@ test("exports a sanitized contribution payload to a local JSON file", async () =
   assert.equal(Object.hasOwn(exported, "session_id"), false);
   assert.equal(Object.hasOwn(exported, "timestamp"), false);
   assert.equal(Object.hasOwn(exported, "estimated_cost_usd"), false);
+  assert.equal(history.length, 1);
+  assert.equal(history[0].session_id, session.session_id);
+  assert.equal(history[0].contribution_id, exported.contribution_id);
+  assert.equal(history[0].output_path, outputPath);
 });
 
 test("exports contribution metadata as JSON output", async () => {
@@ -2581,11 +2589,16 @@ test("exports contribution metadata as JSON output", async () => {
   assert.equal(result.status, "exported");
   assert.equal(result.session_id, session.session_id);
   assert.match(result.contribution_id, /^contrib_[0-9a-f]{16}$/);
+  assert.equal(result.payload_version, "v0.2.0");
   assert.equal(result.path, outputPath);
   assert.equal(result.validation.status, "passed");
   assert.deepEqual(result.validation.missing_required_fields, []);
   assert.deepEqual(result.validation.forbidden_fields_present, []);
   assert.deepEqual(result.validation.unknown_fields_present, []);
+  assert.equal(result.history.session_id, session.session_id);
+  assert.equal(result.history.contribution_id, result.contribution_id);
+  assert.equal(result.history.payload_version, "v0.2.0");
+  assert.equal(result.history.output_path, outputPath);
   assert.equal(exported.payload_version, "v0.2.0");
   assert.equal(exported.contribution_id, result.contribution_id);
 });

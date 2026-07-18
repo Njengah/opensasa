@@ -313,9 +313,11 @@ Before contribution, OpenSasa should show:
 - excluded fields,
 - anonymized or bucketed values,
 - schema version,
+- payload version,
 - destination,
 - contribution status,
-- and whether consent is enabled.
+- whether consent is enabled,
+- and a validation report with missing-required, forbidden, unknown, and checked-field counts.
 
 The user must be able to cancel before sharing.
 
@@ -329,7 +331,7 @@ Implementations should validate records at these boundaries:
 - before accepting public aggregate data,
 - and before using data in public scoring.
 
-Contribution validation should reject payloads containing excluded fields or raw terminal output.
+Contribution validation should reject payloads containing excluded fields or raw terminal output, report missing required public fields, and flag unknown fields outside the documented contribution contract.
 
 ## Open Questions
 

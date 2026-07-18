@@ -822,6 +822,9 @@ program
       }
 
       console.log(`Exported contribution payload ${result.contribution_id} to ${result.path}`);
+      console.log(
+        `Validation ${result.validation.status}: ${result.validation.summary.checked_field_count} fields checked, ${result.validation.summary.missing_required_field_count} missing required, ${result.validation.summary.forbidden_field_count} forbidden, ${result.validation.summary.unknown_field_count} unknown.`,
+      );
       console.log("No upload will occur in this MVP.");
     } catch (error) {
       process.exitCode = 1;

@@ -2427,7 +2427,10 @@ test("previews a sanitized contribution payload without upload", async () => {
   assert.match(stdout, /No upload will occur in this MVP/);
   assert.match(stdout, /Validation:/);
   assert.match(stdout, /status: passed/);
+  assert.match(stdout, /missing_required_fields: none/);
   assert.match(stdout, /forbidden_fields_present: none/);
+  assert.match(stdout, /unknown_fields_present: none/);
+  assert.match(stdout, /checked_field_count: /);
   assert.match(stdout, /payload_version: v0.2.0/);
   assert.match(stdout, /timestamp_bucket: 2026-06-09/);
   assert.match(stdout, /input_tokens_bucket: large/);
@@ -2477,7 +2480,12 @@ test("previews a sanitized contribution payload as JSON without upload", async (
   assert.equal(preview.upload_enabled, false);
   assert.equal(preview.destination, "none");
   assert.equal(preview.validation.status, "passed");
+  assert.deepEqual(preview.validation.missing_required_fields, []);
   assert.deepEqual(preview.validation.forbidden_fields_present, []);
+  assert.deepEqual(preview.validation.unknown_fields_present, []);
+  assert.equal(preview.validation.summary.missing_required_field_count, 0);
+  assert.equal(preview.validation.summary.forbidden_field_count, 0);
+  assert.equal(preview.validation.summary.unknown_field_count, 0);
   assert.equal(preview.included_fields.payload_version, "v0.2.0");
   assert.equal(preview.included_fields.timestamp_bucket, "2026-06-09");
   assert.equal(preview.included_fields.input_tokens_bucket, "large");
@@ -2524,6 +2532,7 @@ test("exports a sanitized contribution payload to a local JSON file", async () =
   const exported = JSON.parse(readFileSync(outputPath, "utf8"));
 
   assert.match(stdout, /Exported contribution payload contrib_[0-9a-f]{16} to /);
+  assert.match(stdout, /Validation passed: \d+ fields checked, 0 missing required, 0 forbidden, 0 unknown\./);
   assert.match(stdout, /No upload will occur in this MVP/);
   assert.equal(exported.schema_version, "opensasa.metadata.v0");
   assert.equal(exported.payload_version, "v0.2.0");
@@ -2573,6 +2582,10 @@ test("exports contribution metadata as JSON output", async () => {
   assert.equal(result.session_id, session.session_id);
   assert.match(result.contribution_id, /^contrib_[0-9a-f]{16}$/);
   assert.equal(result.path, outputPath);
+  assert.equal(result.validation.status, "passed");
+  assert.deepEqual(result.validation.missing_required_fields, []);
+  assert.deepEqual(result.validation.forbidden_fields_present, []);
+  assert.deepEqual(result.validation.unknown_fields_present, []);
   assert.equal(exported.payload_version, "v0.2.0");
   assert.equal(exported.contribution_id, result.contribution_id);
 });

@@ -36,6 +36,10 @@ test("writes a sanitized contribution payload JSON file", () => {
   assert.equal(result.session_id, "session-export-123");
   assert.match(result.contribution_id, /^contrib_[0-9a-f]{16}$/);
   assert.equal(result.path, outputPath);
+  assert.equal(result.validation.status, "passed");
+  assert.deepEqual(result.validation.missing_required_fields, []);
+  assert.deepEqual(result.validation.forbidden_fields_present, []);
+  assert.deepEqual(result.validation.unknown_fields_present, []);
   assert.equal(payload.payload_version, "v0.2.0");
   assert.equal(payload.contribution_id, result.contribution_id);
   assert.equal(payload.provider, "OpenAI");

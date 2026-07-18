@@ -241,7 +241,7 @@ Expected PRs:
 - [x] Add contribution payload version field. (#98)
 - [x] Add contribution validation report. (#99)
 - [x] Add red-team tests for forbidden fields. (#100)
-- [ ] Add contribution bundle preview in dashboard.
+- [x] Add contribution bundle preview in dashboard. (#101)
 - [ ] Add local contribution history.
 - [ ] Add contribution revocation state semantics.
 - [x] Add docs for what is and is not shared. (#83)

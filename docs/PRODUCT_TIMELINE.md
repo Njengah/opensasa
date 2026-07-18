@@ -243,7 +243,7 @@ Expected PRs:
 - [x] Add red-team tests for forbidden fields. (#100)
 - [x] Add contribution bundle preview in dashboard. (#101)
 - [x] Add local contribution history. (#102)
-- [ ] Add contribution revocation state semantics.
+- [x] Add contribution revocation state semantics. (#103)
 - [x] Add docs for what is and is not shared. (#83)
 - [ ] Add sample contribution file.
 - [ ] Add optional signed export metadata.

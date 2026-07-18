@@ -35,6 +35,9 @@ Before any contribution, the developer should be able to review:
 - and whether the contribution is enabled or disabled.
 
 Consent should be specific to the contribution. Using OpenSasa locally should not imply consent to share data.
+If consent is later revoked, local export history should preserve the fact that
+an export happened while clearly marking that the current consent state is no
+longer active.
 This boundary should be treated as a product constraint, not a temporary implementation detail.
 
 ## Excluded By Default

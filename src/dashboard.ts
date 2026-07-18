@@ -401,12 +401,15 @@ function dashboardHtml(): string {
         list.innerHTML = history.length === 0
           ? '<p class="muted">No local contribution exports have been recorded yet.</p>'
           : history.map((entry) =>
-              '<article class="bundle-item">' +
+              (entry.is_revoked ? '<article class="bundle-item" style="border-color: rgba(176, 64, 64, 0.35);">' : '<article class="bundle-item">') +
+              (entry.is_revoked ? '<div class="bundle-meta">Local consent was revoked after this export. The record remains for inspection only.</div>' : '') +
               '<strong>' + entry.contribution_id + '</strong>' +
               '<div class="bundle-meta">' + entry.provider + ' / ' + entry.model_id + ' · ' + entry.task_type + ' · exported ' + entry.exported_at.slice(0, 19).replace("T", " ") + '</div>' +
               '<div class="field-list">' +
               '<span class="pill">validation: ' + entry.validation_status + '</span>' +
-              '<span class="pill">consent: ' + entry.consent_state + '</span>' +
+              '<span class="pill">exported with: ' + entry.consent_state + '</span>' +
+              '<span class="pill">current consent: ' + entry.current_consent_state + '</span>' +
+              '<span class="pill">consent active: ' + (entry.consent_active ? 'yes' : 'no') + '</span>' +
               '<span class="pill">payload_version: ' + entry.payload_version + '</span>' +
               '</div>' +
               '<div class="bundle-meta">' + entry.output_path + '</div>' +

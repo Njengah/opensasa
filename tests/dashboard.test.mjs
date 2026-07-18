@@ -10,7 +10,7 @@ test("serves a local dashboard and report API", async () => {
   const root = mkdtempSync(join(tmpdir(), "opensasa-dashboard-"));
   const dbPath = join(root, "dashboard.db");
   const store = openStore(dbPath);
-  store.createSession({
+  const openAiSession = store.createSession({
     timestamp: "2026-07-11T12:00:00.000Z",
     provider: "OpenAI",
     model_id: "gpt-5",
@@ -30,9 +30,18 @@ test("serves a local dashboard and report API", async () => {
     work_mode: "manual_log",
     contribution_consent: "not_granted",
   });
+  store.createSession({
+    timestamp: "2026-07-13T12:00:00.000Z",
+    provider: "OpenAI",
+    model_id: "gpt-5-mini",
+    task_type: "data_analysis",
+    final_outcome: "accepted",
+    work_mode: "manual_log",
+    contribution_consent: "granted",
+  });
   store.recordContributionHistory({
     exported_at: "2026-07-12T15:00:00.000Z",
-    session_id: "session-export-openai",
+    session_id: openAiSession.session_id,
     contribution_id: "contrib_dashboard_openai",
     payload_version: "v0.2.0",
     output_path: "C:\\exports\\openai.json",
@@ -58,6 +67,9 @@ test("serves a local dashboard and report API", async () => {
     final_outcome: "accepted",
     consent_state: "not_granted",
     validation_status: "passed",
+  });
+  store.updateSession(openAiSession.session_id, {
+    contribution_consent: "revoked",
   });
   store.close();
 
@@ -97,7 +109,7 @@ test("serves a local dashboard and report API", async () => {
     const reportResponse = await fetch(`http://${address.host}:${address.port}/api/report`);
     assert.equal(reportResponse.status, 200);
     const report = await reportResponse.json();
-    assert.equal(report.totalSessions, 2);
+    assert.equal(report.totalSessions, 3);
     assert.equal(report.estimatedTotalCostUsd, 0.5);
     assert.deepEqual(report.trendByDay, [
       {
@@ -112,6 +124,12 @@ test("serves a local dashboard and report API", async () => {
         usefulSessions: 1,
         estimatedCostUsd: null,
       },
+      {
+        date: "2026-07-13",
+        sessions: 1,
+        usefulSessions: 1,
+        estimatedCostUsd: null,
+      },
     ]);
 
     const bundleResponse = await fetch(`http://${address.host}:${address.port}/api/contribution-bundle`);
@@ -121,12 +139,12 @@ test("serves a local dashboard and report API", async () => {
     assert.deepEqual(bundle.consent_summary, {
       granted: 1,
       not_granted: 1,
-      revoked: 0,
+      revoked: 1,
     });
     assert.equal(bundle.validation_summary.status, "passed");
     assert.equal(bundle.validation_summary.payload_count, 1);
     assert.equal(bundle.included_payloads.length, 1);
-    assert.equal(bundle.included_payloads[0].payload.provider, "OpenAI");
+    assert.equal(bundle.included_payloads[0].payload.model_id, "gpt-5-mini");
     assert.match(bundle.excluded_fields.join("\n"), /terminal output/);
 
     const historyResponse = await fetch(`http://${address.host}:${address.port}/api/contribution-history`);
@@ -136,6 +154,11 @@ test("serves a local dashboard and report API", async () => {
     assert.equal(history[0].contribution_id, "contrib_dashboard_anthropic");
     assert.equal(history[1].contribution_id, "contrib_dashboard_openai");
     assert.equal(history[0].output_path, "C:\\exports\\anthropic.json");
+    assert.equal(history[0].current_consent_state, "not_granted");
+    assert.equal(history[0].is_revoked, false);
+    assert.equal(history[1].current_consent_state, "revoked");
+    assert.equal(history[1].is_revoked, true);
+    assert.equal(history[1].consent_active, false);
 
     const filteredResponse = await fetch(`http://${address.host}:${address.port}/api/report?provider=Anthropic`);
     assert.equal((await filteredResponse.json()).totalSessions, 1);

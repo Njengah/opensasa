@@ -240,7 +240,7 @@ Expected PRs:
 - [x] Add explicit consent confirmation for export. (#97)
 - [x] Add contribution payload version field. (#98)
 - [x] Add contribution validation report. (#99)
-- [ ] Add red-team tests for forbidden fields.
+- [x] Add red-team tests for forbidden fields. (#100)
 - [ ] Add contribution bundle preview in dashboard.
 - [ ] Add local contribution history.
 - [ ] Add contribution revocation state semantics.

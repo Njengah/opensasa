@@ -6,6 +6,30 @@ import { after, test } from "node:test";
 import { writeContributionExport } from "../dist/export.js";
 import { localSessionSchema } from "../dist/schema.js";
 
+const forbiddenContributionKeys = [
+  "session_id",
+  "timestamp",
+  "estimated_cost_usd",
+  "duration_seconds",
+  "retry_count",
+  "error_count",
+  "input_tokens_estimate",
+  "output_tokens_estimate",
+  "cached_tokens_estimate",
+  "prompt",
+  "source_code",
+  "model_response",
+  "terminal_output",
+  "file_path",
+  "repository_name",
+  "organization_name",
+  "company_name",
+  "customer_name",
+  "secret",
+  "api_key",
+  "private_notes",
+];
+
 const tmpRoot = mkdtempSync(join(tmpdir(), "opensasa-export-"));
 
 after(() => {
@@ -46,4 +70,14 @@ test("writes a sanitized contribution payload JSON file", () => {
   assert.equal(payload.estimated_cost_bucket, "under_1_usd");
   assert.equal(Object.hasOwn(payload, "session_id"), false);
   assert.equal(Object.hasOwn(payload, "timestamp"), false);
+});
+
+test("exported payload excludes every forbidden contribution field", () => {
+  const outputPath = join(tmpRoot, "nested", "contribution-red-team.json");
+  writeContributionExport(baseSession, outputPath);
+  const payload = JSON.parse(readFileSync(outputPath, "utf8"));
+
+  for (const key of forbiddenContributionKeys) {
+    assert.equal(Object.hasOwn(payload, key), false);
+  }
 });

@@ -80,7 +80,9 @@ The current product is intentionally local-only. It can log safe AI coding
 session metadata, store records in a local SQLite database, update or delete
 local records, list previous sessions, generate a personal report, and preview
 a sanitized contribution payload. It can also export that sanitized payload to
-a local JSON file. It does not upload data or publish rankings.
+a local JSON file. For `v0.1`, that manual export remains the contribution
+boundary: there is no upload destination, submission command, or hosted intake
+service in scope. It does not upload data or publish rankings.
 
 The public development and versioning approach is described in
 [Development Cycle](./docs/DEVELOPMENT_CYCLE.md). The MVP workflow is described

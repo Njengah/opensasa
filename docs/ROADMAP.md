@@ -272,6 +272,12 @@ preview implemented locally; upload, consent flow, destination handling, and
 contribution submission remain out of scope.
 ```
 
+Decision for `v0.1`:
+
+```text
+manual export only; no upload or submission path ships in the beta release.
+```
+
 ## Milestone 5: Public Index Prototype
 
 Goal:
@@ -363,7 +369,7 @@ Before upload or public index work starts, the project should decide:
 - how bucket ranges are defined and versioned,
 - whether reports should add JSON output,
 - whether sessions can be edited after logging,
-- what contribution consent flow is required before upload exists,
+- what contribution consent flow is required before any future upload exists,
 - how contribution payload validation should reject excluded fields,
 - how methodology changelogs should be published,
 - and whether the public site starts as documentation, seed-data dashboard, or later index.

@@ -30,6 +30,10 @@ The first complete loop:
 
 The MVP should not upload data.
 
+For `v0.1`, manual export is the final contribution step. Upload or submission
+behavior remains out of scope until consent flow, backend destination, and
+contribution review rules are separately implemented and approved.
+
 ## Primary User
 
 The first user is an individual developer who uses AI coding tools and wants to understand:
@@ -211,7 +215,10 @@ The preview exists to prove the trust workflow:
 - whether consent is enabled,
 - and why upload is unavailable in the MVP.
 
-Actual upload should wait until contribution rules, validation, backend destination, and consent behavior are implemented and reviewed.
+Actual upload should wait until a later release. `v0.1` stops at manual local
+export, and any future upload should come only after contribution rules,
+validation, backend destination, and consent behavior are implemented and
+reviewed.
 
 ## Verification Rules
 

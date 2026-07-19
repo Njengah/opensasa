@@ -247,7 +247,7 @@ Expected PRs:
 - [x] Add docs for what is and is not shared. (#83)
 - [x] Add sample contribution file. (#104)
 - [x] Add optional signed export metadata. (#105)
-- [ ] Decide whether upload exists in v0.1 or remains manual export.
+- [x] Decide whether upload exists in v0.1 or remains manual export. (#106)
 
 Exit criteria:
 

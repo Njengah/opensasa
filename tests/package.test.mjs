@@ -91,3 +91,27 @@ test("install docs cover the local linked CLI flow", async () => {
   assert.match(installDoc, /npm unlink -g opensasa/);
   assert.match(installDoc, /`v0\.1` does not include uploads or contribution submission/);
 });
+
+test("README links to the first release checklist", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+
+  assert.match(readme, /\[docs\/FIRST_RELEASE_CHECKLIST\.md\]\(\.\/docs\/FIRST_RELEASE_CHECKLIST\.md\)/);
+});
+
+test("first release checklist covers beta release readiness", async () => {
+  const checklist = await readFile(path.join(root, "docs", "FIRST_RELEASE_CHECKLIST.md"), "utf8");
+
+  assert.match(checklist, /v0\.1\.0-beta\.1/);
+  assert.match(checklist, /## 1\. Product Scope Freeze/);
+  assert.match(checklist, /manual export only/);
+  assert.match(checklist, /## 2\. Verification Evidence/);
+  assert.match(checklist, /npm test/);
+  assert.match(checklist, /npm pack --dry-run --json/);
+  assert.match(checklist, /## 3\. Local Workflow Smoke Test/);
+  assert.match(checklist, /opensasa export <session-id> --out \.\/contribution\.json --yes/);
+  assert.match(checklist, /## 4\. Documentation Review/);
+  assert.match(checklist, /## 5\. Release Notes Draft/);
+  assert.match(checklist, /## 6\. Packaging And Tagging Readiness/);
+  assert.match(checklist, /## 7\. Not Ready Means Do Not Tag/);
+  assert.match(checklist, /Do not create the beta tag yet/);
+});

@@ -266,7 +266,7 @@ Expected PRs:
 - [x] Add npm package metadata and bin validation. (#107)
 - [x] Add install docs. (#108)
 - [x] Add first release checklist. (#109)
-- [ ] Add demo walkthrough.
+- [x] Add demo walkthrough. (#110)
 - [ ] Add screenshots or dashboard preview images.
 - [ ] Add architecture doc.
 - [ ] Add security/privacy FAQ.

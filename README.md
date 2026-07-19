@@ -463,6 +463,12 @@ Use JSON output for scripting:
 node ./dist/index.js export <session-id> --out ./contribution.json --yes --json
 ```
 
+Optional export metadata sidecar:
+
+```bash
+OPENSASA_SIGNING_KEY=your-local-secret node ./dist/index.js export <session-id> --out ./contribution.json --metadata-out ./contribution.metadata.json --signing-key-env OPENSASA_SIGNING_KEY --yes
+```
+
 This writes the sanitized contribution payload itself to a local JSON file.
 It does not upload anything. The export path must be supplied explicitly in
 this first export workflow. Export also requires the session's local
@@ -474,6 +480,10 @@ the export path and contribution ID. Successful exports are also recorded in
 local contribution history for later inspection in the dashboard. That history
 keeps the original export record immutable and shows the current local consent
 state, so later revocations remain visible during review.
+When `--metadata-out` is supplied, OpenSasa also writes a detached metadata
+JSON sidecar with the payload hash, byte size, export timestamp, and validation
+status. Adding `--signing-key-env` signs that sidecar with an HMAC-SHA256
+signature derived from the named local environment variable.
 For a checked-in synthetic example of the exported JSON shape, see
 [docs/examples/sample-contribution-payload.json](./docs/examples/sample-contribution-payload.json).
 

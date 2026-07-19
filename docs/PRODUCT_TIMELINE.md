@@ -246,7 +246,7 @@ Expected PRs:
 - [x] Add contribution revocation state semantics. (#103)
 - [x] Add docs for what is and is not shared. (#83)
 - [x] Add sample contribution file. (#104)
-- [ ] Add optional signed export metadata.
+- [x] Add optional signed export metadata. (#105)
 - [ ] Decide whether upload exists in v0.1 or remains manual export.
 
 Exit criteria:

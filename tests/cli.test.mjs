@@ -33,6 +33,8 @@ test("prints export help with explicit confirmation", async () => {
   const { stdout } = await execFileAsync("node", ["./dist/index.js", "export", "--help"]);
 
   assert.match(stdout, /--out/);
+  assert.match(stdout, /--metadata-out/);
+  assert.match(stdout, /--signing-key-env/);
   assert.match(stdout, /--yes/);
   assert.match(stdout, /--json/);
 });
@@ -2603,6 +2605,65 @@ test("exports contribution metadata as JSON output", async () => {
   assert.equal(exported.contribution_id, result.contribution_id);
 });
 
+test("exports optional signed metadata sidecar", async () => {
+  const dbPath = join(tmpRoot, "contribution-export-signed.db");
+  const outputPath = join(tmpRoot, "exports", "session-export-signed.json");
+  const metadataPath = join(tmpRoot, "exports", "session-export-signed.metadata.json");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:34:56.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      contribution_consent: "granted",
+    });
+  } finally {
+    store.close();
+  }
+
+  const { stdout } = await execFileAsync(
+    "node",
+    [
+      "./dist/index.js",
+      "export",
+      session.session_id,
+      "--out",
+      outputPath,
+      "--metadata-out",
+      metadataPath,
+      "--signing-key-env",
+      "OPENSASA_SIGNING_KEY",
+      "--yes",
+      "--db-path",
+      dbPath,
+    ],
+    {
+      env: {
+        ...process.env,
+        OPENSASA_SIGNING_KEY: "local-signing-secret",
+      },
+    },
+  );
+  const exported = JSON.parse(readFileSync(outputPath, "utf8"));
+  const metadata = JSON.parse(readFileSync(metadataPath, "utf8"));
+
+  assert.match(stdout, /Exported contribution payload contrib_[0-9a-f]{16} to /);
+  assert.match(stdout, /Signed export metadata to /);
+  assert.equal(metadata.schema_version, "opensasa.export-metadata.v0");
+  assert.equal(metadata.contribution_id, exported.contribution_id);
+  assert.equal(metadata.payload_version, "v0.2.0");
+  assert.equal(metadata.validation_status, "passed");
+  assert.equal(metadata.signature.algorithm, "hmac-sha256");
+  assert.equal(metadata.signature.key_source, "env:OPENSASA_SIGNING_KEY");
+  assert.match(metadata.signature.value, /^[0-9a-f]{64}$/);
+});
+
 test("returns an error when inspecting a missing session", async () => {
   const dbPath = join(tmpRoot, "missing-inspect.db");
 
@@ -2637,6 +2698,107 @@ test("returns an error when exporting a missing session", async () => {
     ]),
     (error) => {
       assert.match(error.stderr, /Session not found: missing-session/);
+      return true;
+    },
+  );
+});
+
+test("rejects signing configuration without metadata output", async () => {
+  const dbPath = join(tmpRoot, "missing-signing-metadata.db");
+  const outputPath = join(tmpRoot, "exports", "missing-signing-metadata.json");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:34:56.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      contribution_consent: "granted",
+    });
+  } finally {
+    store.close();
+  }
+
+  await assert.rejects(
+    execFileAsync(
+      "node",
+      [
+        "./dist/index.js",
+        "export",
+        session.session_id,
+        "--out",
+        outputPath,
+        "--signing-key-env",
+        "OPENSASA_SIGNING_KEY",
+        "--yes",
+        "--db-path",
+        dbPath,
+      ],
+      {
+        env: {
+          ...process.env,
+          OPENSASA_SIGNING_KEY: "local-signing-secret",
+        },
+      },
+    ),
+    (error) => {
+      assert.match(error.stderr, /--signing-key-env/);
+      assert.match(error.stderr, /--metadata-out/);
+      return true;
+    },
+  );
+});
+
+test("rejects signed export metadata when the signing env var is missing", async () => {
+  const dbPath = join(tmpRoot, "missing-signing-env.db");
+  const outputPath = join(tmpRoot, "exports", "session-export-missing-signing-env.json");
+  const metadataPath = join(tmpRoot, "exports", "session-export-missing-signing-env.metadata.json");
+  const store = openStore(dbPath);
+  let session;
+
+  try {
+    session = store.createSession({
+      timestamp: "2026-06-09T12:34:56.000Z",
+      provider: "OpenAI",
+      model_id: "gpt-5",
+      task_type: "bug_fix",
+      final_outcome: "accepted",
+      work_mode: "manual_log",
+      tests_outcome: "passed",
+      contribution_consent: "granted",
+    });
+  } finally {
+    store.close();
+  }
+
+  await assert.rejects(
+    execFileAsync(
+      "node",
+      [
+        "./dist/index.js",
+        "export",
+        session.session_id,
+        "--out",
+        outputPath,
+        "--metadata-out",
+        metadataPath,
+        "--signing-key-env",
+        "OPENSASA_SIGNING_KEY",
+        "--yes",
+        "--db-path",
+        dbPath,
+      ],
+      {
+        env: { ...process.env },
+      },
+    ),
+    (error) => {
+      assert.match(error.stderr, /Environment variable OPENSASA_SIGNING_KEY is required/);
       return true;
     },
   );

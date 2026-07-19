@@ -169,16 +169,22 @@ Completed:
 - local inspection,
 - no-upload contribution preview,
 - local contribution consent state,
-- README workflow documentation.
+- README workflow documentation,
+- and manual contribution export without any upload path.
 
 Still out of scope:
 
+- upload destinations or submission commands,
 - public uploads,
 - public rankings,
 - hosted backend,
 - web dashboard,
 - automatic imports from coding tools,
 - real contribution submission.
+
+Release decision:
+
+- `v0.1` remains manual-export only. Developers can inspect and write safe local JSON exports, but OpenSasa does not submit them anywhere.
 
 ## Good Next Work
 

@@ -97,6 +97,8 @@ VS Code extension development notes live in
 [vscode-extension/README.md](./vscode-extension/README.md).
 CLI install steps live in
 [docs/INSTALL.md](./docs/INSTALL.md).
+The beta release operator checklist lives in
+[docs/FIRST_RELEASE_CHECKLIST.md](./docs/FIRST_RELEASE_CHECKLIST.md).
 
 ## Local CLI Usage
 

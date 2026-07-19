@@ -251,6 +251,9 @@ Each release should include:
 - next milestone.
 
 Release notes should avoid inflated claims. If the product has early or sample data, say so directly.
+For the first public beta, use
+[`docs/FIRST_RELEASE_CHECKLIST.md`](./FIRST_RELEASE_CHECKLIST.md) as the
+release-readiness checklist.
 
 ## Changelog Expectations
 
@@ -279,4 +282,3 @@ The repo should show progress in this order:
 8. Add public aggregate views.
 
 This order matters because OpenSasa is a trust product. Trust must be visible in the project history before rankings, charts, or public claims appear.
-

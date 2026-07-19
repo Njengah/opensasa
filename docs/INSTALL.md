@@ -125,3 +125,6 @@ npm unlink -g opensasa
 - The dashboard reads only the local SQLite database.
 - Contribution export writes local JSON files.
 - `v0.1` does not include uploads or contribution submission.
+
+After installation, try the seeded end-to-end flow in
+[`docs/DEMO_WALKTHROUGH.md`](./DEMO_WALKTHROUGH.md).

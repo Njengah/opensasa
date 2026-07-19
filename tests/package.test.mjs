@@ -98,6 +98,26 @@ test("README links to the first release checklist", async () => {
   assert.match(readme, /\[docs\/FIRST_RELEASE_CHECKLIST\.md\]\(\.\/docs\/FIRST_RELEASE_CHECKLIST\.md\)/);
 });
 
+test("README links to the demo walkthrough", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+
+  assert.match(readme, /\[docs\/DEMO_WALKTHROUGH\.md\]\(\.\/docs\/DEMO_WALKTHROUGH\.md\)/);
+});
+
+test("demo walkthrough covers the seeded end-to-end flow", async () => {
+  const walkthrough = await readFile(path.join(root, "docs", "DEMO_WALKTHROUGH.md"), "utf8");
+
+  assert.match(walkthrough, /opensasa demo-seed --db-path \.\/opensasa-demo\.db/);
+  assert.match(walkthrough, /opensasa sessions --db-path \.\/opensasa-demo\.db/);
+  assert.match(walkthrough, /opensasa report --db-path \.\/opensasa-demo\.db --compact/);
+  assert.match(walkthrough, /opensasa inspect <session-id> --db-path \.\/opensasa-demo\.db/);
+  assert.match(walkthrough, /opensasa inspect <session-id> --contribution --db-path \.\/opensasa-demo\.db/);
+  assert.match(walkthrough, /opensasa export <session-id> --db-path \.\/opensasa-demo\.db --out \.\/contribution\.json --yes/);
+  assert.match(walkthrough, /opensasa dashboard --db-path \.\/opensasa-demo\.db --port 3210/);
+  assert.match(walkthrough, /There is no upload destination or submission\s+workflow in `v0\.1`/);
+  assert.match(walkthrough, /In under 10 minutes/);
+});
+
 test("first release checklist covers beta release readiness", async () => {
   const checklist = await readFile(path.join(root, "docs", "FIRST_RELEASE_CHECKLIST.md"), "utf8");
 

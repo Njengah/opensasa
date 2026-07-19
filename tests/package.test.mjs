@@ -70,3 +70,24 @@ test("npm pack dry run includes the CLI bin and excludes development-only files"
   assert.equal(packedPaths.some((entry) => entry.startsWith("vscode-extension/")), false);
   assert.equal(packedPaths.some((entry) => entry.startsWith(".github/")), false);
 });
+
+test("README links to dedicated install docs", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+
+  assert.match(readme, /\[docs\/INSTALL\.md\]\(\.\/docs\/INSTALL\.md\)/);
+});
+
+test("install docs cover the local linked CLI flow", async () => {
+  const installDoc = await readFile(path.join(root, "docs", "INSTALL.md"), "utf8");
+
+  assert.match(installDoc, /## Prerequisites/);
+  assert.match(installDoc, /git clone https:\/\/github\.com\/Njengah\/opensasa\.git/);
+  assert.match(installDoc, /npm install/);
+  assert.match(installDoc, /npm run build/);
+  assert.match(installDoc, /npm link/);
+  assert.match(installDoc, /opensasa --help/);
+  assert.match(installDoc, /node \.\/dist\/index\.js --help/);
+  assert.match(installDoc, /--db-path \.\/opensasa-dev\.db/);
+  assert.match(installDoc, /npm unlink -g opensasa/);
+  assert.match(installDoc, /`v0\.1` does not include uploads or contribution submission/);
+});

@@ -95,6 +95,8 @@ For a quick reminder of what currently runs and where development stopped, see
 
 VS Code extension development notes live in
 [vscode-extension/README.md](./vscode-extension/README.md).
+CLI install steps live in
+[docs/INSTALL.md](./docs/INSTALL.md).
 
 ## Local CLI Usage
 
@@ -116,6 +118,9 @@ When installed as a package, the executable name is:
 ```bash
 opensasa
 ```
+
+For the full install and local linking flow, see
+[docs/INSTALL.md](./docs/INSTALL.md).
 
 ### Log A Session
 

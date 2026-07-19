@@ -2,10 +2,33 @@
   "name": "opensasa",
   "version": "0.1.0-alpha.1",
   "description": "Local-first AI coding workflow metadata tracker.",
+  "license": "MIT",
+  "homepage": "https://github.com/Njengah/opensasa#readme",
+  "bugs": {
+    "url": "https://github.com/Njengah/opensasa/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Njengah/opensasa.git"
+  },
+  "keywords": [
+    "ai",
+    "cli",
+    "developer-tools",
+    "local-first",
+    "metadata",
+    "typescript"
+  ],
   "type": "module",
   "bin": {
     "opensasa": "./dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test tests/*.test.mjs && npm --prefix ./vscode-extension run check",

@@ -263,7 +263,7 @@ Goal:
 
 Expected PRs:
 
-- [ ] Add npm package metadata and bin validation.
+- [x] Add npm package metadata and bin validation. (#107)
 - [ ] Add install docs.
 - [ ] Add first release checklist.
 - [ ] Add demo walkthrough.

@@ -1,0 +1,39 @@
+name: Documentation improvement
+description: Report unclear, missing, or inaccurate OpenSasa documentation.
+title: "[Docs]: "
+labels:
+  - documentation
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Public issues must not include secrets, source code, private prompts, model responses, exact paths, raw terminal output, customer/company names, credentials, or private exported payload contents. Describe documentation gaps with safe, synthetic examples only.
+  - type: input
+    id: doc-page
+    attributes:
+      label: Which doc or page is affected?
+      placeholder: "README.md, docs/INSTALL.md, docs/SECURITY_PRIVACY_FAQ.md"
+    validations:
+      required: true
+  - type: textarea
+    id: unclear
+    attributes:
+      label: What is unclear, missing, or inaccurate?
+      description: Quote only short public documentation snippets when needed.
+    validations:
+      required: true
+  - type: textarea
+    id: suggested-change
+    attributes:
+      label: Suggested improvement
+      description: What would make the documentation clearer or more accurate?
+  - type: dropdown
+    id: privacy-sensitive
+    attributes:
+      label: Does this involve privacy or local-first behavior?
+      options:
+        - "No"
+        - "Yes"
+        - "Not sure"
+    validations:
+      required: true

@@ -1,0 +1,78 @@
+name: Bug report
+description: Report a reproducible OpenSasa problem without sharing private data.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve OpenSasa.
+
+        Public issues must not include secrets, source code, private prompts, model responses, exact paths, raw terminal output, customer/company names, credentials, or private exported payload contents. Share only minimal safe details.
+  - type: input
+    id: version
+    attributes:
+      label: OpenSasa version
+      description: Run `opensasa --version` if available, or share the package version.
+      placeholder: "0.1.0-alpha.1"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS and environment
+      description: Include OS, shell, and Node.js version if relevant.
+      placeholder: "Windows 11, PowerShell, Node 22"
+    validations:
+      required: true
+  - type: input
+    id: command-area
+    attributes:
+      label: Command or area affected
+      placeholder: "opensasa report, dashboard, export, VS Code extension"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Summarize the problem without raw terminal output or private data.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Safe reproduction steps
+      description: Use synthetic examples. Do not paste exact local paths, source code, prompts, responses, or exported payload contents.
+      placeholder: |
+        1. Create a temporary test database.
+        2. Run a command with synthetic values.
+        3. Observe the summarized failure.
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification attempted
+      description: What did you try to confirm or work around the issue?
+      placeholder: "Rebuilt the package, retried with a fresh test database, checked --help output."
+  - type: dropdown
+    id: local-data-involved
+    attributes:
+      label: Was a local database, dashboard, or export involved?
+      options:
+        - "No"
+        - "Yes, local database"
+        - "Yes, local dashboard"
+        - "Yes, manual export"
+        - "Yes, multiple local areas"
+    validations:
+      required: true

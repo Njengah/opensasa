@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -69,6 +69,53 @@ test("npm pack dry run includes the CLI bin and excludes development-only files"
   assert.equal(packedPaths.some((entry) => entry.startsWith("docs/")), false);
   assert.equal(packedPaths.some((entry) => entry.startsWith("vscode-extension/")), false);
   assert.equal(packedPaths.some((entry) => entry.startsWith(".github/")), false);
+});
+
+test("GitHub issue templates exist and reinforce safe public reporting", async () => {
+  const templateDir = path.join(root, ".github", "ISSUE_TEMPLATE");
+  const templates = [
+    "bug_report.yml",
+    "documentation_improvement.yml",
+    "feature_request.yml",
+    "security_privacy_concern.yml",
+  ];
+  const files = await readdir(templateDir);
+  const privacyWarning = /Public issues must not include secrets, source code, private prompts, model responses, exact paths, raw terminal output, customer\/company names, credentials, or private exported payload contents/;
+
+  for (const template of templates) {
+    assert.ok(files.includes(template), `${template} should exist`);
+    const contents = await readFile(path.join(templateDir, template), "utf8");
+
+    assert.match(contents, privacyWarning);
+  }
+
+  const bugReport = await readFile(path.join(templateDir, "bug_report.yml"), "utf8");
+  assert.match(bugReport, /OpenSasa version/);
+  assert.match(bugReport, /OS and environment/);
+  assert.match(bugReport, /Command or area affected/);
+  assert.match(bugReport, /Expected behavior/);
+  assert.match(bugReport, /Actual behavior/);
+  assert.match(bugReport, /Safe reproduction steps/);
+  assert.match(bugReport, /Verification attempted/);
+  assert.match(bugReport, /Was a local database, dashboard, or export involved/);
+
+  const featureRequest = await readFile(path.join(templateDir, "feature_request.yml"), "utf8");
+  assert.match(featureRequest, /Problem/);
+  assert.match(featureRequest, /Proposed behavior/);
+  assert.match(featureRequest, /Local-first and privacy impact/);
+  assert.match(featureRequest, /v0\.1 scope fit/);
+  assert.match(featureRequest, /Alternatives considered/);
+
+  const docsRequest = await readFile(path.join(templateDir, "documentation_improvement.yml"), "utf8");
+  assert.match(docsRequest, /Which doc or page is affected/);
+  assert.match(docsRequest, /What is unclear, missing, or inaccurate/);
+
+  const securityConcern = await readFile(
+    path.join(templateDir, "security_privacy_concern.yml"),
+    "utf8",
+  );
+  assert.match(securityConcern, /minimal safe reproduction details only/i);
+  assert.match(securityConcern, /private disclosure path/i);
 });
 
 test("README links to dedicated install docs", async () => {

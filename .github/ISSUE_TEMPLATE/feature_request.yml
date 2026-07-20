@@ -1,0 +1,47 @@
+name: Feature request
+description: Suggest a practical OpenSasa improvement with local-first/privacy context.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Public issues must not include secrets, source code, private prompts, model responses, exact paths, raw terminal output, customer/company names, credentials, or private exported payload contents. Keep examples synthetic and minimal.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-behavior
+    attributes:
+      label: Proposed behavior
+      description: What should OpenSasa do differently?
+    validations:
+      required: true
+  - type: textarea
+    id: privacy-impact
+    attributes:
+      label: Local-first and privacy impact
+      description: Explain whether this changes local storage, dashboard behavior, exports, or any sharing boundary.
+    validations:
+      required: true
+  - type: dropdown
+    id: v01-scope
+    attributes:
+      label: v0.1 scope fit
+      description: Does this fit the current local-first, manual-export beta scope?
+      options:
+        - "Fits v0.1 local-first/manual-export scope"
+        - "Probably later than v0.1"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What workaround or smaller version would also help?

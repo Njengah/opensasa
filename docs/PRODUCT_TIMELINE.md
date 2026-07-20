@@ -270,7 +270,7 @@ Expected PRs:
 - [x] Add screenshots or dashboard preview images. (#111)
 - [x] Add architecture doc. (#112)
 - [x] Add security/privacy FAQ. (#113)
-- [ ] Add issue templates.
+- [x] Add issue templates. (#114)
 - [ ] Add good-first-issue labels/docs.
 - [ ] Add CI release checks.
 - [ ] Tag `v0.1.0-beta.1`.

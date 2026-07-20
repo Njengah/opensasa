@@ -49,4 +49,3 @@
 - name: blocked
   color: bfdadc
   description: Cannot move until a dependency or decision is resolved.
-

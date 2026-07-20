@@ -117,4 +117,3 @@ customer or company names, credentials, or private exported payload contents.
 If an issue needs sensitive details to reproduce, do not label it as a normal
 good first issue. Ask maintainers for a private disclosure path first, then
 create a public follow-up only after the safe scope is clear.
-

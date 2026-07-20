@@ -118,6 +118,36 @@ test("GitHub issue templates exist and reinforce safe public reporting", async (
   assert.match(securityConcern, /private disclosure path/i);
 });
 
+test("good first issue docs define starter scope and label taxonomy", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+  const contributing = await readFile(path.join(root, "CONTRIBUTING.md"), "utf8");
+  const guide = await readFile(path.join(root, "docs", "GOOD_FIRST_ISSUES.md"), "utf8");
+  const labels = await readFile(path.join(root, ".github", "labels.yml"), "utf8");
+
+  assert.match(readme, /\[docs\/GOOD_FIRST_ISSUES\.md\]\(\.\/docs\/GOOD_FIRST_ISSUES\.md\)/);
+  assert.match(contributing, /docs\/GOOD_FIRST_ISSUES\.md/);
+  assert.match(guide, /# Good First Issues/);
+  assert.match(guide, /v0\.1` local-first, manual-export beta track/);
+  assert.match(guide, /small, reviewable\s+issue/);
+  assert.match(guide, /Do not label an issue as `good first issue`/);
+  assert.match(guide, /Recommended Label Taxonomy/);
+  assert.match(guide, /`good first issue`/);
+  assert.match(guide, /`help wanted`/);
+  assert.match(guide, /`privacy`/);
+  assert.match(guide, /`methodology`/);
+  assert.match(guide, /`cli`/);
+  assert.match(guide, /`dashboard`/);
+  assert.match(guide, /`vscode-extension`/);
+  assert.match(guide, /`tests`/);
+  assert.match(guide, /`release`/);
+  assert.match(guide, /node --test tests\/package\.test\.mjs/);
+  assert.match(guide, /npm test/);
+  assert.match(guide, /must not include secrets, source code, private\s+prompts, model responses, exact source or project paths, raw terminal output/);
+  assert.match(labels, /name: good first issue/);
+  assert.match(labels, /name: needs design/);
+  assert.match(labels, /name: blocked/);
+});
+
 test("README links to dedicated install docs", async () => {
   const readme = await readFile(path.join(root, "README.md"), "utf8");
 

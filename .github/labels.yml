@@ -1,0 +1,51 @@
+# Maintainer reference for the OpenSasa label taxonomy.
+# This file documents intended labels; it is not applied automatically unless a
+# separate label-sync workflow is added later.
+
+- name: good first issue
+  color: 7057ff
+  description: Small, well-defined work suitable for a first PR.
+
+- name: help wanted
+  color: 008672
+  description: Useful work where maintainers want outside help.
+
+- name: documentation
+  color: 0075ca
+  description: README, docs, examples, or public explanation changes.
+
+- name: privacy
+  color: b60205
+  description: Local-first behavior, consent, export, disclosure, or data-boundary work.
+
+- name: methodology
+  color: d93f0b
+  description: Scoring, confidence, sampling, anti-gaming, or metric interpretation.
+
+- name: cli
+  color: 1d76db
+  description: CLI commands, flags, help text, validation, or terminal output.
+
+- name: dashboard
+  color: 5319e7
+  description: Local dashboard server, UI, or report visualization work.
+
+- name: vscode-extension
+  color: 0e8a16
+  description: VS Code extension commands, status bar, settings, or extension docs.
+
+- name: tests
+  color: fef2c0
+  description: Test coverage, fixtures, smoke checks, or verification cleanup.
+
+- name: release
+  color: c5def5
+  description: Packaging, changelog, tagging, or release-readiness work.
+
+- name: needs design
+  color: fbca04
+  description: Requires product, privacy, or methodology agreement before implementation.
+
+- name: blocked
+  color: bfdadc
+  description: Cannot move until a dependency or decision is resolved.

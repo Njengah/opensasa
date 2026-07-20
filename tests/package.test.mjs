@@ -109,11 +109,14 @@ test("security and privacy FAQ covers v0.1 boundaries", async () => {
   assert.match(faq, /# Security And Privacy FAQ/);
   assert.match(faq, /local SQLite database/);
   assert.match(faq, /does not include a hosted backend,\s+upload destination, submission command/);
-  assert.match(faq, /does not collect or upload source code,\s+diffs, private prompts, model\s+responses, exact file paths, raw terminal output/);
+  assert.match(faq, /does not collect or upload source code,\s+diffs, private prompts, model\s+responses, exact source or project paths, raw terminal output/);
+  assert.match(faq, /records the output path you explicitly chose in\s+local contribution history/);
   assert.match(faq, /one-way SHA-256\s+identity hash/);
   assert.match(faq, /writes\s+only the resulting verification outcome back to the session record/);
   assert.match(faq, /VS Code extension is a local workflow wrapper around the CLI/);
   assert.match(faq, /dashboard is local-only/);
+  assert.match(faq, /dashboard binds to `127\.0\.0\.1`/);
+  assert.match(faq, /non-loopback address, you may expose local report,\s+contribution preview, and\s+contribution history endpoints/);
   assert.match(faq, /Manual export is the current sharing boundary/);
   assert.match(faq, /payload hash, byte size, export timestamp, and validation status/);
   assert.match(faq, /HMAC-SHA256 signature/);

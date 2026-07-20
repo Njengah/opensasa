@@ -33,9 +33,16 @@ with `--db-path`, `OPENSASA_DB_PATH`, or the local OpenSasa config file.
 ## What is excluded by default?
 
 OpenSasa does not collect or upload source code, diffs, private prompts, model
-responses, exact file paths, raw terminal output, repository names, company
-names, customer names, secrets, API keys, credentials, or private notes by
-default.
+responses, exact source or project paths, raw terminal output, repository
+names, company names, customer names, secrets, API keys, credentials, or
+private notes by default.
+
+One practical exception is local export bookkeeping: when you run
+`opensasa export`, OpenSasa records the output path you explicitly chose in
+local contribution history so you can review what was exported from this
+machine. Treat export and metadata output paths as local record data, and avoid
+placing private project names in those filenames if that matters for your
+workflow.
 
 The intended metadata boundary is simple: if a value could reveal source
 content, a private AI conversation, an exact local path, an organization, a
@@ -80,6 +87,11 @@ default.
 No. The current dashboard is local-only. It reads the local SQLite database and
 serves report views from your machine. It does not upload sessions, send
 telemetry, or publish rankings.
+
+By default, the dashboard binds to `127.0.0.1`. If you override the host with a
+non-loopback address, you may expose local report, contribution preview, and
+contribution history endpoints to other devices that can reach that interface.
+Only do that on a trusted network and with a clear reason.
 
 The dashboard can preview local contribution bundles and local contribution
 history, but previewing those views does not create a hosted submission.

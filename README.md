@@ -97,6 +97,8 @@ The current local-first product architecture is summarized in
 [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
 Security and privacy behavior for `v0.1` is covered in
 [docs/SECURITY_PRIVACY_FAQ.md](./docs/SECURITY_PRIVACY_FAQ.md).
+Contributor-friendly starter work is described in
+[docs/GOOD_FIRST_ISSUES.md](./docs/GOOD_FIRST_ISSUES.md).
 
 VS Code extension development notes live in
 [vscode-extension/README.md](./vscode-extension/README.md).

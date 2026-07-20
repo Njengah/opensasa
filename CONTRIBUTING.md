@@ -28,6 +28,7 @@ Before contributing, read:
 - `docs/METHODOLOGY.md` for scoring and confidence principles,
 - `docs/ROADMAP.md` for staged milestones,
 - `docs/DEVELOPMENT_CYCLE.md` for branch, PR, commit, and release expectations.
+- `docs/GOOD_FIRST_ISSUES.md` for starter issue criteria and label guidance.
 
 ## Current Contribution Focus
 
@@ -42,6 +43,11 @@ The highest-value contributions right now are foundation contributions:
 - improve public-facing explanations without overclaiming.
 
 Implementation contributions should stay narrow until the first MVP workflow is explicitly chosen.
+
+For beginner-friendly work, start with issues labeled `good first issue`. A
+good first issue should be narrow, public-safe, and verifiable with a small
+test or documentation check. See `docs/GOOD_FIRST_ISSUES.md` for label
+definitions and examples of work that should not be treated as beginner-ready.
 
 ## Branches
 

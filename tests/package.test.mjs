@@ -209,6 +209,26 @@ test("architecture docs cover the v0.1 local-first boundaries", async () => {
   assert.match(architectureDoc, /Manual export is the current sharing boundary/);
   assert.match(architectureDoc, /does not include a hosted backend, public aggregate index, upload\s+destination, or submission command/);
   assert.match(architectureDoc, /does not upload source code,\s+prompts, responses, exact paths, raw terminal output/);
+  assert.match(architectureDoc, /docs\/HOSTED_ARCHITECTURE\.md/);
+});
+
+test("hosted architecture decision preserves the local-first trust boundary", async () => {
+  const hostedArchitecture = await readFile(path.join(root, "docs", "HOSTED_ARCHITECTURE.md"), "utf8");
+
+  assert.match(hostedArchitecture, /# Hosted Architecture Decision/);
+  assert.match(hostedArchitecture, /Status: decided for Phase 7 planning/);
+  assert.match(hostedArchitecture, /Use an optional contribution-intake architecture/);
+  assert.match(hostedArchitecture, /local SQLite database remains the personal record/);
+  assert.match(hostedArchitecture, /hosted intake API may accept only validated contribution payloads/);
+  assert.match(hostedArchitecture, /server-side validation must reject excluded fields/);
+  assert.match(hostedArchitecture, /public views are built from aggregate records, not raw local sessions/);
+  assert.match(hostedArchitecture, /sample size and confidence labels/);
+  assert.match(hostedArchitecture, /source code/);
+  assert.match(hostedArchitecture, /private prompts/);
+  assert.match(hostedArchitecture, /raw terminal output/);
+  assert.match(hostedArchitecture, /seed data only/);
+  assert.match(hostedArchitecture, /automatic upload/);
+  assert.match(hostedArchitecture, /background sync/);
 });
 
 test("security and privacy FAQ covers v0.1 boundaries", async () => {
@@ -257,6 +277,12 @@ test("README links to the launch case study", async () => {
   const readme = await readFile(path.join(root, "README.md"), "utf8");
 
   assert.match(readme, /\[docs\/LAUNCH_CASE_STUDY\.md\]\(\.\/docs\/LAUNCH_CASE_STUDY\.md\)/);
+});
+
+test("README links to the hosted architecture decision", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+
+  assert.match(readme, /\[docs\/HOSTED_ARCHITECTURE\.md\]\(\.\/docs\/HOSTED_ARCHITECTURE\.md\)/);
 });
 
 test("README links to the demo walkthrough", async () => {

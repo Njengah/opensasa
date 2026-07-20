@@ -273,7 +273,7 @@ Expected PRs:
 - [x] Add issue templates. (#114)
 - [x] Add good-first-issue labels/docs. (#115)
 - [x] Add CI release checks. (#116)
-- [ ] Tag `v0.1.0-beta.1`.
+- [ ] Tag `v0.1.0-beta.1` after release prep merges. (prep #117)
 - [ ] Publish launch case study.
 
 Exit criteria:

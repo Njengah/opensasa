@@ -26,11 +26,14 @@ Release boundary for `v0.1`:
 
 ## 2. Verification Evidence
 
+- Confirm the Release Checks workflow passed for the release PR or latest `main` push.
 - Run `npm test`.
 - Run `npm pack --dry-run --json`.
 - Verify the packed npm artifact includes the `opensasa` bin and excludes development-only directories.
 - Run `node ./dist/index.js --help`.
 - Run `opensasa --help` from a linked local install if release instructions mention `npm link`.
+- Note: the Release Checks workflow is CI evidence only; it does not publish packages, create tags, or upload release artifacts.
+- The root `npm test` command also covers the VS Code extension check.
 
 ## 3. Local Workflow Smoke Test
 

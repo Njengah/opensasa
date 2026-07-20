@@ -21,8 +21,6 @@ All notable changes to OpenSasa will be documented in this file.
 - Public beta packaging docs: install guide, release checklist, demo
   walkthrough, dashboard preview image, architecture overview, security/privacy
   FAQ, issue templates, good-first-issue guidance, and release checks workflow.
-- Public beta launch case study covering the local-first product loop, privacy
-  boundary, shipped scope, and current limitations.
 
 ### Changed
 

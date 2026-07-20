@@ -327,6 +327,15 @@ test("launch case study covers the public beta boundaries", async () => {
   assert.match(launchPost, /public aggregate model rankings/);
 });
 
+test("launch post draft points to the superseding case study", async () => {
+  const launchPostDraft = await readFile(path.join(root, "docs", "LAUNCH_POST.md"), "utf8");
+  const roadmap = await readFile(path.join(root, "docs", "ROADMAP.md"), "utf8");
+
+  assert.match(launchPostDraft, /superseded by the published/);
+  assert.match(launchPostDraft, /\[.*launch case study\]\(\.\/LAUNCH_CASE_STUDY\.md\)/);
+  assert.match(roadmap, /first public launch post draft, now superseded by the beta launch case study/);
+});
+
 test("dashboard preview asset mirrors shipped dashboard sections", async () => {
   const previewSvg = await readFile(
     path.join(root, "docs", "images", "dashboard-preview.svg"),

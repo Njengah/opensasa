@@ -114,6 +114,11 @@ Future contribution submission must be designed and reviewed separately, with
 documented payloads, destinations, consent flow, validation, and revocation
 behavior.
 
+The Phase 7 hosted boundary is captured in
+[`docs/HOSTED_ARCHITECTURE.md`](./HOSTED_ARCHITECTURE.md). It keeps hosted
+features optional, treats local SQLite as the personal source of truth, and
+allows hosted intake only for validated contribution-safe payloads.
+
 ## Out Of Scope For v0.1
 
 The following are future work and should not be implied by current docs or UI:

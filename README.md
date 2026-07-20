@@ -110,6 +110,8 @@ The beta release operator checklist lives in
 [docs/FIRST_RELEASE_CHECKLIST.md](./docs/FIRST_RELEASE_CHECKLIST.md).
 The public beta launch case study lives in
 [docs/LAUNCH_CASE_STUDY.md](./docs/LAUNCH_CASE_STUDY.md).
+The optional hosted architecture decision lives in
+[docs/HOSTED_ARCHITECTURE.md](./docs/HOSTED_ARCHITECTURE.md).
 
 ## Dashboard Preview
 

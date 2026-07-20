@@ -95,6 +95,8 @@ For a quick reminder of what currently runs and where development stopped, see
 
 The current local-first product architecture is summarized in
 [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
+Security and privacy behavior for `v0.1` is covered in
+[docs/SECURITY_PRIVACY_FAQ.md](./docs/SECURITY_PRIVACY_FAQ.md).
 
 VS Code extension development notes live in
 [vscode-extension/README.md](./vscode-extension/README.md).

@@ -269,7 +269,7 @@ Expected PRs:
 - [x] Add demo walkthrough. (#110)
 - [x] Add screenshots or dashboard preview images. (#111)
 - [x] Add architecture doc. (#112)
-- [ ] Add security/privacy FAQ.
+- [x] Add security/privacy FAQ. (#113)
 - [ ] Add issue templates.
 - [ ] Add good-first-issue labels/docs.
 - [ ] Add CI release checks.

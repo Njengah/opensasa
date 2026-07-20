@@ -1,0 +1,57 @@
+name: Security or privacy concern
+description: Ask about safe reporting before sharing sensitive OpenSasa details.
+title: "[Security/Privacy]: "
+labels:
+  - security
+  - privacy
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not share sensitive vulnerability details in a public issue.
+
+        Public issues must not include secrets, source code, private prompts, model responses, exact paths, raw terminal output, customer/company names, credentials, or private exported payload contents. Share minimal safe reproduction details only, and ask maintainers for a private disclosure path if the report is sensitive.
+  - type: dropdown
+    id: sensitivity
+    attributes:
+      label: Is this report sensitive?
+      options:
+        - "Yes, I need a private disclosure path before sharing details"
+        - "No, this is a general privacy/security question"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Minimal safe summary
+      description: Describe the affected area without exploit details, secrets, private data, exact paths, or raw logs.
+      placeholder: "A local dashboard/export/database behavior may expose more data than expected."
+    validations:
+      required: true
+  - type: dropdown
+    id: affected-area
+    attributes:
+      label: Affected area
+      options:
+        - "Local database"
+        - "Local dashboard"
+        - "Manual export"
+        - "CLI command"
+        - "VS Code extension"
+        - "Documentation"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: safe-repro
+    attributes:
+      label: Minimal safe reproduction details
+      description: Use synthetic data only. If real private data or exploit details are required, ask for a private disclosure path instead.
+  - type: checkboxes
+    id: public-boundary
+    attributes:
+      label: Public reporting boundary
+      options:
+        - label: I have not included secrets, credentials, source code, private prompts, model responses, exact paths, raw terminal output, customer/company names, or private exported payload contents.
+          required: true

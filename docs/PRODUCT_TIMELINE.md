@@ -272,7 +272,7 @@ Expected PRs:
 - [x] Add security/privacy FAQ. (#113)
 - [x] Add issue templates. (#114)
 - [x] Add good-first-issue labels/docs. (#115)
-- [ ] Add CI release checks.
+- [x] Add CI release checks. (#116)
 - [ ] Tag `v0.1.0-beta.1`.
 - [ ] Publish launch case study.
 

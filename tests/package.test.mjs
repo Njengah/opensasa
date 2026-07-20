@@ -83,6 +83,12 @@ test("README links to the architecture docs", async () => {
   assert.match(readme, /\[docs\/ARCHITECTURE\.md\]\(\.\/docs\/ARCHITECTURE\.md\)/);
 });
 
+test("README links to the security and privacy FAQ", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+
+  assert.match(readme, /\[docs\/SECURITY_PRIVACY_FAQ\.md\]\(\.\/docs\/SECURITY_PRIVACY_FAQ\.md\)/);
+});
+
 test("architecture docs cover the v0.1 local-first boundaries", async () => {
   const architectureDoc = await readFile(path.join(root, "docs", "ARCHITECTURE.md"), "utf8");
 
@@ -95,6 +101,24 @@ test("architecture docs cover the v0.1 local-first boundaries", async () => {
   assert.match(architectureDoc, /Manual export is the current sharing boundary/);
   assert.match(architectureDoc, /does not include a hosted backend, public aggregate index, upload\s+destination, or submission command/);
   assert.match(architectureDoc, /does not upload source code,\s+prompts, responses, exact paths, raw terminal output/);
+});
+
+test("security and privacy FAQ covers v0.1 boundaries", async () => {
+  const faq = await readFile(path.join(root, "docs", "SECURITY_PRIVACY_FAQ.md"), "utf8");
+
+  assert.match(faq, /# Security And Privacy FAQ/);
+  assert.match(faq, /local SQLite database/);
+  assert.match(faq, /does not include a hosted backend,\s+upload destination, submission command/);
+  assert.match(faq, /does not collect or upload source code,\s+diffs, private prompts, model\s+responses, exact file paths, raw terminal output/);
+  assert.match(faq, /one-way SHA-256\s+identity hash/);
+  assert.match(faq, /writes\s+only the resulting verification outcome back to the session record/);
+  assert.match(faq, /VS Code extension is a local workflow wrapper around the CLI/);
+  assert.match(faq, /dashboard is local-only/);
+  assert.match(faq, /Manual export is the current sharing boundary/);
+  assert.match(faq, /payload hash, byte size, export timestamp, and validation status/);
+  assert.match(faq, /HMAC-SHA256 signature/);
+  assert.match(faq, /cannot recall an exported file that already\s+left your machine/);
+  assert.match(faq, /do not paste secrets, source code, private prompts,\s+model responses, exact paths, or raw terminal output into a public issue/);
 });
 
 test("install docs cover the local linked CLI flow", async () => {

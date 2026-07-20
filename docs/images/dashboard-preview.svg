@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1660" viewBox="0 0 1280 1660" role="img" aria-labelledby="title desc">
+  <title id="title">OpenSasa dashboard preview</title>
+  <desc id="desc">Synthetic preview image of the local OpenSasa dashboard showing overview cards, model and tool tables, daily trend, cost summary, outcomes, contribution bundle preview, and contribution history.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#edf2f7" />
+    </linearGradient>
+    <style>
+      .page { fill: url(#bg); }
+      .panel { fill: #ffffff; stroke: #dfe4e8; stroke-width: 2; rx: 18; }
+      .notice { fill: #edf8f0; stroke: #b8d9c2; stroke-width: 2; rx: 18; }
+      .card { fill: #ffffff; stroke: #dfe4e8; stroke-width: 2; rx: 18; }
+      .muted { fill: #5f6b76; font: 28px system-ui, sans-serif; }
+      .small { fill: #5f6b76; font: 22px system-ui, sans-serif; }
+      .heading { fill: #17202a; font: 700 54px system-ui, sans-serif; }
+      .section { fill: #17202a; font: 700 34px system-ui, sans-serif; }
+      .label { fill: #17202a; font: 600 24px system-ui, sans-serif; }
+      .value { fill: #17202a; font: 700 38px system-ui, sans-serif; }
+      .pill { fill: #e7f1ff; rx: 999; }
+      .pill-text { fill: #1459a6; font: 600 21px system-ui, sans-serif; }
+      .rule { stroke: #edf0f2; stroke-width: 2; }
+      .trend { fill: #dcecff; }
+      .cost { fill: #d8f0df; }
+      .bundle { fill: #f8fafb; stroke: #dfe4e8; stroke-width: 2; rx: 14; }
+      .field { fill: #eef1f4; rx: 999; }
+      .accent { fill: #1459a6; font: 700 22px system-ui, sans-serif; }
+      .mono { fill: #17202a; font: 600 22px "Courier New", monospace; }
+    </style>
+  </defs>
+
+  <rect class="page" width="1280" height="1660" rx="32" />
+
+  <text x="80" y="110" class="heading">OpenSasa Dashboard</text>
+  <text x="80" y="156" class="muted">Your private AI coding workflow report.</text>
+  <text x="935" y="112" class="small">Synthetic local demo preview</text>
+
+  <rect class="notice" x="80" y="198" width="1120" height="86" rx="18" />
+  <text x="112" y="252" class="label">This dashboard reads only your local OpenSasa database. No data is uploaded.</text>
+
+  <rect class="panel" x="80" y="322" width="1120" height="150" rx="18" />
+  <text x="112" y="372" class="section">Filters</text>
+  <rect class="pill" x="112" y="398" width="158" height="40" rx="20" />
+  <text x="136" y="424" class="pill-text">Provider: OpenAI</text>
+  <rect class="pill" x="286" y="398" width="210" height="40" rx="20" />
+  <text x="310" y="424" class="pill-text">Model: gpt-5-mini</text>
+  <rect class="pill" x="512" y="398" width="158" height="40" rx="20" />
+  <text x="536" y="424" class="pill-text">Tool: Codex</text>
+  <rect class="pill" x="686" y="398" width="196" height="40" rx="20" />
+  <text x="710" y="424" class="pill-text">Language: TypeScript</text>
+  <rect class="pill" x="898" y="398" width="122" height="40" rx="20" />
+  <text x="922" y="424" class="pill-text">Task: All</text>
+  <rect class="pill" x="1036" y="398" width="132" height="40" rx="20" />
+  <text x="1060" y="424" class="pill-text">Outcome: All</text>
+
+  <rect class="card" x="80" y="512" width="262" height="148" rx="18" />
+  <text x="112" y="560" class="label">Sessions</text>
+  <text x="112" y="620" class="value">24</text>
+  <text x="112" y="646" class="small">Synthetic demo rows</text>
+
+  <rect class="card" x="365" y="512" width="262" height="148" rx="18" />
+  <text x="397" y="560" class="label">Useful outcome rate</text>
+  <text x="397" y="620" class="value">79.2%</text>
+  <text x="397" y="646" class="small">Accepted and partial</text>
+
+  <rect class="card" x="650" y="512" width="262" height="148" rx="18" />
+  <text x="682" y="560" class="label">Estimated cost</text>
+  <text x="682" y="620" class="value">$14.84</text>
+  <text x="682" y="646" class="small">Local calculation only</text>
+
+  <rect class="card" x="935" y="512" width="265" height="148" rx="18" />
+  <text x="967" y="560" class="label">Confidence</text>
+  <text x="967" y="620" class="value">Medium</text>
+  <text x="967" y="646" class="small">Seeded evaluation sample</text>
+
+  <rect class="panel" x="80" y="700" width="540" height="300" rx="18" />
+  <text x="112" y="750" class="section">Models</text>
+  <text x="112" y="798" class="small">Model</text>
+  <text x="376" y="798" class="small">Sessions</text>
+  <text x="494" y="798" class="small">Cost</text>
+  <line class="rule" x1="112" y1="818" x2="588" y2="818" />
+  <text x="112" y="860" class="label">gpt-5-mini</text>
+  <text x="390" y="860" class="label">11</text>
+  <text x="500" y="860" class="label">$6.10</text>
+  <line class="rule" x1="112" y1="882" x2="588" y2="882" />
+  <text x="112" y="924" class="label">gpt-5</text>
+  <text x="390" y="924" class="label">8</text>
+  <text x="500" y="924" class="label">$5.88</text>
+  <line class="rule" x1="112" y1="946" x2="588" y2="946" />
+  <text x="112" y="988" class="label">claude-sonnet</text>
+  <text x="390" y="988" class="label">5</text>
+  <text x="500" y="988" class="label">$2.86</text>
+
+  <rect class="panel" x="660" y="700" width="540" height="300" rx="18" />
+  <text x="692" y="750" class="section">Tools</text>
+  <text x="692" y="798" class="small">Tool</text>
+  <text x="948" y="798" class="small">Sessions</text>
+  <text x="1072" y="798" class="small">Cost</text>
+  <line class="rule" x1="692" y1="818" x2="1168" y2="818" />
+  <text x="692" y="860" class="label">Codex</text>
+  <text x="968" y="860" class="label">12</text>
+  <text x="1072" y="860" class="label">$7.24</text>
+  <line class="rule" x1="692" y1="882" x2="1168" y2="882" />
+  <text x="692" y="924" class="label">VS Code</text>
+  <text x="968" y="924" class="label">7</text>
+  <text x="1072" y="924" class="label">$4.32</text>
+  <line class="rule" x1="692" y1="946" x2="1168" y2="946" />
+  <text x="692" y="988" class="label">Claude Code</text>
+  <text x="968" y="988" class="label">5</text>
+  <text x="1072" y="988" class="label">$3.28</text>
+
+  <rect class="panel" x="80" y="1040" width="540" height="300" rx="18" />
+  <text x="112" y="1090" class="section">Daily trend</text>
+  <text x="112" y="1140" class="small">2026-07-13</text>
+  <rect class="trend" x="262" y="1116" width="180" height="24" rx="8" />
+  <text x="468" y="1140" class="small">3 / 4 useful</text>
+  <text x="112" y="1192" class="small">2026-07-14</text>
+  <rect class="trend" x="262" y="1168" width="250" height="24" rx="8" />
+  <text x="538" y="1192" class="small">5 / 6 useful</text>
+  <text x="112" y="1244" class="small">2026-07-15</text>
+  <rect class="trend" x="262" y="1220" width="320" height="24" rx="8" />
+  <text x="112" y="1296" class="small">2026-07-16</text>
+  <rect class="trend" x="262" y="1272" width="220" height="24" rx="8" />
+  <text x="508" y="1296" class="small">4 / 5 useful</text>
+  <text x="608" y="1244" class="small">6 / 7 useful</text>
+
+  <rect class="panel" x="660" y="1040" width="540" height="300" rx="18" />
+  <text x="692" y="1090" class="section">Cost summary</text>
+  <text x="692" y="1138" class="label">Total estimated cost: $14.84</text>
+  <text x="692" y="1190" class="small">By model</text>
+  <text x="692" y="1232" class="small">gpt-5-mini</text>
+  <rect class="cost" x="856" y="1208" width="250" height="24" rx="8" />
+  <text x="1124" y="1232" class="small">$6.10</text>
+  <text x="692" y="1284" class="small">gpt-5</text>
+  <rect class="cost" x="856" y="1260" width="238" height="24" rx="8" />
+  <text x="1112" y="1284" class="small">$5.88</text>
+  <text x="692" y="1336" class="small">claude-sonnet</text>
+  <rect class="cost" x="856" y="1312" width="116" height="24" rx="8" />
+  <text x="990" y="1336" class="small">$2.86</text>
+
+  <rect class="panel" x="80" y="1380" width="540" height="200" rx="18" />
+  <text x="112" y="1430" class="section">Outcomes</text>
+  <rect class="pill" x="112" y="1462" width="160" height="40" rx="20" />
+  <text x="134" y="1488" class="pill-text">Accepted: 15</text>
+  <rect class="pill" x="286" y="1462" width="206" height="40" rx="20" />
+  <text x="308" y="1488" class="pill-text">Partially accepted: 4</text>
+  <rect class="pill" x="506" y="1462" width="156" height="40" rx="20" />
+  <text x="528" y="1488" class="pill-text">Rejected: 5</text>
+  <text x="112" y="1540" class="label">Verification</text>
+  <text x="112" y="1576" class="small">Tests passed: 18   Build passed: 16   Lint passed: 17</text>
+
+  <rect class="panel" x="660" y="1380" width="540" height="200" rx="18" />
+  <text x="692" y="1430" class="section">Contribution bundle preview</text>
+  <text x="692" y="1472" class="small">Consent-granted sessions included in a future privacy-safe export bundle.</text>
+  <rect class="bundle" x="692" y="1498" width="220" height="54" rx="14" />
+  <text x="718" y="1532" class="accent">Included sessions: 9</text>
+  <rect class="bundle" x="930" y="1498" width="238" height="54" rx="14" />
+  <text x="956" y="1532" class="accent">Excluded fields: 8</text>
+  <text x="692" y="1576" class="label">Contribution history</text>
+  <text x="692" y="1608" class="small">3 local exports recorded. No upload destination exists in the MVP.</text>
+</svg>

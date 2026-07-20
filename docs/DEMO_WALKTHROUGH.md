@@ -139,6 +139,10 @@ http://127.0.0.1:3210
 The dashboard reads only the local SQLite file and does not send telemetry or
 session data anywhere.
 
+Preview image of the seeded local dashboard:
+
+![OpenSasa dashboard preview](./images/dashboard-preview.svg)
+
 ## 9. Reset The Demo
 
 To start over, delete the demo database file and seed it again:

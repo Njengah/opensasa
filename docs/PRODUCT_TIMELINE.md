@@ -267,7 +267,7 @@ Expected PRs:
 - [x] Add install docs. (#108)
 - [x] Add first release checklist. (#109)
 - [x] Add demo walkthrough. (#110)
-- [ ] Add screenshots or dashboard preview images.
+- [x] Add screenshots or dashboard preview images. (#111)
 - [ ] Add architecture doc.
 - [ ] Add security/privacy FAQ.
 - [ ] Add issue templates.

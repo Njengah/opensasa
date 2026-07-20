@@ -102,6 +102,17 @@ The quickest hands-on evaluation path lives in
 The beta release operator checklist lives in
 [docs/FIRST_RELEASE_CHECKLIST.md](./docs/FIRST_RELEASE_CHECKLIST.md).
 
+## Dashboard Preview
+
+For the seeded dashboard preview image and the fastest local walkthrough, see
+[docs/DEMO_WALKTHROUGH.md](./docs/DEMO_WALKTHROUGH.md).
+
+That preview mirrors the local-only dashboard sections that ship today:
+overview cards, model and tool comparisons, daily trend, cost summary,
+verification outcomes, contribution bundle preview, and contribution history.
+The dashboard still reads only your local SQLite database and does not upload
+session data.
+
 ## Local CLI Usage
 
 Install dependencies and build the CLI:

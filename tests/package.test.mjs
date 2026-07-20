@@ -104,6 +104,14 @@ test("README links to the demo walkthrough", async () => {
   assert.match(readme, /\[docs\/DEMO_WALKTHROUGH\.md\]\(\.\/docs\/DEMO_WALKTHROUGH\.md\)/);
 });
 
+test("README points readers to the dashboard preview walkthrough", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+
+  assert.match(readme, /## Dashboard Preview/);
+  assert.match(readme, /\[docs\/DEMO_WALKTHROUGH\.md\]\(\.\/docs\/DEMO_WALKTHROUGH\.md\)/);
+  assert.match(readme, /does not upload\s+session data/);
+});
+
 test("demo walkthrough covers the seeded end-to-end flow", async () => {
   const walkthrough = await readFile(path.join(root, "docs", "DEMO_WALKTHROUGH.md"), "utf8");
 
@@ -116,6 +124,13 @@ test("demo walkthrough covers the seeded end-to-end flow", async () => {
   assert.match(walkthrough, /opensasa dashboard --db-path \.\/opensasa-demo\.db --port 3210/);
   assert.match(walkthrough, /There is no upload destination or submission\s+workflow in `v0\.1`/);
   assert.match(walkthrough, /In under 10 minutes/);
+});
+
+test("demo walkthrough embeds the dashboard preview image", async () => {
+  const walkthrough = await readFile(path.join(root, "docs", "DEMO_WALKTHROUGH.md"), "utf8");
+
+  assert.match(walkthrough, /!\[OpenSasa dashboard preview\]\(\.\/images\/dashboard-preview\.svg\)/);
+  assert.match(walkthrough, /Preview image of the seeded local dashboard/);
 });
 
 test("first release checklist covers beta release readiness", async () => {
@@ -134,4 +149,23 @@ test("first release checklist covers beta release readiness", async () => {
   assert.match(checklist, /## 6\. Packaging And Tagging Readiness/);
   assert.match(checklist, /## 7\. Not Ready Means Do Not Tag/);
   assert.match(checklist, /Do not create the beta tag yet/);
+});
+
+test("dashboard preview asset mirrors shipped dashboard sections", async () => {
+  const previewSvg = await readFile(
+    path.join(root, "docs", "images", "dashboard-preview.svg"),
+    "utf8",
+  );
+
+  assert.match(previewSvg, /<svg[\s\S]*OpenSasa dashboard preview/);
+  assert.match(previewSvg, /OpenSasa Dashboard/);
+  assert.match(previewSvg, /No data is uploaded/);
+  assert.match(previewSvg, /Models/);
+  assert.match(previewSvg, /Tools/);
+  assert.match(previewSvg, /Daily trend/);
+  assert.match(previewSvg, /Cost summary/);
+  assert.match(previewSvg, /Outcomes/);
+  assert.match(previewSvg, /Verification/);
+  assert.match(previewSvg, /Contribution bundle preview/);
+  assert.match(previewSvg, /Contribution history/);
 });

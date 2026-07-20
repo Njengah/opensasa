@@ -291,7 +291,7 @@ Goal:
 Expected PRs:
 
 - [x] Decide hosted architecture. (#120)
-- [ ] Add public aggregate schema.
+- [x] Add public aggregate schema. (#121)
 - [ ] Add ingestion endpoint for safe contribution payloads.
 - [ ] Add server-side validation.
 - [ ] Add confidence labels for aggregate views.

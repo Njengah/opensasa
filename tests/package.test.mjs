@@ -71,6 +71,37 @@ test("npm pack dry run includes the CLI bin and excludes development-only files"
   assert.equal(packedPaths.some((entry) => entry.startsWith(".github/")), false);
 });
 
+test("release checks workflow runs non-publishing release readiness checks", async () => {
+  const workflow = await readFile(
+    path.join(root, ".github", "workflows", "release-checks.yml"),
+    "utf8",
+  );
+
+  assert.match(workflow, /^name:\s+Release Checks/m);
+  assert.match(workflow, /^on:\s*$/m);
+  assert.match(workflow, /^\s+pull_request:\s*$/m);
+  assert.match(workflow, /^\s+push:\s*$/m);
+  assert.match(workflow, /^\s+workflow_dispatch:\s*$/m);
+  assert.match(workflow, /^\s+node-version:\s+20\s*$/m);
+  assert.match(workflow, /^\s+cache:\s+npm\s*$/m);
+  assert.match(workflow, /^\s+run:\s+npm ci\s*$/m);
+  assert.match(workflow, /^\s+run:\s+npm test\s*$/m);
+  assert.match(workflow, /npm pack --dry-run --json/);
+  assert.match(workflow, /pack-dry-run\.json/);
+  assert.match(workflow, /packInfo\.name !== "opensasa"/);
+  assert.match(workflow, /packInfo\.version !== packageJson\.version/);
+  assert.match(workflow, /binPath !== "dist\/index\.js"/);
+  assert.match(workflow, /packedPaths\.includes\(binPath\)/);
+  assert.match(workflow, /"src\/"/);
+  assert.match(workflow, /"tests\/"/);
+  assert.match(workflow, /"docs\/"/);
+  assert.match(workflow, /"vscode-extension\/"/);
+  assert.match(workflow, /"\.github\/"/);
+  assert.match(workflow, /node \.\/dist\/index\.js --help/);
+  assert.doesNotMatch(workflow, /npm\s+publish/);
+  assert.doesNotMatch(workflow, /git\s+tag/);
+});
+
 test("GitHub issue templates exist and reinforce safe public reporting", async () => {
   const templateDir = path.join(root, ".github", "ISSUE_TEMPLATE");
   const templates = [

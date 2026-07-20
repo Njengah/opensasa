@@ -1,0 +1,79 @@
+name: Release Checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-readiness:
+    name: Release readiness
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run root test suite
+        run: npm test
+
+      - name: Validate npm pack dry run
+        run: |
+          npm pack --dry-run --json > pack-dry-run.json
+          node --input-type=module <<'NODE'
+          import { readFile } from "node:fs/promises";
+
+          const packageJson = JSON.parse(await readFile("package.json", "utf8"));
+          const packEntries = JSON.parse(await readFile("pack-dry-run.json", "utf8"));
+          const [packInfo] = packEntries;
+
+          if (!packInfo) {
+            throw new Error("npm pack dry run did not return package metadata");
+          }
+
+          const packedPaths = packInfo.files.map((file) => file.path);
+          const binPath = packageJson.bin?.opensasa?.replace(/^\.\//, "");
+          const forbiddenPrefixes = [
+            "src/",
+            "tests/",
+            "docs/",
+            "vscode-extension/",
+            ".github/",
+            "node_modules/",
+          ];
+
+          if (packInfo.name !== "opensasa") {
+            throw new Error(`Unexpected package name: ${packInfo.name}`);
+          }
+
+          if (packInfo.version !== packageJson.version) {
+            throw new Error(`Pack version ${packInfo.version} does not match package.json ${packageJson.version}`);
+          }
+
+          if (binPath !== "dist/index.js" || !packedPaths.includes(binPath)) {
+            throw new Error("Packed artifact must include the opensasa CLI bin at dist/index.js");
+          }
+
+          for (const prefix of forbiddenPrefixes) {
+            if (packedPaths.some((entry) => entry.startsWith(prefix))) {
+              throw new Error(`Packed artifact must not include development-only path: ${prefix}`);
+            }
+          }
+          NODE
+
+      - name: Smoke test built CLI help
+        run: node ./dist/index.js --help

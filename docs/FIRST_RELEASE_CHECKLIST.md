@@ -77,10 +77,11 @@ Suggested release note outline:
 ## 6. Packaging And Tagging Readiness
 
 - Confirm `package.json` version is the intended pre-release version.
+- Confirm `opensasa --version` prints `0.1.0-beta.1`.
 - Confirm the root `LICENSE` file is present.
-- Confirm `CHANGELOG.md` is updated if the release process is using it.
+- Confirm `CHANGELOG.md` includes the `0.1.0-beta.1` release notes.
 - Confirm release branch/tag naming is consistent with [`docs/DEVELOPMENT_CYCLE.md`](./DEVELOPMENT_CYCLE.md).
-- Confirm the repo is ready for the `v0.1.0-beta.1` tag only after the remaining Phase 6 docs and assets are complete.
+- Confirm the repo is ready for the `v0.1.0-beta.1` tag on `main` after this release-prep PR is merged and CI passes.
 
 ## 7. Not Ready Means Do Not Tag
 
@@ -93,4 +94,4 @@ Do not create the beta tag yet if any of these are still missing:
 - architecture doc,
 - security/privacy FAQ,
 - CI release checks,
-- or the release notes and launch narrative needed for a credible public beta.
+- or release notes needed for a credible public beta.

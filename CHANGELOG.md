@@ -2,6 +2,48 @@
 
 All notable changes to OpenSasa will be documented in this file.
 
+## 0.1.0-beta.1 - 2026-07-20
+
+### Added
+
+- Local dashboard alpha with overview cards, model and tool comparisons, daily
+  trend, cost summary, verification and outcome views, contribution bundle
+  preview, and contribution history.
+- Local workflow helpers for config, project identity hashing, coarse git
+  metadata, verification command capture, session drafts, finalization,
+  activity heartbeats, and agent status.
+- VS Code extension workflow for starting and finishing local sessions, opening
+  the local dashboard, showing local status, and configuring the local database
+  path.
+- Manual contribution export workflow with explicit consent, payload validation,
+  local contribution history, optional detached export metadata, and optional
+  HMAC signing.
+- Public beta packaging docs: install guide, release checklist, demo
+  walkthrough, dashboard preview image, architecture overview, security/privacy
+  FAQ, issue templates, good-first-issue guidance, and release checks workflow.
+
+### Changed
+
+- Version advanced from `0.1.0-alpha.1` to `0.1.0-beta.1` for the CLI package
+  and VS Code extension package.
+
+### Privacy
+
+- The beta remains local-first. It does not include uploads, contribution
+  submission, hosted backend behavior, telemetry, or public rankings from real
+  contributed data.
+- Dashboard and VS Code workflows use the same local SQLite database boundary
+  as the CLI.
+- Manual export writes local files only and requires explicit consent and
+  confirmation.
+
+### Known Limitations
+
+- Public contribution upload is not implemented.
+- Hosted dashboards, team analytics, public aggregate rankings, and account
+  features are not included.
+- The beta tag should be created on `main` only after release checks pass.
+
 ## 0.1.0-alpha.1 - 2026-06-18
 
 ### Added

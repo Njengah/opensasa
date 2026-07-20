@@ -2,7 +2,7 @@
   "name": "opensasa-vscode",
   "displayName": "OpenSasa",
   "description": "Local-first AI coding workflow metadata for VS Code.",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-beta.1",
   "publisher": "opensasa",
   "license": "MIT",
   "repository": {

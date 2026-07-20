@@ -24,7 +24,7 @@ test("root package has npm publish metadata", async () => {
   );
 
   assert.equal(packageJson.name, "opensasa");
-  assert.equal(packageJson.version, "0.1.0-alpha.1");
+  assert.equal(packageJson.version, "0.1.0-beta.1");
   assert.equal(packageJson.description, "Local-first AI coding workflow metadata tracker.");
   assert.equal(packageJson.license, "MIT");
   assert.equal(packageJson.bin.opensasa, "./dist/index.js");

@@ -35,7 +35,7 @@ Completed foundation work:
 - methodology draft,
 - public roadmap,
 - contribution rules,
-- first public launch post draft,
+- first public launch post draft, now superseded by the beta launch case study,
 - first MVP workflow decision,
 - CLI-first decision.
 

@@ -50,6 +50,7 @@ Release boundary for `v0.1`:
 - Confirm [`README.md`](../README.md) explains value, privacy, and current limitations.
 - Confirm [`docs/INSTALL.md`](./INSTALL.md) still works end to end.
 - Confirm [`docs/DEMO_WALKTHROUGH.md`](./DEMO_WALKTHROUGH.md) still matches the seeded demo flow.
+- Confirm [`docs/LAUNCH_CASE_STUDY.md`](./LAUNCH_CASE_STUDY.md) still matches the shipped beta scope.
 - Confirm [`docs/SHARING_BOUNDARY.md`](./SHARING_BOUNDARY.md) matches actual product behavior.
 - Confirm [`docs/PRIVACY.md`](./PRIVACY.md) still matches local-first defaults.
 - Confirm [`docs/METADATA_SCHEMA.md`](./METADATA_SCHEMA.md) matches the current payload and export metadata.

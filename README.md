@@ -93,6 +93,9 @@ Seed-only methodology examples are available in
 For a quick reminder of what currently runs and where development stopped, see
 [Project Snapshot](./docs/PROJECT_SNAPSHOT.md).
 
+The current local-first product architecture is summarized in
+[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
+
 VS Code extension development notes live in
 [vscode-extension/README.md](./vscode-extension/README.md).
 CLI install steps live in

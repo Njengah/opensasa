@@ -77,6 +77,26 @@ test("README links to dedicated install docs", async () => {
   assert.match(readme, /\[docs\/INSTALL\.md\]\(\.\/docs\/INSTALL\.md\)/);
 });
 
+test("README links to the architecture docs", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+
+  assert.match(readme, /\[docs\/ARCHITECTURE\.md\]\(\.\/docs\/ARCHITECTURE\.md\)/);
+});
+
+test("architecture docs cover the v0.1 local-first boundaries", async () => {
+  const architectureDoc = await readFile(path.join(root, "docs", "ARCHITECTURE.md"), "utf8");
+
+  assert.match(architectureDoc, /# OpenSasa Architecture/);
+  assert.match(architectureDoc, /The CLI is the product engine/);
+  assert.match(architectureDoc, /local SQLite database/);
+  assert.match(architectureDoc, /validated before storage/);
+  assert.match(architectureDoc, /dashboard server reads\s+the same SQLite database as the CLI/);
+  assert.match(architectureDoc, /VS Code extension is a local workflow wrapper around the CLI/);
+  assert.match(architectureDoc, /Manual export is the current sharing boundary/);
+  assert.match(architectureDoc, /does not include a hosted backend, public aggregate index, upload\s+destination, or submission command/);
+  assert.match(architectureDoc, /does not upload source code,\s+prompts, responses, exact paths, raw terminal output/);
+});
+
 test("install docs cover the local linked CLI flow", async () => {
   const installDoc = await readFile(path.join(root, "docs", "INSTALL.md"), "utf8");
 

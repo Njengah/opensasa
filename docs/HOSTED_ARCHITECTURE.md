@@ -93,6 +93,9 @@ The public dashboard should start with seed data only. Real-data views should
 remain hidden or clearly disabled until sample-size and confidence thresholds
 are met.
 
+The public aggregate record shape is defined in
+[`docs/PUBLIC_AGGREGATE_SCHEMA.md`](./PUBLIC_AGGREGATE_SCHEMA.md).
+
 ## Non-Goals
 
 This decision does not approve:

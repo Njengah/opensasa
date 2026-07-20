@@ -253,6 +253,12 @@ test("README links to the first release checklist", async () => {
   assert.match(readme, /\[docs\/FIRST_RELEASE_CHECKLIST\.md\]\(\.\/docs\/FIRST_RELEASE_CHECKLIST\.md\)/);
 });
 
+test("README links to the launch case study", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+
+  assert.match(readme, /\[docs\/LAUNCH_CASE_STUDY\.md\]\(\.\/docs\/LAUNCH_CASE_STUDY\.md\)/);
+});
+
 test("README links to the demo walkthrough", async () => {
   const readme = await readFile(path.join(root, "README.md"), "utf8");
 
@@ -300,10 +306,25 @@ test("first release checklist covers beta release readiness", async () => {
   assert.match(checklist, /## 3\. Local Workflow Smoke Test/);
   assert.match(checklist, /opensasa export <session-id> --out \.\/contribution\.json --yes/);
   assert.match(checklist, /## 4\. Documentation Review/);
+  assert.match(checklist, /docs\/LAUNCH_CASE_STUDY\.md/);
   assert.match(checklist, /## 5\. Release Notes Draft/);
   assert.match(checklist, /## 6\. Packaging And Tagging Readiness/);
   assert.match(checklist, /## 7\. Not Ready Means Do Not Tag/);
   assert.match(checklist, /Do not create the beta tag yet/);
+});
+
+test("launch case study covers the public beta boundaries", async () => {
+  const launchPost = await readFile(path.join(root, "docs", "LAUNCH_CASE_STUDY.md"), "utf8");
+
+  assert.match(launchPost, /OpenSasa v0\.1 Beta Launch Case Study/);
+  assert.match(launchPost, /v0\.1\.0-beta\.1/);
+  assert.match(launchPost, /opensasa demo-seed/);
+  assert.match(launchPost, /opensasa dashboard/);
+  assert.match(launchPost, /VS Code extension/);
+  assert.match(launchPost, /manual export contribution bundle/);
+  assert.match(launchPost, /No source code uploaded by default/);
+  assert.match(launchPost, /there is no upload destination\s+or submission workflow/);
+  assert.match(launchPost, /public aggregate model rankings/);
 });
 
 test("dashboard preview asset mirrors shipped dashboard sections", async () => {

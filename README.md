@@ -108,6 +108,8 @@ The quickest hands-on evaluation path lives in
 [docs/DEMO_WALKTHROUGH.md](./docs/DEMO_WALKTHROUGH.md).
 The beta release operator checklist lives in
 [docs/FIRST_RELEASE_CHECKLIST.md](./docs/FIRST_RELEASE_CHECKLIST.md).
+The public beta launch case study lives in
+[docs/LAUNCH_CASE_STUDY.md](./docs/LAUNCH_CASE_STUDY.md).
 
 ## Dashboard Preview
 

@@ -274,7 +274,7 @@ Expected PRs:
 - [x] Add good-first-issue labels/docs. (#115)
 - [x] Add CI release checks. (#116)
 - [x] Tag `v0.1.0-beta.1`. (tag pushed after #117; recorded in #118)
-- [ ] Publish launch case study.
+- [x] Publish launch case study. (#119)
 
 Exit criteria:
 

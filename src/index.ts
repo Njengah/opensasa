@@ -170,7 +170,7 @@ type AgentStatusOptions = StoreOptions & {
 program
   .name("opensasa")
   .description("Local-first AI coding workflow metadata tracker.")
-  .version("0.1.0-alpha.1")
+  .version("0.1.0-beta.1")
   .showHelpAfterError();
 
 program

@@ -51,7 +51,7 @@ test("prints dashboard help", async () => {
 test("prints version", async () => {
   const { stdout } = await execFileAsync("node", ["./dist/index.js", "--version"]);
 
-  assert.equal(stdout.trim(), "0.1.0-alpha.1");
+  assert.equal(stdout.trim(), "0.1.0-beta.1");
 });
 
 test("prints log help with manual session options", async () => {

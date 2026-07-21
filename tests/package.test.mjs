@@ -206,8 +206,9 @@ test("architecture docs cover the v0.1 local-first boundaries", async () => {
   assert.match(architectureDoc, /validated before storage/);
   assert.match(architectureDoc, /dashboard server reads\s+the same SQLite database as the CLI/);
   assert.match(architectureDoc, /VS Code extension is a local workflow wrapper around the CLI/);
-  assert.match(architectureDoc, /Manual export is the current sharing boundary/);
-  assert.match(architectureDoc, /does not include a hosted backend, public aggregate index, upload\s+destination, or submission command/);
+  assert.match(architectureDoc, /Manual export remains the default sharing boundary/);
+  assert.match(architectureDoc, /does not add automatic upload, public aggregate rankings,\s+account sync, or persisted community data/);
+  assert.match(architectureDoc, /validates `POST \/api\/contributions` payloads/);
   assert.match(architectureDoc, /does not upload source code,\s+prompts, responses, exact paths, raw terminal output/);
   assert.match(architectureDoc, /docs\/HOSTED_ARCHITECTURE\.md/);
 });
@@ -230,6 +231,22 @@ test("hosted architecture decision preserves the local-first trust boundary", as
   assert.match(hostedArchitecture, /automatic upload/);
   assert.match(hostedArchitecture, /background sync/);
   assert.match(hostedArchitecture, /docs\/PUBLIC_AGGREGATE_SCHEMA\.md/);
+  assert.match(hostedArchitecture, /`opensasa ingest`/);
+  assert.match(hostedArchitecture, /does not persist accepted payloads yet/);
+});
+
+test("contribution ingestion endpoint docs explain the non-persistent boundary", async () => {
+  const ingestionDoc = await readFile(path.join(root, "docs", "INGESTION_ENDPOINT.md"), "utf8");
+
+  assert.match(ingestionDoc, /# Contribution Ingestion Endpoint/);
+  assert.match(ingestionDoc, /opensasa ingest/);
+  assert.match(ingestionDoc, /GET \/health/);
+  assert.match(ingestionDoc, /POST \/api\/contributions/);
+  assert.match(ingestionDoc, /does not persist accepted payloads/);
+  assert.match(ingestionDoc, /database persistence/);
+  assert.match(ingestionDoc, /automatic upload/);
+  assert.match(ingestionDoc, /Binding to `0\.0\.0\.0` exposes an\s+unauthenticated HTTP intake endpoint/);
+  assert.match(ingestionDoc, /invalid enum values/);
 });
 
 test("public aggregate schema requires confidence and safe provenance", async () => {
@@ -260,7 +277,8 @@ test("security and privacy FAQ covers v0.1 boundaries", async () => {
 
   assert.match(faq, /# Security And Privacy FAQ/);
   assert.match(faq, /local SQLite database/);
-  assert.match(faq, /does not include a hosted backend,\s+upload destination, submission command/);
+  assert.match(faq, /optional ingestion endpoint that validates safe payloads but does not\s+store them yet/);
+  assert.match(faq, /If you override\s+`--host` to `0\.0\.0\.0`/);
   assert.match(faq, /does not collect or upload source code,\s+diffs, private prompts, model\s+responses, exact source or project paths, raw terminal output/);
   assert.match(faq, /records the output path you explicitly chose in\s+local contribution history/);
   assert.match(faq, /one-way SHA-256\s+identity hash/);
@@ -288,7 +306,7 @@ test("install docs cover the local linked CLI flow", async () => {
   assert.match(installDoc, /node \.\/dist\/index\.js --help/);
   assert.match(installDoc, /--db-path \.\/opensasa-dev\.db/);
   assert.match(installDoc, /npm unlink -g opensasa/);
-  assert.match(installDoc, /`v0\.1` does not include uploads or contribution submission/);
+  assert.match(installDoc, /there is no automatic upload or account sync to configure/);
 });
 
 test("README links to the first release checklist", async () => {
@@ -307,6 +325,13 @@ test("README links to the hosted architecture decision", async () => {
   const readme = await readFile(path.join(root, "README.md"), "utf8");
 
   assert.match(readme, /\[docs\/HOSTED_ARCHITECTURE\.md\]\(\.\/docs\/HOSTED_ARCHITECTURE\.md\)/);
+});
+
+test("README links to the contribution ingestion endpoint docs", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+
+  assert.match(readme, /\[docs\/INGESTION_ENDPOINT\.md\]\(\.\/docs\/INGESTION_ENDPOINT\.md\)/);
+  assert.match(readme, /validates safe payloads but does not\s+store them yet/);
 });
 
 test("README links to the demo walkthrough", async () => {

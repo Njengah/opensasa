@@ -8,8 +8,14 @@ features.
 
 Yes. The `v0.1` CLI, local dashboard, and VS Code extension workflow are
 designed around local metadata capture. Session records are written to a local
-SQLite database, and the shipped product does not include a hosted backend,
-upload destination, submission command, or public ranking submission flow.
+SQLite database. The shipped beta did not include upload or submission; Phase 7
+adds an optional ingestion endpoint that validates safe payloads but does not
+store them yet.
+
+The ingestion endpoint binds to `127.0.0.1` by default. If you override
+`--host` to `0.0.0.0` or another non-loopback address, you expose an
+unauthenticated HTTP intake endpoint. Use that only for deliberate testing on a
+trusted network.
 
 ## What is stored locally?
 

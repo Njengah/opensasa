@@ -39,9 +39,10 @@ Before any future submission feature exists, the payload, destination, consent
 flow, and validation rules must be inspectable and documented in a separate
 change.
 
-For `v0.1`, the practical sharing boundary is manual export only. OpenSasa can
-write a local contribution JSON file, but it does not include an upload
-destination, submission workflow, or background transfer path.
+For `v0.1`, the practical sharing boundary is manual export only. Current Phase
+7 work adds an optional ingestion endpoint for explicit safe payload submission
+tests, but there is no built-in automatic upload, account sync, or background
+transfer path.
 
 ## Practical rule
 

@@ -2,8 +2,9 @@
 
 This guide covers the supported `v0.1` install path for OpenSasa.
 
-For `v0.1`, OpenSasa is a local-first CLI with manual export only. There is no
-upload destination or hosted service to configure.
+For `v0.1`, OpenSasa is a local-first CLI with manual export only. Current Phase
+7 work adds an optional ingestion endpoint for safe payload validation, but
+there is no automatic upload or account sync to configure.
 
 ## Prerequisites
 

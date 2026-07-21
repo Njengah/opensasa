@@ -5,6 +5,7 @@ import { writeContributionExport } from "./export.js";
 import { ZodError } from "zod";
 import { createDemoSeedSessions } from "./demo.js";
 import { createDashboardServer, listenDashboardServer } from "./dashboard.js";
+import { createContributionIngestionServer, listenContributionIngestionServer } from "./ingest.js";
 import { hashProjectIdentity } from "./project.js";
 import { runVerificationCommand, type VerificationKind } from "./verify.js";
 import {
@@ -131,6 +132,11 @@ type DashboardOptions = StoreOptions & {
   port?: number;
 };
 
+type IngestOptions = {
+  host?: string;
+  port?: number;
+};
+
 type VerifyOptions = StoreOptions & {
   kind?: VerificationKind;
   command?: string;
@@ -188,6 +194,25 @@ program
       server.close();
       process.exitCode = 1;
       console.error(formatCliError(error));
+    }
+  });
+
+program
+  .command("ingest")
+  .description("Start the contribution ingestion endpoint for safe payloads.")
+  .option("--host <host>", "local interface to bind", "127.0.0.1")
+  .option("--port <port>", "port to bind", parsePositiveInteger, 3220)
+  .action(async (options: IngestOptions) => {
+    const server = createContributionIngestionServer();
+    try {
+      const address = await listenContributionIngestionServer(server, options.host, options.port);
+      console.log(`OpenSasa contribution ingestion running at http://${address.host}:${address.port}`);
+      console.log("POST safe contribution payloads to /api/contributions.");
+      console.log("Accepted payloads are validated but not stored in this PR.");
+    } catch (error) {
+      server.close();
+      process.exitCode = 1;
+      console.error(formatIngestError(error));
     }
   });
 
@@ -978,6 +1003,14 @@ function formatCliError(error: unknown): string {
   }
 
   return "Unable to log session.";
+}
+
+function formatIngestError(error: unknown): string {
+  if (error instanceof Error) {
+    return `Unable to start contribution ingestion endpoint: ${error.message}`;
+  }
+
+  return "Unable to start contribution ingestion endpoint.";
 }
 
 function formatSessions(sessions: LocalSession[]): string {

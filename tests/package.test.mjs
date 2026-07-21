@@ -229,6 +229,30 @@ test("hosted architecture decision preserves the local-first trust boundary", as
   assert.match(hostedArchitecture, /seed data only/);
   assert.match(hostedArchitecture, /automatic upload/);
   assert.match(hostedArchitecture, /background sync/);
+  assert.match(hostedArchitecture, /docs\/PUBLIC_AGGREGATE_SCHEMA\.md/);
+});
+
+test("public aggregate schema requires confidence and safe provenance", async () => {
+  const aggregateSchema = await readFile(path.join(root, "docs", "PUBLIC_AGGREGATE_SCHEMA.md"), "utf8");
+
+  assert.match(aggregateSchema, /# Public Aggregate Schema/);
+  assert.match(aggregateSchema, /opensasa\.public-aggregate\.v0/);
+  assert.match(aggregateSchema, /opensasa\.methodology\.v0/);
+  assert.match(aggregateSchema, /accepted contribution payloads or seed data only/);
+  assert.match(aggregateSchema, /never store raw local sessions as public view records/);
+  assert.match(aggregateSchema, /sample size and confidence label on every metric/);
+  assert.match(aggregateSchema, /`insufficient`, `early`, `moderate`, or `strong`/);
+  assert.match(aggregateSchema, /`seed`, `test`, `community`, or `vendor`/);
+  assert.match(aggregateSchema, /`data_source`/);
+  assert.match(aggregateSchema, /`repo_size_bucket`/);
+  assert.match(aggregateSchema, /under_1_usd/);
+  assert.match(aggregateSchema, /5m_to_30m/);
+  assert.match(aggregateSchema, /"zero"/);
+  assert.match(aggregateSchema, /"tiny"/);
+  assert.match(aggregateSchema, /source code, private prompts, model responses, exact paths, raw\s+terminal output/);
+  assert.match(aggregateSchema, /Do not show a naked percentage without sample size/);
+  assert.match(aggregateSchema, /Seed and test data must never be labeled as real community performance/);
+  assert.match(aggregateSchema, /show rates without denominators/);
 });
 
 test("security and privacy FAQ covers v0.1 boundaries", async () => {

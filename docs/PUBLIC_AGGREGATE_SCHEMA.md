@@ -73,7 +73,12 @@ Filters should use the same safe public dimensions as contribution payloads:
 | `task_type` | Optional task type. |
 | `language` | Optional language. |
 | `framework` | Optional framework. |
-| `work_mode` | Optional manual, wrapper, agent, or extension workflow mode. |
+| `repo_size_bucket` | Optional coarse repository-size bucket. |
+| `file_count_bucket` | Optional coarse file-count bucket. |
+| `changed_file_count_bucket` | Optional coarse changed-file-count bucket. |
+| `lines_added_bucket` | Optional coarse lines-added bucket. |
+| `lines_removed_bucket` | Optional coarse lines-removed bucket. |
+| `data_source` | Optional `manual`, `imported`, `wrapper`, `sample`, or `unknown`. |
 | `timestamp_bucket` | Optional day, week, or month bucket. |
 | `data_provenance` | Optional `seed`, `test`, `community`, or `vendor`. |
 
@@ -128,7 +133,7 @@ Required quality fields:
 | Field | Type | Notes |
 | --- | --- | --- |
 | `sample_size` | integer | Number of accepted contribution records behind the metric. |
-| `confidence_label` | enum | `insufficient`, `low`, `medium`, or `high`. |
+| `confidence_label` | enum | `insufficient`, `early`, `moderate`, or `strong`. |
 | `data_quality_label` | enum | `seed`, `test`, `early`, `mixed`, or `reviewed`. |
 | `minimum_sample_size_met` | boolean | Whether this view meets the configured public threshold. |
 | `notes` | array of strings | Public-safe caveats, if any. |
@@ -163,20 +168,20 @@ Seed and test data must never be labeled as real community performance.
     "verified_success_count": 10,
     "verification_unknown_count": 5,
     "estimated_cost_bucket_counts": {
-      "low": 18,
-      "medium": 6
+      "under_1_usd": 18,
+      "under_10_usd": 6
     },
     "duration_bucket_counts": {
-      "short": 9,
-      "medium": 15
+      "1m_to_5m": 9,
+      "5m_to_30m": 15
     },
     "retry_bucket_counts": {
-      "none": 10,
-      "one_or_two": 14
+      "zero": 10,
+      "tiny": 14
     },
     "error_bucket_counts": {
-      "none": 20,
-      "one_or_two": 4
+      "zero": 20,
+      "tiny": 4
     }
   },
   "quality": {

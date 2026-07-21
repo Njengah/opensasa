@@ -57,6 +57,12 @@ Do not combine the first hosted slice with accounts, team dashboards, automatic
 sync, vendor portals, billing, or private cloud analytics. Those features add
 different consent, retention, access-control, and threat-model requirements.
 
+The initial implementation exposes `opensasa ingest`, a small HTTP intake
+server with `GET /health` and `POST /api/contributions`. It validates incoming
+safe contribution payloads at the boundary and returns accepted or rejected
+responses, but it does not persist accepted payloads yet. Persistence,
+aggregation, and public dashboards remain separate reviewable steps.
+
 ## Privacy Rules
 
 Hosted OpenSasa must never require or silently collect:

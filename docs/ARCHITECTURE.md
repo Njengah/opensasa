@@ -4,8 +4,9 @@ This document describes the current `v0.1` architecture. OpenSasa is a
 local-first tracker: the CLI, local SQLite store, report API, dashboard, and
 VS Code extension all operate on data on the developer's machine.
 
-`v0.1` does not include a hosted backend, public aggregate index, upload
-destination, or submission command.
+`v0.1` shipped without upload or submission. Phase 7 adds an optional intake
+boundary, but it still does not add automatic upload, public aggregate rankings,
+account sync, or persisted community data.
 
 ## System Shape
 
@@ -100,24 +101,27 @@ session. `opensasa export` writes a sanitized contribution payload, and
 optionally detached export metadata, to local JSON files. Export requires
 explicit local consent on the session.
 
-Manual export is the current sharing boundary. OpenSasa can write files that a
-developer may inspect and decide how to use, but it does not include:
+Manual export remains the default sharing boundary. OpenSasa can write files
+that a developer may inspect and decide how to use. The optional Phase 7 intake
+endpoint can validate an explicitly submitted safe payload, but it does not
+persist accepted payloads yet. OpenSasa still does not include:
 
 - an upload destination;
 - a submission API;
 - background transfer;
-- hosted intake;
 - public ranking updates;
 - public aggregate dashboards based on real contributed data.
 
-Future contribution submission must be designed and reviewed separately, with
-documented payloads, destinations, consent flow, validation, and revocation
-behavior.
+Future persisted contribution submission must be designed and reviewed
+separately, with documented payloads, destinations, consent flow, validation,
+and revocation behavior.
 
 The Phase 7 hosted boundary is captured in
 [`docs/HOSTED_ARCHITECTURE.md`](./HOSTED_ARCHITECTURE.md). It keeps hosted
 features optional, treats local SQLite as the personal source of truth, and
-allows hosted intake only for validated contribution-safe payloads.
+allows hosted intake only for validated contribution-safe payloads. The first
+intake implementation validates `POST /api/contributions` payloads and returns
+accepted or rejected responses, but it does not persist accepted payloads.
 
 ## Out Of Scope For v0.1
 

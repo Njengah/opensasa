@@ -81,8 +81,9 @@ session metadata, store records in a local SQLite database, update or delete
 local records, list previous sessions, generate a personal report, and preview
 a sanitized contribution payload. It can also export that sanitized payload to
 a local JSON file. For `v0.1`, that manual export remains the contribution
-boundary: there is no upload destination, submission command, or hosted intake
-service in scope. It does not upload data or publish rankings.
+boundary: there is no automatic upload, account sync, or public ranking flow.
+The optional Phase 7 ingestion endpoint validates safe payloads but does not
+store them yet.
 
 The public development and versioning approach is described in
 [Development Cycle](./docs/DEVELOPMENT_CYCLE.md). The MVP workflow is described
@@ -112,6 +113,8 @@ The public beta launch case study lives in
 [docs/LAUNCH_CASE_STUDY.md](./docs/LAUNCH_CASE_STUDY.md).
 The optional hosted architecture decision lives in
 [docs/HOSTED_ARCHITECTURE.md](./docs/HOSTED_ARCHITECTURE.md).
+The contribution ingestion endpoint boundary lives in
+[docs/INGESTION_ENDPOINT.md](./docs/INGESTION_ENDPOINT.md).
 
 ## Dashboard Preview
 

@@ -99,6 +99,11 @@ The public dashboard should start with seed data only. Real-data views should
 remain hidden or clearly disabled until sample-size and confidence thresholds
 are met.
 
+The first seed-only implementation is documented in
+[`docs/PUBLIC_DASHBOARD.md`](./PUBLIC_DASHBOARD.md). It exposes `/public` and
+`/api/public/aggregates` from the local dashboard server, and every returned
+record is labeled as seed data with insufficient confidence.
+
 The public aggregate record shape is defined in
 [`docs/PUBLIC_AGGREGATE_SCHEMA.md`](./PUBLIC_AGGREGATE_SCHEMA.md).
 

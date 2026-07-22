@@ -295,7 +295,7 @@ Expected PRs:
 - [x] Add ingestion endpoint for safe contribution payloads. (#122)
 - [x] Add server-side validation. (#123)
 - [x] Add confidence labels for aggregate views. (#124)
-- [ ] Add seed-data-only public dashboard.
+- [x] Add seed-data-only public dashboard. (#125)
 - [ ] Add real-data dashboard only after enough contributions.
 - [ ] Add account system only if needed.
 - [ ] Add optional sync.

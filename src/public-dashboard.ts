@@ -2,6 +2,8 @@ import {
   aggregateMethodologyVersion,
   calculatePublicAggregateQuality,
   publicAggregateSchemaVersion,
+  type PublicAggregateProvenance,
+  type PublicAggregateConfidenceLabel,
   type PublicAggregateQuality,
 } from "./public-aggregate.js";
 
@@ -16,7 +18,7 @@ export type PublicAggregateRecord = {
   methodology_version: typeof aggregateMethodologyVersion;
   aggregate_id: string;
   generated_at: string;
-  data_provenance: "seed";
+  data_provenance: PublicAggregateProvenance;
   view_type: PublicAggregateViewType;
   filters: Record<string, string>;
   group: {
@@ -48,9 +50,25 @@ export type SeedPublicDashboard = {
   generated_at: string;
   no_real_data_notice: string;
   records: PublicAggregateRecord[];
+  real_data_gate: RealDataDashboardGate;
 };
 
 const generatedAt = "2026-07-23T00:00:00.000Z";
+const realDataEligibleConfidenceLabels: PublicAggregateConfidenceLabel[] = ["early", "moderate", "strong"];
+
+export type RealDataDashboardGateStatus =
+  | "blocked_no_real_records"
+  | "blocked_insufficient_contributions"
+  | "eligible_after_thresholds";
+
+export type RealDataDashboardGate = {
+  status: RealDataDashboardGateStatus;
+  real_data_enabled: boolean;
+  eligible_record_count: number;
+  blocked_record_count: number;
+  required_confidence_labels: typeof realDataEligibleConfidenceLabels;
+  notes: string[];
+};
 
 export function buildSeedPublicDashboard(): SeedPublicDashboard {
   const records = [
@@ -117,7 +135,65 @@ export function buildSeedPublicDashboard(): SeedPublicDashboard {
     generated_at: generatedAt,
     no_real_data_notice: "Seed data is illustrative only. No real contribution data is shown.",
     records,
+    real_data_gate: buildRealDataDashboardGate(records),
   };
+}
+
+export function buildRealDataDashboardGate(records: PublicAggregateRecord[]): RealDataDashboardGate {
+  const realRecords = records.filter((record) => record.data_provenance !== "seed" && record.data_provenance !== "test");
+
+  if (realRecords.length === 0) {
+    return {
+      status: "blocked_no_real_records",
+      real_data_enabled: false,
+      eligible_record_count: 0,
+      blocked_record_count: 0,
+      required_confidence_labels: realDataEligibleConfidenceLabels,
+      notes: [
+        "Real-data public dashboard is disabled because there are no community or vendor aggregate records.",
+        "Keep showing the seed-only preview until accepted contribution aggregates meet public confidence thresholds.",
+      ],
+    };
+  }
+
+  const eligibleRecordCount = realRecords.filter(isRealDataDashboardRecordEligible).length;
+  const blockedRecordCount = realRecords.length - eligibleRecordCount;
+
+  if (eligibleRecordCount === 0) {
+    return {
+      status: "blocked_insufficient_contributions",
+      real_data_enabled: false,
+      eligible_record_count: 0,
+      blocked_record_count: blockedRecordCount,
+      required_confidence_labels: realDataEligibleConfidenceLabels,
+      notes: [
+        "Real-data public dashboard is disabled because no real aggregate record meets sample-size and confidence thresholds.",
+        "Public records need non-seed provenance, minimum sample size, and at least early confidence before display.",
+      ],
+    };
+  }
+
+  return {
+    status: "eligible_after_thresholds",
+    real_data_enabled: true,
+    eligible_record_count: eligibleRecordCount,
+    blocked_record_count: blockedRecordCount,
+    required_confidence_labels: realDataEligibleConfidenceLabels,
+    notes: [
+      "At least one real aggregate record meets the public dashboard threshold.",
+      "Only eligible records should be displayed; blocked records must remain hidden or clearly disabled.",
+    ],
+  };
+}
+
+export function isRealDataDashboardRecordEligible(record: PublicAggregateRecord): boolean {
+  return (
+    record.data_provenance !== "seed"
+    && record.data_provenance !== "test"
+    && record.quality.sample_size === record.metrics.task_count
+    && record.quality.minimum_sample_size_met
+    && realDataEligibleConfidenceLabels.includes(record.quality.confidence_label)
+  );
 }
 
 function seedAggregateRecord(input: {

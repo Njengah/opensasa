@@ -102,7 +102,10 @@ are met.
 The first seed-only implementation is documented in
 [`docs/PUBLIC_DASHBOARD.md`](./PUBLIC_DASHBOARD.md). It exposes `/public` and
 `/api/public/aggregates` from the local dashboard server, and every returned
-record is labeled as seed data with insufficient confidence.
+record is labeled as seed data with insufficient confidence. The response also
+includes a real-data gate that must keep real contribution dashboards disabled
+until at least one non-seed aggregate record meets sample-size and confidence
+thresholds.
 
 The public aggregate record shape is defined in
 [`docs/PUBLIC_AGGREGATE_SCHEMA.md`](./PUBLIC_AGGREGATE_SCHEMA.md).

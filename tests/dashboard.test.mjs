@@ -122,6 +122,7 @@ test("serves a local dashboard and report API", async () => {
     assert.match(publicHtml, /illustrative seed data only/);
     assert.match(publicHtml, /does not use real contribution data/);
     assert.match(publicHtml, /\/api\/public\/aggregates/);
+    assert.match(publicHtml, /Real-data gate/);
     assert.doesNotMatch(publicHtml, /private-internal-model-do-not-publish/);
 
     const publicAggregatesResponse = await fetch(`http://${address.host}:${address.port}/api/public/aggregates`);
@@ -133,6 +134,9 @@ test("serves a local dashboard and report API", async () => {
     assert.equal(publicAggregates.status, "seed only");
     assert.equal(publicAggregates.upload_enabled, false);
     assert.equal(publicAggregates.real_data_enabled, false);
+    assert.equal(publicAggregates.real_data_gate.status, "blocked_no_real_records");
+    assert.equal(publicAggregates.real_data_gate.real_data_enabled, false);
+    assert.match(publicAggregates.real_data_gate.notes.join("\n"), /Keep showing the seed-only preview/);
     assert.ok(publicAggregates.records.length >= 4);
     assert.equal(publicAggregates.records.every((record) => record.data_provenance === "seed"), true);
     assert.equal(publicAggregates.records.every((record) => record.quality.confidence_label === "insufficient"), true);

@@ -164,15 +164,18 @@ function publicDashboardHtml(): string {
       <h1>OpenSasa Public Aggregate Preview</h1>
       <p class="muted">Seed-only public dashboard for methodology and UI validation.</p>
       <p class="notice">This page shows illustrative seed data only. It does not use real contribution data, upload data, or publish rankings.</p>
+      <p id="real-data-gate" class="notice">Checking real-data dashboard gate...</p>
       <section id="records" class="grid"><article class="card">Loading seed aggregates...</article></section>
       <p><a href="/api/public/aggregates">View seed aggregate JSON</a></p>
       <p><a href="/">Back to local dashboard</a></p>
     </main>
     <script>
       const records = document.querySelector("#records");
+      const realDataGate = document.querySelector("#real-data-gate");
       fetch("/api/public/aggregates")
         .then((response) => response.ok ? response.json() : Promise.reject(new Error("Seed aggregates unavailable")))
         .then((payload) => {
+          realDataGate.textContent = "Real-data gate: " + payload.real_data_gate.status + ". " + payload.real_data_gate.notes.join(" ");
           records.replaceChildren(...payload.records.map((record) => {
             const article = document.createElement("article");
             article.className = "card";

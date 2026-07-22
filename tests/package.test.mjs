@@ -374,10 +374,15 @@ test("public dashboard docs define seed-only public aggregate boundary", async (
   assert.match(publicDashboard, /Do not expose this local dashboard server as the hosted public service/);
   assert.match(publicDashboard, /private local endpoints such as `\/api\/report`/);
   assert.match(publicDashboard, /illustrative seed aggregate records only/);
+  assert.match(publicDashboard, /The API also returns `real_data_gate`/);
+  assert.match(publicDashboard, /meets the minimum public sample size/);
+  assert.match(publicDashboard, /has `early`, `moderate`, or `strong` confidence/);
   assert.match(publicDashboard, /`data_provenance: "seed"`/);
   assert.match(publicDashboard, /`quality\.confidence_label: "insufficient"`/);
   assert.match(hostedArchitecture, /docs\/PUBLIC_DASHBOARD\.md/);
   assert.match(hostedArchitecture, /every returned\s+record is labeled as seed data with insufficient confidence/);
+  assert.match(hostedArchitecture, /real-data gate/);
+  assert.match(hostedArchitecture, /non-seed aggregate record meets sample-size and confidence\s+thresholds/);
 });
 
 test("README links to the demo walkthrough", async () => {

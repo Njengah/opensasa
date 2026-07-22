@@ -184,7 +184,18 @@ Confidence should consider:
 - recency,
 - and concentration risk from one user, team, vendor, or tool.
 
-Numeric thresholds should be defined later after reviewing real data.
+Initial public aggregate thresholds are implemented in
+`src/public-aggregate.ts`:
+
+| Label | Initial threshold |
+| --- | --- |
+| `insufficient` | Seed/test data, fewer than 30 accepted contribution records, no verification coverage, or less than 25% verification coverage. |
+| `early` | At least 30 records, but fewer than 100 records or less than 50% verification coverage. |
+| `moderate` | At least 100 records, but fewer than 500 records or less than 75% verification coverage. |
+| `strong` | At least 500 records with at least 75% verification coverage. |
+
+These thresholds are intentionally conservative. Changing them should update the
+methodology version and release notes.
 
 ## Data Quality Weighting
 

@@ -136,9 +136,23 @@ Required quality fields:
 | `confidence_label` | enum | `insufficient`, `early`, `moderate`, or `strong`. |
 | `data_quality_label` | enum | `seed`, `test`, `early`, `mixed`, or `reviewed`. |
 | `minimum_sample_size_met` | boolean | Whether this view meets the configured public threshold. |
+| `verification_share` | object | Numerator, denominator, and rate for records with known verification status. |
 | `notes` | array of strings | Public-safe caveats, if any. |
 
 Seed and test data must never be labeled as real community performance.
+
+Initial confidence labels are calculated by
+`calculatePublicAggregateQuality()` in `src/public-aggregate.ts`:
+
+| Label | Initial rule |
+| --- | --- |
+| `insufficient` | Seed/test data, fewer than 30 accepted contribution records, no verification coverage, or less than 25% verification coverage. |
+| `early` | At least 30 records, but fewer than 100 records or less than 50% verification coverage. |
+| `moderate` | At least 100 records, but fewer than 500 records or less than 75% verification coverage. |
+| `strong` | At least 500 records with at least 75% verification coverage. |
+
+These thresholds are intentionally conservative and should be revised only with
+a methodology version change.
 
 ## Example
 
@@ -189,6 +203,11 @@ Seed and test data must never be labeled as real community performance.
     "confidence_label": "insufficient",
     "data_quality_label": "seed",
     "minimum_sample_size_met": false,
+    "verification_share": {
+      "numerator": 19,
+      "denominator": 24,
+      "rate": 0.7916666666666666
+    },
     "notes": [
       "Seed data is illustrative and must not be interpreted as real model performance."
     ]

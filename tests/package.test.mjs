@@ -272,6 +272,11 @@ test("public aggregate schema requires confidence and safe provenance", async ()
   assert.match(aggregateSchema, /never store raw local sessions as public view records/);
   assert.match(aggregateSchema, /sample size and confidence label on every metric/);
   assert.match(aggregateSchema, /`insufficient`, `early`, `moderate`, or `strong`/);
+  assert.match(aggregateSchema, /calculatePublicAggregateQuality/);
+  assert.match(aggregateSchema, /fewer than 30 accepted contribution records/);
+  assert.match(aggregateSchema, /At least 500 records with at least 75% verification coverage/);
+  assert.match(aggregateSchema, /`verification_share`/);
+  assert.match(aggregateSchema, /"verification_share"/);
   assert.match(aggregateSchema, /`seed`, `test`, `community`, or `vendor`/);
   assert.match(aggregateSchema, /`data_source`/);
   assert.match(aggregateSchema, /`repo_size_bucket`/);
@@ -283,6 +288,16 @@ test("public aggregate schema requires confidence and safe provenance", async ()
   assert.match(aggregateSchema, /Do not show a naked percentage without sample size/);
   assert.match(aggregateSchema, /Seed and test data must never be labeled as real community performance/);
   assert.match(aggregateSchema, /show rates without denominators/);
+});
+
+test("methodology docs define initial public aggregate confidence thresholds", async () => {
+  const methodology = await readFile(path.join(root, "docs", "METHODOLOGY.md"), "utf8");
+
+  assert.match(methodology, /## Confidence Model/);
+  assert.match(methodology, /src\/public-aggregate\.ts/);
+  assert.match(methodology, /fewer than 30 accepted contribution records/);
+  assert.match(methodology, /At least 100 records, but fewer than 500 records/);
+  assert.match(methodology, /Changing them should update the\s+methodology version and release notes/);
 });
 
 test("security and privacy FAQ covers v0.1 boundaries", async () => {

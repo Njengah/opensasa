@@ -293,7 +293,7 @@ Expected PRs:
 - [x] Decide hosted architecture. (#120)
 - [x] Add public aggregate schema. (#121)
 - [x] Add ingestion endpoint for safe contribution payloads. (#122)
-- [ ] Add server-side validation.
+- [x] Add server-side validation. (#123)
 - [ ] Add confidence labels for aggregate views.
 - [ ] Add seed-data-only public dashboard.
 - [ ] Add real-data dashboard only after enough contributions.

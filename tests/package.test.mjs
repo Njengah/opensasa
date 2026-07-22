@@ -247,6 +247,19 @@ test("contribution ingestion endpoint docs explain the non-persistent boundary",
   assert.match(ingestionDoc, /automatic upload/);
   assert.match(ingestionDoc, /Binding to `0\.0\.0\.0` exposes an\s+unauthenticated HTTP intake endpoint/);
   assert.match(ingestionDoc, /invalid enum values/);
+  assert.match(ingestionDoc, /SERVER_SIDE_VALIDATION\.md/);
+});
+
+test("server-side validation docs define issue codes and boundaries", async () => {
+  const validationDoc = await readFile(path.join(root, "docs", "SERVER_SIDE_VALIDATION.md"), "utf8");
+
+  assert.match(validationDoc, /# Server-Side Contribution Validation/);
+  assert.match(validationDoc, /incoming HTTP payloads are untrusted/);
+  assert.match(validationDoc, /`missing_required_field`/);
+  assert.match(validationDoc, /`forbidden_field`/);
+  assert.match(validationDoc, /`invalid_version`/);
+  assert.match(validationDoc, /`private_marker`/);
+  assert.match(validationDoc, /accepted payloads are still not persisted/);
 });
 
 test("public aggregate schema requires confidence and safe provenance", async () => {
@@ -331,6 +344,7 @@ test("README links to the contribution ingestion endpoint docs", async () => {
   const readme = await readFile(path.join(root, "README.md"), "utf8");
 
   assert.match(readme, /\[docs\/INGESTION_ENDPOINT\.md\]\(\.\/docs\/INGESTION_ENDPOINT\.md\)/);
+  assert.match(readme, /\[docs\/SERVER_SIDE_VALIDATION\.md\]\(\.\/docs\/SERVER_SIDE_VALIDATION\.md\)/);
   assert.match(readme, /validates safe payloads but does not\s+store them yet/);
 });
 

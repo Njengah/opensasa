@@ -358,6 +358,9 @@ Implementations should validate records at these boundaries:
 
 Contribution validation should reject payloads containing excluded fields or raw terminal output, report missing required public fields, and flag unknown fields outside the documented contribution contract.
 
+The server-side HTTP intake validation contract is documented in
+[`docs/SERVER_SIDE_VALIDATION.md`](./SERVER_SIDE_VALIDATION.md).
+
 ## Open Questions
 
 - Should timestamp buckets be daily, weekly, or monthly for public contribution?

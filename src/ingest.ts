@@ -1,13 +1,6 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import { validateServerContributionPayload, type ServerContributionValidation } from "./contribution-validation.js";
 import { validateContributionPreview, type ContributionPreview } from "./inspect.js";
-import {
-  bucketValues,
-  contributionPayloadVersion,
-  finalOutcomes,
-  schemaVersion,
-  taskTypes,
-  verificationOutcomes,
-} from "./schema.js";
 
 export type ContributionIngestionServerOptions = {
   host?: string;
@@ -20,6 +13,7 @@ export type ContributionIngestionResult = {
   contribution_id?: string;
   payload_version?: string;
   validation: ReturnType<typeof validateContributionPreview>;
+  server_validation: ServerContributionValidation;
   contract_errors: string[];
   notice: string;
 };
@@ -106,25 +100,28 @@ async function handleContributionIngestionRequest(
 export function ingestContributionPayload(payload: unknown): ContributionIngestionResult {
   if (!isRecord(payload)) {
     const validation = validateContributionPreview({});
+    const serverValidation = validateServerContributionPayload(payload);
     return {
       status: "rejected",
       stored: false,
       validation,
-      contract_errors: ["Payload must be a JSON object."],
+      server_validation: serverValidation,
+      contract_errors: serverValidation.issues.map((issue) => issue.message),
       notice: "Contribution payload must be a JSON object. Nothing was stored.",
     };
   }
 
   const validation = validateContributionPreview(payload);
-  const contractErrors = validateContributionPayloadContract(payload);
-  if (validation.status === "failed" || contractErrors.length > 0) {
+  const serverValidation = validateServerContributionPayload(payload);
+  if (serverValidation.status === "failed") {
     return {
       status: "rejected",
       stored: false,
       contribution_id: typeof payload.contribution_id === "string" ? payload.contribution_id : undefined,
       payload_version: typeof payload.payload_version === "string" ? payload.payload_version : undefined,
       validation,
-      contract_errors: contractErrors,
+      server_validation: serverValidation,
+      contract_errors: serverValidation.issues.map((issue) => issue.message),
       notice: "Payload failed contribution-safe validation. Nothing was stored.",
     };
   }
@@ -136,112 +133,10 @@ export function ingestContributionPayload(payload: unknown): ContributionIngesti
     contribution_id: contribution.contribution_id,
     payload_version: contribution.payload_version,
     validation,
+    server_validation: serverValidation,
     contract_errors: [],
     notice: "Payload accepted by the intake boundary but not stored. Persistence is not enabled in this PR.",
   };
-}
-
-function validateContributionPayloadContract(payload: Record<string, unknown>): string[] {
-  const errors: string[] = [];
-  const stringFields = [
-    "contribution_id",
-    "timestamp_bucket",
-    "provider",
-    "model_id",
-    "input_tokens_bucket",
-    "output_tokens_bucket",
-    "cached_tokens_bucket",
-    "estimated_cost_bucket",
-    "duration_bucket",
-    "retry_count_bucket",
-    "error_count_bucket",
-    "tests_outcome",
-    "build_outcome",
-    "lint_outcome",
-    "typecheck_outcome",
-    "final_outcome",
-    "data_source",
-  ];
-  const optionalStringFields = [
-    "model_version",
-    "tool",
-    "language",
-    "framework",
-    "repo_size_bucket",
-    "file_count_bucket",
-    "changed_file_count_bucket",
-    "lines_added_bucket",
-    "lines_removed_bucket",
-  ];
-
-  if (payload.schema_version !== schemaVersion) {
-    errors.push(`schema_version must be ${schemaVersion}.`);
-  }
-  if (payload.payload_version !== contributionPayloadVersion) {
-    errors.push(`payload_version must be ${contributionPayloadVersion}.`);
-  }
-  for (const field of stringFields) {
-    if (typeof payload[field] !== "string" || payload[field].trim() === "") {
-      errors.push(`${field} must be a non-empty string.`);
-    }
-  }
-  for (const field of optionalStringFields) {
-    if (payload[field] !== undefined && (typeof payload[field] !== "string" || payload[field].trim() === "")) {
-      errors.push(`${field} must be a non-empty string when present.`);
-    }
-  }
-  if (typeof payload.verified_success !== "boolean") {
-    errors.push("verified_success must be a boolean.");
-  }
-  if (typeof payload.contribution_id === "string" && !/^contrib_[a-zA-Z0-9_-]+$/.test(payload.contribution_id)) {
-    errors.push("contribution_id must be an opaque contrib_ identifier.");
-  }
-  if (typeof payload.timestamp_bucket === "string" && !/^\d{4}-\d{2}-\d{2}$/.test(payload.timestamp_bucket)) {
-    errors.push("timestamp_bucket must use YYYY-MM-DD format.");
-  }
-  if (typeof payload.task_type === "string" && !(taskTypes as readonly string[]).includes(payload.task_type)) {
-    errors.push("task_type must be a documented task type.");
-  }
-  if (typeof payload.final_outcome === "string" && !(finalOutcomes as readonly string[]).includes(payload.final_outcome)) {
-    errors.push("final_outcome must be a documented final outcome.");
-  }
-  for (const field of ["tests_outcome", "build_outcome", "lint_outcome", "typecheck_outcome"]) {
-    const value = payload[field];
-    if (typeof value === "string" && !(verificationOutcomes as readonly string[]).includes(value)) {
-      errors.push(`${field} must be a documented verification outcome.`);
-    }
-  }
-  for (const field of [
-    "input_tokens_bucket",
-    "output_tokens_bucket",
-    "cached_tokens_bucket",
-    "retry_count_bucket",
-    "error_count_bucket",
-    "repo_size_bucket",
-    "file_count_bucket",
-    "changed_file_count_bucket",
-    "lines_added_bucket",
-    "lines_removed_bucket",
-  ]) {
-    const value = payload[field];
-    if (typeof value === "string" && !isAllowedCountBucket(value)) {
-      errors.push(`${field} must be a documented bucket value.`);
-    }
-  }
-  if (typeof payload.duration_bucket === "string" && !isAllowedDurationBucket(payload.duration_bucket)) {
-    errors.push("duration_bucket must be a documented duration bucket value.");
-  }
-  if (typeof payload.estimated_cost_bucket === "string" && !isAllowedCostBucket(payload.estimated_cost_bucket)) {
-    errors.push("estimated_cost_bucket must be a documented cost bucket value.");
-  }
-  for (const field of ["provider", "model_id", "model_version", "tool", "language", "framework", "data_source"]) {
-    const value = payload[field];
-    if (typeof value === "string" && containsPrivateMarker(value)) {
-      errors.push(`${field} contains private-looking text and must be normalized before ingestion.`);
-    }
-  }
-
-  return errors;
 }
 
 function isJsonContentType(contentType: string | string[] | undefined): boolean {
@@ -272,22 +167,6 @@ function readJsonBody(request: IncomingMessage): Promise<unknown> {
     });
     request.on("error", reject);
   });
-}
-
-function isAllowedCostBucket(value: string): boolean {
-  return ["free", "under_1_cent", "under_10_cents", "under_1_usd", "under_10_usd", "over_10_usd", "unknown"].includes(value);
-}
-
-function isAllowedCountBucket(value: string): boolean {
-  return value === "zero" || (bucketValues as readonly string[]).includes(value);
-}
-
-function isAllowedDurationBucket(value: string): boolean {
-  return ["under_1m", "1m_to_5m", "5m_to_30m", "30m_to_2h", "over_2h", "unknown"].includes(value);
-}
-
-function containsPrivateMarker(value: string): boolean {
-  return /\b(customer|client|company|secret|private[_ -]?repo|api[_ -]?key|token)\b/i.test(value);
 }
 
 function sendJson(response: ServerResponse, statusCode: number, value: unknown): void {

@@ -39,6 +39,8 @@ test("accepts a contribution-safe payload without storing it", () => {
   assert.equal(result.contribution_id, "contrib_test_123");
   assert.equal(result.payload_version, "v0.2.0");
   assert.equal(result.validation.status, "passed");
+  assert.equal(result.server_validation.status, "passed");
+  assert.deepEqual(result.server_validation.issues, []);
   assert.match(result.notice, /not stored/i);
 });
 
@@ -51,21 +53,25 @@ test("rejects payloads with forbidden private fields", () => {
   assert.equal(result.status, "rejected");
   assert.equal(result.stored, false);
   assert.equal(result.validation.status, "failed");
+  assert.equal(result.server_validation.status, "failed");
   assert.deepEqual(result.validation.forbidden_fields_present, ["source_code"]);
+  assert.equal(result.server_validation.summary.forbidden_field_count, 1);
   assert.match(result.notice, /failed contribution-safe validation/i);
 });
 
 test("rejects invalid contribution contract values", () => {
   const result = ingestContributionPayload({
     ...safePayload,
-    task_type: "customer_acme_private_repo",
+    task_type: 123,
     verified_success: "yes",
   });
 
   assert.equal(result.status, "rejected");
   assert.equal(result.stored, false);
   assert.equal(result.validation.status, "passed");
-  assert.match(result.contract_errors.join("\n"), /task_type must be a documented task type/);
+  assert.equal(result.server_validation.status, "failed");
+  assert.equal(result.server_validation.summary.invalid_type_count, 2);
+  assert.match(result.contract_errors.join("\n"), /task_type must be a non-empty string/);
   assert.match(result.contract_errors.join("\n"), /verified_success must be a boolean/);
 });
 
@@ -76,6 +82,7 @@ test("rejects private-looking values in allowed text fields", () => {
   });
 
   assert.equal(result.status, "rejected");
+  assert.equal(result.server_validation.summary.private_marker_count, 1);
   assert.match(result.contract_errors.join("\n"), /model_id contains private-looking text/);
 });
 
@@ -98,7 +105,9 @@ test("serves health and contribution ingestion endpoints", async () => {
       body: JSON.stringify(safePayload),
     });
     assert.equal(accepted.status, 202);
-    assert.equal((await accepted.json()).status, "accepted");
+    const acceptedJson = await accepted.json();
+    assert.equal(acceptedJson.status, "accepted");
+    assert.equal(acceptedJson.server_validation.status, "passed");
 
     const rejected = await fetch(`http://${address.host}:${address.port}/api/contributions`, {
       method: "POST",
@@ -109,6 +118,7 @@ test("serves health and contribution ingestion endpoints", async () => {
     const rejectedJson = await rejected.json();
     assert.equal(rejectedJson.status, "rejected");
     assert.deepEqual(rejectedJson.validation.forbidden_fields_present, ["repository_name"]);
+    assert.equal(rejectedJson.server_validation.summary.forbidden_field_count, 1);
 
     const wrongContentType = await fetch(`http://${address.host}:${address.port}/api/contributions`, {
       method: "POST",

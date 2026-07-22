@@ -61,6 +61,9 @@ fields, unknown fields, invalid enum values, invalid bucket values, invalid
 boolean types, malformed contribution IDs, malformed timestamp buckets, or
 private-looking text in normalized public fields.
 
+The server-side validation response is documented in
+[`SERVER_SIDE_VALIDATION.md`](./SERVER_SIDE_VALIDATION.md).
+
 Accepted payloads return `202`. Rejected payloads return `422` when validation
 fails. Payloads that include forbidden fields such as `source_code`,
 `terminal_output`, exact paths, repository names, or private notes are rejected
@@ -77,5 +80,6 @@ This endpoint deliberately does not add:
 - sync;
 - automatic upload from local clients.
 
-Those remain separate Phase 7 tasks. The next step is server-side validation
-documentation and stricter tests around the accepted payload contract.
+Those remain separate Phase 7 tasks. Server-side validation now protects the
+intake boundary, but later storage, aggregation, and public dashboard work must
+still be designed and reviewed in separate PRs.

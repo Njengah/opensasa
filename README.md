@@ -115,6 +115,8 @@ The optional hosted architecture decision lives in
 [docs/HOSTED_ARCHITECTURE.md](./docs/HOSTED_ARCHITECTURE.md).
 The contribution ingestion endpoint boundary lives in
 [docs/INGESTION_ENDPOINT.md](./docs/INGESTION_ENDPOINT.md).
+The server-side contribution validation contract lives in
+[docs/SERVER_SIDE_VALIDATION.md](./docs/SERVER_SIDE_VALIDATION.md).
 
 ## Dashboard Preview
 

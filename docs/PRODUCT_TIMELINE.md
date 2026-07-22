@@ -294,7 +294,7 @@ Expected PRs:
 - [x] Add public aggregate schema. (#121)
 - [x] Add ingestion endpoint for safe contribution payloads. (#122)
 - [x] Add server-side validation. (#123)
-- [ ] Add confidence labels for aggregate views.
+- [x] Add confidence labels for aggregate views. (#124)
 - [ ] Add seed-data-only public dashboard.
 - [ ] Add real-data dashboard only after enough contributions.
 - [ ] Add account system only if needed.

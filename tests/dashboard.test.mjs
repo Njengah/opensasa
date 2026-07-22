@@ -39,6 +39,15 @@ test("serves a local dashboard and report API", async () => {
     work_mode: "manual_log",
     contribution_consent: "granted",
   });
+  store.createSession({
+    timestamp: "2026-07-14T12:00:00.000Z",
+    provider: "PrivateVendor",
+    model_id: "private-internal-model-do-not-publish",
+    task_type: "feature",
+    final_outcome: "rejected",
+    work_mode: "manual_log",
+    contribution_consent: "not_granted",
+  });
   store.recordContributionHistory({
     exported_at: "2026-07-12T15:00:00.000Z",
     session_id: openAiSession.session_id,
@@ -106,10 +115,32 @@ test("serves a local dashboard and report API", async () => {
     assert.match(pageHtml, /fetch\("\/api\/contribution-history" \+ queryString\)/);
     assert.match(pageHtml, /renderContributionHistory/);
 
+    const publicPage = await fetch(`http://${address.host}:${address.port}/public`);
+    assert.equal(publicPage.status, 200);
+    const publicHtml = await publicPage.text();
+    assert.match(publicHtml, /OpenSasa Public Aggregate Preview/);
+    assert.match(publicHtml, /illustrative seed data only/);
+    assert.match(publicHtml, /does not use real contribution data/);
+    assert.match(publicHtml, /\/api\/public\/aggregates/);
+    assert.doesNotMatch(publicHtml, /private-internal-model-do-not-publish/);
+
+    const publicAggregatesResponse = await fetch(`http://${address.host}:${address.port}/api/public/aggregates`);
+    assert.equal(publicAggregatesResponse.status, 200);
+    const publicAggregatesText = await publicAggregatesResponse.text();
+    assert.doesNotMatch(publicAggregatesText, /private-internal-model-do-not-publish/);
+    assert.doesNotMatch(publicAggregatesText, /PrivateVendor/);
+    const publicAggregates = JSON.parse(publicAggregatesText);
+    assert.equal(publicAggregates.status, "seed only");
+    assert.equal(publicAggregates.upload_enabled, false);
+    assert.equal(publicAggregates.real_data_enabled, false);
+    assert.ok(publicAggregates.records.length >= 4);
+    assert.equal(publicAggregates.records.every((record) => record.data_provenance === "seed"), true);
+    assert.equal(publicAggregates.records.every((record) => record.quality.confidence_label === "insufficient"), true);
+
     const reportResponse = await fetch(`http://${address.host}:${address.port}/api/report`);
     assert.equal(reportResponse.status, 200);
     const report = await reportResponse.json();
-    assert.equal(report.totalSessions, 3);
+    assert.equal(report.totalSessions, 4);
     assert.equal(report.estimatedTotalCostUsd, 0.5);
     assert.deepEqual(report.trendByDay, [
       {
@@ -130,6 +161,12 @@ test("serves a local dashboard and report API", async () => {
         usefulSessions: 1,
         estimatedCostUsd: null,
       },
+      {
+        date: "2026-07-14",
+        sessions: 1,
+        usefulSessions: 0,
+        estimatedCostUsd: null,
+      },
     ]);
 
     const bundleResponse = await fetch(`http://${address.host}:${address.port}/api/contribution-bundle`);
@@ -138,7 +175,7 @@ test("serves a local dashboard and report API", async () => {
     assert.equal(bundle.included_session_count, 1);
     assert.deepEqual(bundle.consent_summary, {
       granted: 1,
-      not_granted: 1,
+      not_granted: 2,
       revoked: 1,
     });
     assert.equal(bundle.validation_summary.status, "passed");

@@ -117,6 +117,8 @@ The contribution ingestion endpoint boundary lives in
 [docs/INGESTION_ENDPOINT.md](./docs/INGESTION_ENDPOINT.md).
 The server-side contribution validation contract lives in
 [docs/SERVER_SIDE_VALIDATION.md](./docs/SERVER_SIDE_VALIDATION.md).
+The seed-only public aggregate dashboard boundary lives in
+[docs/PUBLIC_DASHBOARD.md](./docs/PUBLIC_DASHBOARD.md).
 
 ## Dashboard Preview
 

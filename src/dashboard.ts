@@ -1,5 +1,6 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { buildContributionBundlePreview } from "./inspect.js";
+import { buildSeedPublicDashboard } from "./public-dashboard.js";
 import { calculateLocalReport, formatLocalReportJson } from "./report.js";
 import { isUsefulOutcome, type LocalSession } from "./schema.js";
 import { openStore } from "./storage.js";
@@ -68,6 +69,16 @@ function handleDashboardRequest(
     return;
   }
 
+  if (url.pathname === "/public") {
+    sendHtml(response, publicDashboardHtml());
+    return;
+  }
+
+  if (url.pathname === "/api/public/aggregates") {
+    sendJson(response, 200, buildSeedPublicDashboard());
+    return;
+  }
+
   if (url.pathname === "/api/report") {
     let store;
     try {
@@ -126,6 +137,108 @@ function handleDashboardRequest(
   }
 
   sendJson(response, 404, { error: "Not found." });
+}
+
+function publicDashboardHtml(): string {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OpenSasa Public Aggregate Preview</title>
+    <style>
+      :root { color-scheme: light; font-family: system-ui, sans-serif; background: #f7f5ef; color: #1c2520; }
+      body { margin: 0; }
+      main { max-width: 980px; margin: 0 auto; padding: 32px 20px 56px; }
+      h1 { margin-bottom: 8px; }
+      .notice { background: #fff3cd; border: 1px solid #ebcf79; border-radius: 12px; padding: 14px 16px; }
+      .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 24px; }
+      .card { background: #ffffff; border: 1px solid #ded8ca; border-radius: 14px; padding: 16px; }
+      .muted { color: #667064; }
+      .pill { background: #e8efe4; border-radius: 999px; display: inline-block; margin: 4px 6px 0 0; padding: 4px 9px; }
+      code { background: #eee7d7; border-radius: 4px; padding: 2px 5px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>OpenSasa Public Aggregate Preview</h1>
+      <p class="muted">Seed-only public dashboard for methodology and UI validation.</p>
+      <p class="notice">This page shows illustrative seed data only. It does not use real contribution data, upload data, or publish rankings.</p>
+      <section id="records" class="grid"><article class="card">Loading seed aggregates...</article></section>
+      <p><a href="/api/public/aggregates">View seed aggregate JSON</a></p>
+      <p><a href="/">Back to local dashboard</a></p>
+    </main>
+    <script>
+      const records = document.querySelector("#records");
+      fetch("/api/public/aggregates")
+        .then((response) => response.ok ? response.json() : Promise.reject(new Error("Seed aggregates unavailable")))
+        .then((payload) => {
+          records.replaceChildren(...payload.records.map((record) => {
+            const article = document.createElement("article");
+            article.className = "card";
+
+            const title = document.createElement("h2");
+            title.textContent = record.group.value;
+            article.append(title);
+
+            const group = document.createElement("p");
+            group.className = "muted";
+            group.textContent = record.view_type + " / " + record.group.dimension;
+            article.append(group);
+
+            const taskCount = document.createElement("p");
+            taskCount.append("Tasks: ");
+            const taskCountValue = document.createElement("strong");
+            taskCountValue.textContent = String(record.metrics.task_count);
+            taskCount.append(taskCountValue);
+            article.append(taskCount);
+
+            const acceptedCount = document.createElement("p");
+            acceptedCount.append("Accepted or partial: ");
+            const acceptedCountValue = document.createElement("strong");
+            acceptedCountValue.textContent = String(record.metrics.accepted_count + record.metrics.partially_accepted_count);
+            acceptedCount.append(acceptedCountValue);
+            article.append(acceptedCount);
+
+            const verifiedCount = document.createElement("p");
+            verifiedCount.append("Verified success: ");
+            const verifiedCountValue = document.createElement("strong");
+            verifiedCountValue.textContent = String(record.metrics.verified_success_count);
+            verifiedCount.append(verifiedCountValue);
+            article.append(verifiedCount);
+
+            const confidence = document.createElement("span");
+            confidence.className = "pill";
+            confidence.textContent = "confidence: " + record.quality.confidence_label;
+            article.append(confidence);
+
+            const quality = document.createElement("span");
+            quality.className = "pill";
+            quality.textContent = "quality: " + record.quality.data_quality_label;
+            article.append(quality);
+
+            const provenance = document.createElement("span");
+            provenance.className = "pill";
+            provenance.textContent = "provenance: " + record.data_provenance;
+            article.append(provenance);
+
+            const notes = document.createElement("p");
+            notes.className = "muted";
+            notes.textContent = record.quality.notes.join(" ");
+            article.append(notes);
+
+            return article;
+          }));
+        })
+        .catch(() => {
+          const fallback = document.createElement("article");
+          fallback.className = "card";
+          fallback.textContent = "Unable to load seed aggregates.";
+          records.replaceChildren(fallback);
+        });
+    </script>
+  </body>
+</html>`;
 }
 
 export function calculateDashboardTrend(sessions: LocalSession[]): DashboardTrendPoint[] {

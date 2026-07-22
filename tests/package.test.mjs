@@ -360,7 +360,24 @@ test("README links to the contribution ingestion endpoint docs", async () => {
 
   assert.match(readme, /\[docs\/INGESTION_ENDPOINT\.md\]\(\.\/docs\/INGESTION_ENDPOINT\.md\)/);
   assert.match(readme, /\[docs\/SERVER_SIDE_VALIDATION\.md\]\(\.\/docs\/SERVER_SIDE_VALIDATION\.md\)/);
+  assert.match(readme, /\[docs\/PUBLIC_DASHBOARD\.md\]\(\.\/docs\/PUBLIC_DASHBOARD\.md\)/);
   assert.match(readme, /validates safe payloads but does not\s+store them yet/);
+});
+
+test("public dashboard docs define seed-only public aggregate boundary", async () => {
+  const publicDashboard = await readFile(path.join(root, "docs", "PUBLIC_DASHBOARD.md"), "utf8");
+  const hostedArchitecture = await readFile(path.join(root, "docs", "HOSTED_ARCHITECTURE.md"), "utf8");
+
+  assert.match(publicDashboard, /# Seed-Only Public Dashboard/);
+  assert.match(publicDashboard, /\/public/);
+  assert.match(publicDashboard, /\/api\/public\/aggregates/);
+  assert.match(publicDashboard, /Do not expose this local dashboard server as the hosted public service/);
+  assert.match(publicDashboard, /private local endpoints such as `\/api\/report`/);
+  assert.match(publicDashboard, /illustrative seed aggregate records only/);
+  assert.match(publicDashboard, /`data_provenance: "seed"`/);
+  assert.match(publicDashboard, /`quality\.confidence_label: "insufficient"`/);
+  assert.match(hostedArchitecture, /docs\/PUBLIC_DASHBOARD\.md/);
+  assert.match(hostedArchitecture, /every returned\s+record is labeled as seed data with insufficient confidence/);
 });
 
 test("README links to the demo walkthrough", async () => {

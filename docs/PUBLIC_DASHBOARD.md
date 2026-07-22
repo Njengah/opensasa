@@ -45,5 +45,13 @@ Every record is labeled with:
 - `quality.data_quality_label: "seed"`;
 - schema and methodology versions.
 
+The API also returns `real_data_gate`, which keeps real contribution dashboards
+disabled until eligible aggregate records exist. A real aggregate record is
+eligible only when it:
+
+- is not seed or test data;
+- meets the minimum public sample size;
+- has `early`, `moderate`, or `strong` confidence.
+
 Real contribution data should remain hidden until sample-size, confidence, and
 validation thresholds are met.

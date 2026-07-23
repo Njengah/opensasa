@@ -117,6 +117,20 @@ test("product timeline tracks less manual capture as completed", async () => {
   assert.match(timeline, /- \[x\] Add agent status command\. \(#81\)/);
 });
 
+test("product timeline tracks local dashboard as completed", async () => {
+  const timeline = await readFile(path.join(root, "docs", "PRODUCT_TIMELINE.md"), "utf8");
+
+  assert.match(
+    timeline,
+    /- \[x\] Local dashboard\. \(#64, #65, #66, #67, #68, #69, #70, #71, #72\)/,
+  );
+  assert.match(timeline, /## Phase 2: Local Dashboard Alpha/);
+  assert.match(timeline, /- \[x\] Add local HTTP server command: `opensasa dashboard`\. \(#64\)/);
+  assert.match(timeline, /- \[x\] Add dashboard static app scaffold\. \(#65\)/);
+  assert.match(timeline, /- \[x\] Add dashboard empty state with demo instructions\. \(#71\)/);
+  assert.match(timeline, /- \[x\] Add Playwright\/smoke tests for dashboard rendering\. \(#72\)/);
+});
+
 test("GitHub issue templates exist and reinforce safe public reporting", async () => {
   const templateDir = path.join(root, ".github", "ISSUE_TEMPLATE");
   const templates = [

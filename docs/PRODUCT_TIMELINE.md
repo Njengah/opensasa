@@ -90,7 +90,7 @@ Already working:
 Broader product capability status:
 
 - [x] Less manual data capture. (#73, #74, #75, #76, #77, #78, #79, #80, #81, #82, #134)
-- [x] Local dashboard. (#64, #65, #66, #67, #68, #69, #70, #71, #72)
+- [x] Local dashboard. (#64, #65, #66, #67, #68, #69, #70, #71, #72, #135)
 - [ ] Background agent.
 - [ ] VS Code integration.
 - [ ] Real export/submission workflow.

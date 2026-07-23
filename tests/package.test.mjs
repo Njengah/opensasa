@@ -327,7 +327,7 @@ test("team private dashboard design stays gated behind account and sync decision
   assert.match(teamDashboard, /how revoked members lose access/);
   assert.match(teamDashboard, /This decision does not add:\s*\r?\n\r?\n- hosted private dashboard routes;\s*\r?\n- organization or team membership;\s*\r?\n- role-based access control;/);
   assert.match(teamDashboard, /OpenSasa should keep the shipped\s+dashboard local-only and keep public dashboards aggregate-only/);
-  assert.match(productTimeline, /- \[ \] Add organization\/team private dashboard design\./);
+  assert.match(productTimeline, /- \[[ x]\] Add organization\/team private dashboard design\.(?: \(#\d+\))?/);
 });
 
 test("contribution ingestion endpoint docs explain the non-persistent boundary", async () => {

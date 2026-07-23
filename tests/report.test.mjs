@@ -390,6 +390,200 @@ test("formats an empty compact report clearly", () => {
   assert.match(output, /No matching sessions/);
 });
 
+test("keeps full report text output stable", () => {
+  const report = calculateLocalReport([
+    session({
+      final_outcome: "accepted",
+      tool: "Codex",
+      language: "TypeScript",
+      framework: "Node.js",
+      tests_outcome: "passed",
+      error_count: 2,
+      duration_seconds: 300,
+      input_tokens_estimate: 1200,
+      output_tokens_estimate: 500,
+      cached_tokens_estimate: 100,
+      estimated_cost_usd: 0.5,
+      cost_source: "estimated",
+      repo_size_bucket: "small",
+      file_count_bucket: "medium",
+      changed_file_count_bucket: "tiny",
+      lines_added_bucket: "small",
+      lines_removed_bucket: "tiny",
+    }),
+  ]);
+
+  assert.equal(
+    formatLocalReport(report),
+    `OpenSasa Local Report
+
+Total sessions: 1
+
+Outcome summary:
+Accepted or partially accepted: 1
+Rejected: 0
+Unknown outcome: 0
+
+Rates:
+Useful outcome rate: 100.0% (1/1)
+Unknown outcome rate: 0.0% (0/1)
+Verified success rate: 100.0% (1/1)
+
+Cost summary:
+Estimated total cost: $0.5000
+Cost per useful task: $0.5000
+Failure cost: $0.0000
+
+Token estimate summary:
+Sessions with token estimates: 1
+Input tokens estimate: 1200
+Output tokens estimate: 500
+Cached tokens estimate: 100
+Total tokens estimate: 1800
+
+Error count summary:
+Sessions with error counts: 1
+Total error count: 2
+Average errors per recorded session: 2.00
+
+Speed summary:
+Speed to useful output: 300.0s
+
+Retry summary:
+Total retries on useful sessions: 0
+Retry burden: 0.00
+Total retries on rejected sessions: 0
+Failure retry burden: unknown
+
+Confidence summary:
+Confidence level: insufficient
+Known outcome sessions: 1
+Verified sessions: 1
+Verification share: 100.0% (1/1)
+Confidence note: Not enough known and verified local sessions for a reliable signal yet.
+
+Verification outcome summary:
+tests_outcome:
+- passed: 1
+build_outcome:
+- unknown: 1
+lint_outcome:
+- unknown: 1
+typecheck_outcome:
+- unknown: 1
+manual_review_outcome:
+- unknown: 1
+
+Session groupings:
+Sessions by provider:
+- OpenAI: 1
+
+Sessions by model:
+- OpenAI/gpt-5: 1
+
+Sessions by tool:
+- Codex: 1
+
+Sessions by language:
+- TypeScript: 1
+
+Sessions by framework:
+- Node.js: 1
+
+Sessions by work mode:
+- manual_log: 1
+
+Sessions by cost source:
+- estimated: 1
+
+Sessions by repo size bucket:
+- small: 1
+
+Sessions by file count bucket:
+- medium: 1
+
+Sessions by changed file count bucket:
+- tiny: 1
+
+Sessions by lines added bucket:
+- small: 1
+
+Sessions by lines removed bucket:
+- tiny: 1
+
+Sessions by duration bucket:
+- 1m_to_5m: 1
+
+Sessions by error count bucket:
+- tiny: 1
+
+Sessions by task type:
+- bug_fix: 1
+
+Cost groupings:
+Cost by provider:
+- OpenAI: $0.5000
+Cost by model:
+- OpenAI/gpt-5: $0.5000
+Cost by tool:
+- Codex: $0.5000
+Cost by language:
+- TypeScript: $0.5000
+Cost by framework:
+- Node.js: $0.5000
+Cost by work mode:
+- manual_log: $0.5000
+Cost by cost source:
+- estimated: $0.5000
+Cost by repo size bucket:
+- small: $0.5000
+Cost by file count bucket:
+- medium: $0.5000
+Cost by changed file count bucket:
+- tiny: $0.5000
+Cost by lines added bucket:
+- small: $0.5000
+Cost by lines removed bucket:
+- tiny: $0.5000
+Cost by duration bucket:
+- 1m_to_5m: $0.5000
+Cost by error count bucket:
+- tiny: $0.5000`,
+  );
+});
+
+test("keeps compact report text output stable", () => {
+  const report = calculateLocalReport([
+    session({
+      final_outcome: "accepted",
+      tool: "Codex",
+      language: "TypeScript",
+      framework: "Node.js",
+      tests_outcome: "passed",
+      error_count: 2,
+      duration_seconds: 300,
+      input_tokens_estimate: 1200,
+      output_tokens_estimate: 500,
+      cached_tokens_estimate: 100,
+      estimated_cost_usd: 0.5,
+      cost_source: "estimated",
+      repo_size_bucket: "small",
+      file_count_bucket: "medium",
+      changed_file_count_bucket: "tiny",
+      lines_added_bucket: "small",
+      lines_removed_bucket: "tiny",
+    }),
+  ]);
+
+  assert.equal(
+    formatLocalReportCompact(report),
+    `OpenSasa: 1 session
+Useful 100.0% (1/1) | Verified 100.0% (1/1) | Unknown 0.0% (0/1)
+Cost $0.5000 | Useful task $0.5000 | Retries 0.00
+Tokens 1800 | Errors 2 | Confidence insufficient`,
+  );
+});
+
 test("formats a readable local report", () => {
   const report = calculateLocalReport([
     session({

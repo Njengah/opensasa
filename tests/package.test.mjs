@@ -246,12 +246,15 @@ test("hosted architecture decision preserves the local-first trust boundary", as
   assert.match(hostedArchitecture, /private hosted dashboards stay disabled until account, membership,\s+access-control, sync or upload, private storage, and audit requirements are\s+approved separately/);
   assert.match(hostedArchitecture, /docs\/ABUSE_AND_ANTI_GAMING\.md/);
   assert.match(hostedArchitecture, /public aggregate\s+rankings stay disabled until sample-size, confidence, provenance, verification,\s+and abuse-flag rules are visible/);
+  assert.match(hostedArchitecture, /docs\/METHODOLOGY_CHANGELOG\.md/);
+  assert.match(hostedArchitecture, /methodology\s+changes that affect public aggregate interpretation must be recorded there/);
   assert.match(hostedArchitecture, /## Current Phase 7 Sequence/);
   assert.match(hostedArchitecture, /account-system decision gate/);
   assert.match(hostedArchitecture, /optional-sync decision gate/);
   assert.match(hostedArchitecture, /organization\/team private dashboard design gate/);
   assert.match(hostedArchitecture, /abuse and anti-gaming rules/);
-  assert.match(hostedArchitecture, /The next separate decision is the public methodology changelog/);
+  assert.match(hostedArchitecture, /public methodology changelog/);
+  assert.match(hostedArchitecture, /The initial Phase 7 planning sequence is complete after these decision gates/);
   assert.match(hostedArchitecture, /docs\/PUBLIC_AGGREGATE_SCHEMA\.md/);
   assert.match(hostedArchitecture, /`opensasa ingest`/);
   assert.match(hostedArchitecture, /does not persist accepted payloads yet/);
@@ -393,10 +396,11 @@ test("methodology docs define initial public aggregate confidence thresholds", a
 
   assert.match(methodology, /## Confidence Model/);
   assert.match(methodology, /ABUSE_AND_ANTI_GAMING\.md/);
+  assert.match(methodology, /METHODOLOGY_CHANGELOG\.md/);
   assert.match(methodology, /src\/public-aggregate\.ts/);
   assert.match(methodology, /fewer than 30 accepted contribution records/);
   assert.match(methodology, /At least 100 records, but fewer than 500 records/);
-  assert.match(methodology, /Changing them should update the\s+methodology version and release notes/);
+  assert.match(methodology, /Changing them should update the\s+methodology version and \[`METHODOLOGY_CHANGELOG\.md`\]/);
 });
 
 test("abuse and anti-gaming rules keep public aggregate claims conservative", async () => {
@@ -429,6 +433,35 @@ test("abuse and anti-gaming rules keep public aggregate claims conservative", as
   assert.match(abuseRules, /Future enforcement work must become a separate PR/);
   assert.match(aggregateSchema, /ABUSE_AND_ANTI_GAMING\.md/);
   assert.match(productTimeline, /- \[[ x]\] Add abuse and anti-gaming rules\.(?: \(#\d+\))?/);
+});
+
+test("public methodology changelog records public aggregate methodology history", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+  const methodologyChangelog = await readFile(path.join(root, "docs", "METHODOLOGY_CHANGELOG.md"), "utf8");
+  const aggregateSchema = await readFile(path.join(root, "docs", "PUBLIC_AGGREGATE_SCHEMA.md"), "utf8");
+  const productTimeline = await readFile(path.join(root, "docs", "PRODUCT_TIMELINE.md"), "utf8");
+
+  assert.match(readme, /\[docs\/METHODOLOGY_CHANGELOG\.md\]\(\.\/docs\/METHODOLOGY_CHANGELOG\.md\)/);
+  assert.match(methodologyChangelog, /# Public Methodology Changelog/);
+  assert.match(methodologyChangelog, /Status: public methodology history for Phase 7/);
+  assert.match(methodologyChangelog, /opensasa\.methodology\.v0/);
+  assert.match(methodologyChangelog, /Update this changelog whenever a PR changes:/);
+  assert.match(methodologyChangelog, /public aggregate formulas/);
+  assert.match(methodologyChangelog, /confidence labels or thresholds/);
+  assert.match(methodologyChangelog, /data provenance rules/);
+  assert.match(methodologyChangelog, /abuse or anti-gaming rules/);
+  assert.match(methodologyChangelog, /whether existing public aggregate records need regeneration/);
+  assert.match(methodologyChangelog, /Changing public methodology behavior should also update the methodology version/);
+  assert.match(methodologyChangelog, /## 2026-07-23 - opensasa\.methodology\.v0/);
+  assert.match(methodologyChangelog, /Related schema version: `opensasa\.public-aggregate\.v0`/);
+  assert.match(methodologyChangelog, /#121: defined the public aggregate schema/);
+  assert.match(methodologyChangelog, /#124: added confidence labels for aggregate views/);
+  assert.match(methodologyChangelog, /#130: added abuse and anti-gaming rules/);
+  assert.match(methodologyChangelog, /Public aggregate records must include schema version and methodology version/);
+  assert.match(methodologyChangelog, /Seed and test records are always `insufficient`/);
+  assert.match(methodologyChangelog, /No persisted public aggregate records exist yet/);
+  assert.match(aggregateSchema, /METHODOLOGY_CHANGELOG\.md/);
+  assert.match(productTimeline, /- \[[ x]\] Add public methodology changelog\.(?: \(#\d+\))?/);
 });
 
 test("security and privacy FAQ covers v0.1 boundaries", async () => {

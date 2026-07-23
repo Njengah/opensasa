@@ -298,7 +298,7 @@ Expected PRs:
 - [x] Add seed-data-only public dashboard. (#125)
 - [x] Add real-data dashboard only after enough contributions. (#126)
 - [x] Add account system only if needed. (#127)
-- [ ] Add optional sync.
+- [x] Add optional sync. (#128)
 - [ ] Add organization/team private dashboard design.
 - [ ] Add abuse and anti-gaming rules.
 - [ ] Add public methodology changelog.

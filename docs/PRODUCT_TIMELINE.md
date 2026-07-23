@@ -136,7 +136,7 @@ Expected PRs:
 - [x] Add compact report mode for terminal readability. (#63)
 - [x] Add report snapshot tests for stable text output. (#132)
 - [x] Add report schema/version metadata to JSON output. (#61)
-- [ ] Add `opensasa doctor` for local database/config checks.
+- [x] Add `opensasa doctor` for local database/config checks. (#133)
 - [x] Add demo seed database or fixture generator. (#62)
 
 Exit criteria:

@@ -122,6 +122,10 @@ features optional, treats local SQLite as the personal source of truth, and
 allows hosted intake only for validated contribution-safe payloads. The first
 intake implementation validates `POST /api/contributions` payloads and returns
 accepted or rejected responses, but it does not persist accepted payloads.
+The account-system decision gate is captured in
+[`docs/ACCOUNT_SYSTEM_DECISION.md`](./ACCOUNT_SYSTEM_DECISION.md); hosted
+accounts remain disabled until a separate identity-dependent feature is
+approved.
 
 ## Out Of Scope For v0.1
 

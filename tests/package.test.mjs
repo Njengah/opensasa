@@ -211,6 +211,8 @@ test("architecture docs cover the v0.1 local-first boundaries", async () => {
   assert.match(architectureDoc, /validates `POST \/api\/contributions` payloads/);
   assert.match(architectureDoc, /does not upload source code,\s+prompts, responses, exact paths, raw terminal output/);
   assert.match(architectureDoc, /docs\/HOSTED_ARCHITECTURE\.md/);
+  assert.match(architectureDoc, /docs\/ACCOUNT_SYSTEM_DECISION\.md/);
+  assert.match(architectureDoc, /hosted\s+accounts remain disabled until a separate identity-dependent feature is\s+approved/);
 });
 
 test("hosted architecture decision preserves the local-first trust boundary", async () => {
@@ -230,9 +232,37 @@ test("hosted architecture decision preserves the local-first trust boundary", as
   assert.match(hostedArchitecture, /seed data only/);
   assert.match(hostedArchitecture, /automatic upload/);
   assert.match(hostedArchitecture, /background sync/);
+  assert.match(hostedArchitecture, /docs\/ACCOUNT_SYSTEM_DECISION\.md/);
+  assert.match(hostedArchitecture, /accounts stay\s+disabled until a separate feature needs identity/);
+  assert.match(hostedArchitecture, /## Current Phase 7 Sequence/);
+  assert.match(hostedArchitecture, /account-system decision gate/);
+  assert.match(hostedArchitecture, /The next separate decisions are optional sync/);
   assert.match(hostedArchitecture, /docs\/PUBLIC_AGGREGATE_SCHEMA\.md/);
   assert.match(hostedArchitecture, /`opensasa ingest`/);
   assert.match(hostedArchitecture, /does not persist accepted payloads yet/);
+});
+
+test("account system decision keeps hosted accounts gated until needed", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+  const accountDecision = await readFile(path.join(root, "docs", "ACCOUNT_SYSTEM_DECISION.md"), "utf8");
+
+  assert.match(readme, /\[docs\/ACCOUNT_SYSTEM_DECISION\.md\]\(\.\/docs\/ACCOUNT_SYSTEM_DECISION\.md\)/);
+  assert.match(accountDecision, /# Account System Decision/);
+  assert.match(accountDecision, /Status: not needed for the current Phase 7 slice/);
+  assert.match(accountDecision, /without login, authentication sessions, billing identity/);
+  assert.match(accountDecision, /Do not add an account system until a later feature has a concrete need/);
+  assert.match(accountDecision, /local SQLite database remains the personal source of truth/);
+  assert.match(accountDecision, /hosted intake can validate contribution-safe payloads without storing a user\s+profile/);
+  assert.match(accountDecision, /public dashboards read aggregate records, not private local sessions/);
+  assert.match(accountDecision, /private hosted dashboards for a signed-in developer/);
+  assert.match(accountDecision, /team or organization dashboards with member access control/);
+  assert.match(accountDecision, /cross-device sync that cannot be safely handled by explicit export\/import/);
+  assert.match(accountDecision, /what identity fields are collected/);
+  assert.match(accountDecision, /retention and deletion behavior/);
+  assert.match(accountDecision, /access-control rules/);
+  assert.match(accountDecision, /whether contribution records can be linked back to an account/);
+  assert.match(accountDecision, /This decision does not add/);
+  assert.match(accountDecision, /hosted user profiles/);
 });
 
 test("contribution ingestion endpoint docs explain the non-persistent boundary", async () => {

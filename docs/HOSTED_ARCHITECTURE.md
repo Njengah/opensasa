@@ -56,6 +56,10 @@ The first hosted slice should be small:
 Do not combine the first hosted slice with accounts, team dashboards, automatic
 sync, vendor portals, billing, or private cloud analytics. Those features add
 different consent, retention, access-control, and threat-model requirements.
+The account-system boundary is documented in
+[`docs/ACCOUNT_SYSTEM_DECISION.md`](./ACCOUNT_SYSTEM_DECISION.md); accounts stay
+disabled until a separate feature needs identity and the project has documented
+retention, deletion, access-control, and abuse rules.
 
 The initial implementation exposes `opensasa ingest`, a small HTTP intake
 server with `GET /health` and `POST /api/contributions`. It validates incoming
@@ -126,11 +130,18 @@ This decision does not approve:
 
 Those are separate decisions and should become separate PRs if Phase 7 proceeds.
 
-## Next PRs
+## Current Phase 7 Sequence
 
-After this decision, the next small PRs should be:
+The initial Phase 7 sequence now includes:
 
-1. define the public aggregate schema;
-2. design the safe contribution ingestion endpoint;
-3. document server-side validation rules;
-4. add confidence labels for aggregate views.
+1. hosted architecture decision;
+2. public aggregate schema;
+3. safe contribution ingestion endpoint;
+4. server-side validation rules;
+5. aggregate confidence labels;
+6. seed-only public dashboard;
+7. real-data public dashboard gate;
+8. account-system decision gate.
+
+The next separate decisions are optional sync, organization or team private
+dashboard design, abuse and anti-gaming rules, and public methodology changelog.

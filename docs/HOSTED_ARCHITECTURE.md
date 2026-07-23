@@ -76,6 +76,9 @@ The abuse and anti-gaming boundary is documented in
 [`docs/ABUSE_AND_ANTI_GAMING.md`](./ABUSE_AND_ANTI_GAMING.md); public aggregate
 rankings stay disabled until sample-size, confidence, provenance, verification,
 and abuse-flag rules are visible.
+The public methodology changelog is documented in
+[`docs/METHODOLOGY_CHANGELOG.md`](./METHODOLOGY_CHANGELOG.md); methodology
+changes that affect public aggregate interpretation must be recorded there.
 
 The initial implementation exposes `opensasa ingest`, a small HTTP intake
 server with `GET /health` and `POST /api/contributions`. It validates incoming
@@ -160,6 +163,7 @@ The initial Phase 7 sequence now includes:
 8. account-system decision gate;
 9. optional-sync decision gate;
 10. organization/team private dashboard design gate;
-11. abuse and anti-gaming rules.
+11. abuse and anti-gaming rules;
+12. public methodology changelog.
 
-The next separate decision is the public methodology changelog.
+The initial Phase 7 planning sequence is complete after these decision gates.

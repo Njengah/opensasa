@@ -121,6 +121,8 @@ The organization/team private dashboard design gate lives in
 [docs/TEAM_PRIVATE_DASHBOARD_DESIGN.md](./docs/TEAM_PRIVATE_DASHBOARD_DESIGN.md).
 The abuse and anti-gaming rulebook lives in
 [docs/ABUSE_AND_ANTI_GAMING.md](./docs/ABUSE_AND_ANTI_GAMING.md).
+The public methodology changelog lives in
+[docs/METHODOLOGY_CHANGELOG.md](./docs/METHODOLOGY_CHANGELOG.md).
 The contribution ingestion endpoint boundary lives in
 [docs/INGESTION_ENDPOINT.md](./docs/INGESTION_ENDPOINT.md).
 The server-side contribution validation contract lives in

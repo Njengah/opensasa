@@ -40,6 +40,8 @@ opensasa.methodology.v0
 Schema versions describe the shape of aggregate records. Methodology versions
 describe formulas, thresholds, confidence labels, and bucket definitions used to
 calculate those records.
+Public methodology changes are tracked in
+[`METHODOLOGY_CHANGELOG.md`](./METHODOLOGY_CHANGELOG.md).
 
 ## Aggregate View Record
 
@@ -152,7 +154,8 @@ Initial confidence labels are calculated by
 | `strong` | At least 500 records with at least 75% verification coverage. |
 
 These thresholds are intentionally conservative and should be revised only with
-a methodology version change.
+a methodology version change and a
+[`METHODOLOGY_CHANGELOG.md`](./METHODOLOGY_CHANGELOG.md) entry.
 
 ## Example
 

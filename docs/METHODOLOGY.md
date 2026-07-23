@@ -10,6 +10,8 @@ Seed-only examples for interpreting these metrics are available in
 [`METHODOLOGY_EXAMPLES.md`](./METHODOLOGY_EXAMPLES.md).
 Abuse and anti-gaming rules for public aggregates are documented in
 [`ABUSE_AND_ANTI_GAMING.md`](./ABUSE_AND_ANTI_GAMING.md).
+Public methodology changes are tracked in
+[`METHODOLOGY_CHANGELOG.md`](./METHODOLOGY_CHANGELOG.md).
 
 ## Methodology Principles
 
@@ -197,7 +199,7 @@ Initial public aggregate thresholds are implemented in
 | `strong` | At least 500 records with at least 75% verification coverage. |
 
 These thresholds are intentionally conservative. Changing them should update the
-methodology version and release notes.
+methodology version and [`METHODOLOGY_CHANGELOG.md`](./METHODOLOGY_CHANGELOG.md).
 
 ## Data Quality Weighting
 

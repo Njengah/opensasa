@@ -301,7 +301,7 @@ Expected PRs:
 - [x] Add optional sync. (#128)
 - [x] Add organization/team private dashboard design. (#129)
 - [x] Add abuse and anti-gaming rules. (#130)
-- [ ] Add public methodology changelog.
+- [x] Add public methodology changelog. (#131)
 
 Exit criteria:
 

@@ -72,6 +72,10 @@ The organization/team private dashboard boundary is documented in
 private hosted dashboards stay disabled until account, membership,
 access-control, sync or upload, private storage, and audit requirements are
 approved separately.
+The abuse and anti-gaming boundary is documented in
+[`docs/ABUSE_AND_ANTI_GAMING.md`](./ABUSE_AND_ANTI_GAMING.md); public aggregate
+rankings stay disabled until sample-size, confidence, provenance, verification,
+and abuse-flag rules are visible.
 
 The initial implementation exposes `opensasa ingest`, a small HTTP intake
 server with `GET /health` and `POST /api/contributions`. It validates incoming
@@ -155,7 +159,7 @@ The initial Phase 7 sequence now includes:
 7. real-data public dashboard gate;
 8. account-system decision gate;
 9. optional-sync decision gate;
-10. organization/team private dashboard design gate.
+10. organization/team private dashboard design gate;
+11. abuse and anti-gaming rules.
 
-The next separate decisions are abuse and anti-gaming rules and public
-methodology changelog.
+The next separate decision is the public methodology changelog.

@@ -244,11 +244,14 @@ test("hosted architecture decision preserves the local-first trust boundary", as
   assert.match(hostedArchitecture, /sync stays\s+disabled until a separate feature needs background data movement/);
   assert.match(hostedArchitecture, /docs\/TEAM_PRIVATE_DASHBOARD_DESIGN\.md/);
   assert.match(hostedArchitecture, /private hosted dashboards stay disabled until account, membership,\s+access-control, sync or upload, private storage, and audit requirements are\s+approved separately/);
+  assert.match(hostedArchitecture, /docs\/ABUSE_AND_ANTI_GAMING\.md/);
+  assert.match(hostedArchitecture, /public aggregate\s+rankings stay disabled until sample-size, confidence, provenance, verification,\s+and abuse-flag rules are visible/);
   assert.match(hostedArchitecture, /## Current Phase 7 Sequence/);
   assert.match(hostedArchitecture, /account-system decision gate/);
   assert.match(hostedArchitecture, /optional-sync decision gate/);
   assert.match(hostedArchitecture, /organization\/team private dashboard design gate/);
-  assert.match(hostedArchitecture, /The next separate decisions are abuse and anti-gaming rules/);
+  assert.match(hostedArchitecture, /abuse and anti-gaming rules/);
+  assert.match(hostedArchitecture, /The next separate decision is the public methodology changelog/);
   assert.match(hostedArchitecture, /docs\/PUBLIC_AGGREGATE_SCHEMA\.md/);
   assert.match(hostedArchitecture, /`opensasa ingest`/);
   assert.match(hostedArchitecture, /does not persist accepted payloads yet/);
@@ -389,10 +392,43 @@ test("methodology docs define initial public aggregate confidence thresholds", a
   const methodology = await readFile(path.join(root, "docs", "METHODOLOGY.md"), "utf8");
 
   assert.match(methodology, /## Confidence Model/);
+  assert.match(methodology, /ABUSE_AND_ANTI_GAMING\.md/);
   assert.match(methodology, /src\/public-aggregate\.ts/);
   assert.match(methodology, /fewer than 30 accepted contribution records/);
   assert.match(methodology, /At least 100 records, but fewer than 500 records/);
   assert.match(methodology, /Changing them should update the\s+methodology version and release notes/);
+});
+
+test("abuse and anti-gaming rules keep public aggregate claims conservative", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+  const abuseRules = await readFile(path.join(root, "docs", "ABUSE_AND_ANTI_GAMING.md"), "utf8");
+  const aggregateSchema = await readFile(path.join(root, "docs", "PUBLIC_AGGREGATE_SCHEMA.md"), "utf8");
+  const productTimeline = await readFile(path.join(root, "docs", "PRODUCT_TIMELINE.md"), "utf8");
+
+  assert.match(readme, /\[docs\/ABUSE_AND_ANTI_GAMING\.md\]\(\.\/docs\/ABUSE_AND_ANTI_GAMING\.md\)/);
+  assert.match(abuseRules, /# Abuse And Anti-Gaming Rules/);
+  assert.match(abuseRules, /Status: rulebook for Phase 7 public aggregate planning/);
+  assert.match(abuseRules, /without adding moderation queues, account enforcement,\s+identity tracking, public rankings, or automated penalties/);
+  assert.match(abuseRules, /prefer hiding, flagging, or lowering confidence over publishing\s+metrics that look precise but may be manipulated/);
+  assert.match(abuseRules, /raw task volume without verification/);
+  assert.match(abuseRules, /seed, synthetic, or test data presented as community data/);
+  assert.match(abuseRules, /vendor-submitted data presented as independent community signal/);
+  assert.match(abuseRules, /Every public aggregate record must keep visible labels/);
+  assert.match(abuseRules, /Synthetic display data should use seed or test provenance in public\s+aggregate records/);
+  assert.match(abuseRules, /one safe provenance, vendor, tool, or import-source bucket dominating a\s+result/);
+  assert.match(abuseRules, /Contributor-level or team-level abuse detection requires a separate identity\s+and privacy decision/);
+  assert.match(abuseRules, /must not be used to justify collecting\s+stable contributor, account, team, organization, repository, or customer\s+identity/);
+  assert.match(abuseRules, /unusually high success rate with low verification coverage/);
+  assert.match(abuseRules, /Flagged records should not raise confidence labels/);
+  assert.match(abuseRules, /Vendor data must:/);
+  assert.match(abuseRules, /never define thresholds, ranking formulas, or confidence labels by itself/);
+  assert.match(abuseRules, /Public rankings must stay disabled until:/);
+  assert.match(abuseRules, /abuse flags are handled/);
+  assert.match(abuseRules, /Abuse prevention must not become a reason to collect private implementation\s+data/);
+  assert.match(abuseRules, /This decision does not add:\s*\r?\n\r?\n- user accounts;\s*\r?\n- identity enforcement;\s*\r?\n- moderation queues;/);
+  assert.match(abuseRules, /Future enforcement work must become a separate PR/);
+  assert.match(aggregateSchema, /ABUSE_AND_ANTI_GAMING\.md/);
+  assert.match(productTimeline, /- \[[ x]\] Add abuse and anti-gaming rules\.(?: \(#\d+\))?/);
 });
 
 test("security and privacy FAQ covers v0.1 boundaries", async () => {

@@ -130,6 +130,11 @@ The optional-sync decision gate is captured in
 [`docs/OPTIONAL_SYNC_DECISION.md`](./OPTIONAL_SYNC_DECISION.md); background sync
 and automatic upload remain disabled until a separate sync-specific consent,
 identity, retention, deletion, and conflict-resolution model is approved.
+The organization/team private dashboard design gate is captured in
+[`docs/TEAM_PRIVATE_DASHBOARD_DESIGN.md`](./TEAM_PRIVATE_DASHBOARD_DESIGN.md);
+hosted private dashboards remain disabled until account, membership,
+access-control, sync or upload, private storage, and audit requirements are
+approved separately.
 
 ## Out Of Scope For v0.1
 

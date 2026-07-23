@@ -215,6 +215,8 @@ test("architecture docs cover the v0.1 local-first boundaries", async () => {
   assert.match(architectureDoc, /hosted\s+accounts remain disabled until a separate identity-dependent feature is\s+approved/);
   assert.match(architectureDoc, /docs\/OPTIONAL_SYNC_DECISION\.md/);
   assert.match(architectureDoc, /background sync\s+and automatic upload remain disabled until a separate sync-specific consent/);
+  assert.match(architectureDoc, /docs\/TEAM_PRIVATE_DASHBOARD_DESIGN\.md/);
+  assert.match(architectureDoc, /hosted private dashboards remain disabled until account, membership,\s+access-control, sync or upload, private storage, and audit requirements are\s+approved separately/);
 });
 
 test("hosted architecture decision preserves the local-first trust boundary", async () => {
@@ -240,10 +242,13 @@ test("hosted architecture decision preserves the local-first trust boundary", as
   assert.match(hostedArchitecture, /accounts stay\s+disabled until a separate feature needs identity/);
   assert.match(hostedArchitecture, /docs\/OPTIONAL_SYNC_DECISION\.md/);
   assert.match(hostedArchitecture, /sync stays\s+disabled until a separate feature needs background data movement/);
+  assert.match(hostedArchitecture, /docs\/TEAM_PRIVATE_DASHBOARD_DESIGN\.md/);
+  assert.match(hostedArchitecture, /private hosted dashboards stay disabled until account, membership,\s+access-control, sync or upload, private storage, and audit requirements are\s+approved separately/);
   assert.match(hostedArchitecture, /## Current Phase 7 Sequence/);
   assert.match(hostedArchitecture, /account-system decision gate/);
   assert.match(hostedArchitecture, /optional-sync decision gate/);
-  assert.match(hostedArchitecture, /The next separate decisions are organization or team private dashboard design/);
+  assert.match(hostedArchitecture, /organization\/team private dashboard design gate/);
+  assert.match(hostedArchitecture, /The next separate decisions are abuse and anti-gaming rules/);
   assert.match(hostedArchitecture, /docs\/PUBLIC_AGGREGATE_SCHEMA\.md/);
   assert.match(hostedArchitecture, /`opensasa ingest`/);
   assert.match(hostedArchitecture, /does not persist accepted payloads yet/);
@@ -292,8 +297,37 @@ test("optional sync decision keeps background sync gated until needed", async ()
   assert.match(syncDecision, /the exact synced record types and excluded fields/);
   assert.match(syncDecision, /the user consent flow and default disabled state/);
   assert.match(syncDecision, /how to inspect, pause, disable, and delete synced data/);
-  assert.match(syncDecision, /This decision does not add:\s*\n\n- background sync;\s*\n- automatic upload;/);
+  assert.match(syncDecision, /This decision does not add:\s*\r?\n\r?\n- background sync;\s*\r?\n- automatic upload;/);
   assert.match(syncDecision, /OpenSasa should keep all\s+sync behavior disabled and continue using explicit local export\/import\s+boundaries/);
+});
+
+test("team private dashboard design stays gated behind account and sync decisions", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+  const teamDashboard = await readFile(path.join(root, "docs", "TEAM_PRIVATE_DASHBOARD_DESIGN.md"), "utf8");
+  const productTimeline = await readFile(path.join(root, "docs", "PRODUCT_TIMELINE.md"), "utf8");
+
+  assert.match(readme, /\[docs\/TEAM_PRIVATE_DASHBOARD_DESIGN\.md\]\(\.\/docs\/TEAM_PRIVATE_DASHBOARD_DESIGN\.md\)/);
+  assert.match(teamDashboard, /# Organization And Team Private Dashboard Design/);
+  assert.match(teamDashboard, /Status: design gate only/);
+  assert.match(teamDashboard, /without adding accounts, sync, organization membership, hosted private storage,\s+or access-controlled dashboard code/);
+  assert.match(teamDashboard, /Keep organization and team private dashboards as a separate future feature/);
+  assert.match(teamDashboard, /This document is the first design gate/);
+  assert.match(teamDashboard, /does\s+not approve implementation/);
+  assert.match(teamDashboard, /A future implementation PR must come only after the\s+project has approved/);
+  assert.match(teamDashboard, /an account system with identity, retention, deletion, recovery, and abuse\s+rules/);
+  assert.match(teamDashboard, /organization or team membership and role-based access control/);
+  assert.match(teamDashboard, /optional sync or explicit upload rules for the exact records shown/);
+  assert.match(teamDashboard, /audit trail for who viewed, changed, exported, or deleted shared data/);
+  assert.match(teamDashboard, /The current local dashboard remains personal and local-only/);
+  assert.match(teamDashboard, /Public aggregate dashboards remain separate/);
+  assert.match(teamDashboard, /personal local records that never leave the developer's machine/);
+  assert.match(teamDashboard, /private workspace records shared under organization or team policy/);
+  assert.match(teamDashboard, /who can invite, remove, or change members/);
+  assert.match(teamDashboard, /which roles can view raw private records/);
+  assert.match(teamDashboard, /how revoked members lose access/);
+  assert.match(teamDashboard, /This decision does not add:\s*\r?\n\r?\n- hosted private dashboard routes;\s*\r?\n- organization or team membership;\s*\r?\n- role-based access control;/);
+  assert.match(teamDashboard, /OpenSasa should keep the shipped\s+dashboard local-only and keep public dashboards aggregate-only/);
+  assert.match(productTimeline, /- \[ \] Add organization\/team private dashboard design\./);
 });
 
 test("contribution ingestion endpoint docs explain the non-persistent boundary", async () => {

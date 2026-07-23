@@ -33,8 +33,10 @@ The intended Phase 7 flow is:
 4. The client submits only the contribution payload to hosted intake.
 5. Hosted intake validates schema version, required fields, allowed enums, and
    excluded-field rules.
-6. Accepted payloads are stored as contribution records.
-7. Aggregate jobs calculate public metrics from accepted records.
+6. Accepted payloads may be stored as contribution records only after a
+   separate persistence PR is approved.
+7. Aggregate jobs calculate public metrics from accepted records after
+   persistence exists.
 8. Public dashboards display aggregate metrics with sample size, confidence,
    methodology version, and data-quality labels.
 
@@ -48,8 +50,8 @@ The first hosted slice should be small:
 
 - contribution intake API;
 - contribution validation;
-- append-only accepted contribution store;
-- aggregate materialization job;
+- append-only accepted contribution store after a separate persistence decision;
+- aggregate materialization job after a separate persistence decision;
 - seed-data-only public dashboard until real contribution volume is sufficient;
 - methodology and schema version metadata on every public aggregate.
 
@@ -60,6 +62,11 @@ The account-system boundary is documented in
 [`docs/ACCOUNT_SYSTEM_DECISION.md`](./ACCOUNT_SYSTEM_DECISION.md); accounts stay
 disabled until a separate feature needs identity and the project has documented
 retention, deletion, access-control, and abuse rules.
+The optional-sync boundary is documented in
+[`docs/OPTIONAL_SYNC_DECISION.md`](./OPTIONAL_SYNC_DECISION.md); sync stays
+disabled until a separate feature needs background data movement and the project
+has documented consent, identity, deletion, recovery, and conflict-resolution
+rules.
 
 The initial implementation exposes `opensasa ingest`, a small HTTP intake
 server with `GET /health` and `POST /api/contributions`. It validates incoming
@@ -141,7 +148,8 @@ The initial Phase 7 sequence now includes:
 5. aggregate confidence labels;
 6. seed-only public dashboard;
 7. real-data public dashboard gate;
-8. account-system decision gate.
+8. account-system decision gate;
+9. optional-sync decision gate.
 
-The next separate decisions are optional sync, organization or team private
-dashboard design, abuse and anti-gaming rules, and public methodology changelog.
+The next separate decisions are organization or team private dashboard design,
+abuse and anti-gaming rules, and public methodology changelog.

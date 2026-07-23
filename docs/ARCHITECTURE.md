@@ -126,6 +126,10 @@ The account-system decision gate is captured in
 [`docs/ACCOUNT_SYSTEM_DECISION.md`](./ACCOUNT_SYSTEM_DECISION.md); hosted
 accounts remain disabled until a separate identity-dependent feature is
 approved.
+The optional-sync decision gate is captured in
+[`docs/OPTIONAL_SYNC_DECISION.md`](./OPTIONAL_SYNC_DECISION.md); background sync
+and automatic upload remain disabled until a separate sync-specific consent,
+identity, retention, deletion, and conflict-resolution model is approved.
 
 ## Out Of Scope For v0.1
 

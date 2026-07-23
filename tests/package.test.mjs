@@ -122,7 +122,7 @@ test("product timeline tracks local dashboard as completed", async () => {
 
   assert.match(
     timeline,
-    /- \[x\] Local dashboard\. \(#64, #65, #66, #67, #68, #69, #70, #71, #72\)/,
+    /- \[x\] Local dashboard\. \(#64, #65, #66, #67, #68, #69, #70, #71, #72, #135\)/,
   );
   assert.match(timeline, /## Phase 2: Local Dashboard Alpha/);
   assert.match(timeline, /- \[x\] Add local HTTP server command: `opensasa dashboard`\. \(#64\)/);

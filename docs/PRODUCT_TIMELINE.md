@@ -300,7 +300,7 @@ Expected PRs:
 - [x] Add account system only if needed. (#127)
 - [x] Add optional sync. (#128)
 - [x] Add organization/team private dashboard design. (#129)
-- [ ] Add abuse and anti-gaming rules.
+- [x] Add abuse and anti-gaming rules. (#130)
 - [ ] Add public methodology changelog.
 
 Exit criteria:

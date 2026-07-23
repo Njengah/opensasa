@@ -557,6 +557,18 @@ For a persistent local override, create `~/.opensasa/config.json`:
 
 An explicit `--db-path` wins over the environment variable and config file.
 
+Check local config and database access without uploading anything:
+
+```bash
+node ./dist/index.js doctor
+```
+
+For script-friendly checks or a temporary database path:
+
+```bash
+node ./dist/index.js doctor --db-path ./opensasa-dev.db --json
+```
+
 To associate sessions with a project without storing its name or path, pass a
 path when logging:
 

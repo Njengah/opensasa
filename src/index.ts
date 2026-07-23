@@ -6,6 +6,7 @@ import { ZodError } from "zod";
 import { createDemoSeedSessions } from "./demo.js";
 import { createDashboardServer, listenDashboardServer } from "./dashboard.js";
 import { createContributionIngestionServer, listenContributionIngestionServer } from "./ingest.js";
+import { getConfigPath, readConfig } from "./config.js";
 import { hashProjectIdentity } from "./project.js";
 import { runVerificationCommand, type VerificationKind } from "./verify.js";
 import {
@@ -21,7 +22,7 @@ import {
   formatLocalReportJson,
 } from "./report.js";
 import { deriveVerifiedSuccess, isoTimestampSchema, type LocalSession } from "./schema.js";
-import { openStore } from "./storage.js";
+import { getDefaultDatabasePath, openStore } from "./storage.js";
 
 const program = new Command();
 
@@ -173,6 +174,10 @@ type AgentStatusOptions = StoreOptions & {
   json?: boolean;
 };
 
+type DoctorOptions = StoreOptions & {
+  json?: boolean;
+};
+
 program
   .name("opensasa")
   .description("Local-first AI coding workflow metadata tracker.")
@@ -213,6 +218,70 @@ program
       server.close();
       process.exitCode = 1;
       console.error(formatIngestError(error));
+    }
+  });
+
+program
+  .command("doctor")
+  .description("Check local OpenSasa config and database access.")
+  .option("--db-path <path>", "override local database path")
+  .option("--json", "output doctor checks as JSON")
+  .action((options: DoctorOptions) => {
+    let store;
+    try {
+      const configPath = getConfigPath();
+      const config = readConfig();
+      const databaseSource = options.dbPath
+        ? "--db-path"
+        : process.env.OPENSASA_DB_PATH
+          ? "OPENSASA_DB_PATH"
+          : config.db_path
+            ? "config"
+            : "default";
+      const databasePath = options.dbPath
+        ?? process.env.OPENSASA_DB_PATH
+        ?? config.db_path
+        ?? getDefaultDatabasePath();
+
+      store = openStore(databasePath);
+      store.listSessions({ limit: 1 });
+
+      const result = {
+        status: "ok",
+        config: {
+          status: "ok",
+          path: configPath,
+          configured_db_path: config.db_path ?? null,
+        },
+        database: {
+          status: "ok",
+          path: store.path,
+          source: databaseSource,
+        },
+        privacy: "local checks only; no data uploaded",
+      };
+
+      if (options.json) {
+        process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+        return;
+      }
+
+      console.log("OpenSasa doctor");
+      console.log(`Config: ok (${result.config.path})`);
+      console.log(`Database: ok (${result.database.path})`);
+      console.log(`Database path source: ${result.database.source}`);
+      console.log("Privacy: local checks only; no data uploaded.");
+    } catch (error) {
+      process.exitCode = 1;
+      if (options.json) {
+        process.stdout.write(
+          `${JSON.stringify({ status: "error", message: formatDoctorError(error) }, null, 2)}\n`,
+        );
+      } else {
+        console.error(formatDoctorError(error));
+      }
+    } finally {
+      store?.close();
     }
   });
 
@@ -1011,6 +1080,14 @@ function formatIngestError(error: unknown): string {
   }
 
   return "Unable to start contribution ingestion endpoint.";
+}
+
+function formatDoctorError(error: unknown): string {
+  if (error instanceof Error) {
+    return `OpenSasa doctor failed: ${error.message}`;
+  }
+
+  return "OpenSasa doctor failed.";
 }
 
 function formatSessions(sessions: LocalSession[]): string {

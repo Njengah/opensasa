@@ -108,7 +108,7 @@ test("product timeline tracks less manual capture as completed", async () => {
   assert.match(timeline, /Broader product capability status:/);
   assert.match(
     timeline,
-    /- \[x\] Less manual data capture\. \(#73, #74, #75, #76, #77, #78, #79, #80, #81, #82\)/,
+    /- \[x\] Less manual data capture\. \(#73, #74, #75, #76, #77, #78, #79, #80, #81, #82, #134\)/,
   );
   assert.match(timeline, /## Phase 3: Local Agent And Capture Helpers/);
   assert.match(timeline, /- \[x\] Add session draft command\. \(#77\)/);

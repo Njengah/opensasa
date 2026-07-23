@@ -228,3 +228,6 @@ Future server-side validation should reject aggregate records that:
 
 This schema should be updated before any public dashboard depends on a new field
 or metric.
+
+Abuse and anti-gaming rules for interpreting public aggregates are documented in
+[`ABUSE_AND_ANTI_GAMING.md`](./ABUSE_AND_ANTI_GAMING.md).

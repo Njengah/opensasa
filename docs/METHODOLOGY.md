@@ -8,6 +8,8 @@ This is not a final scoring contract. It is the foundation for future implementa
 
 Seed-only examples for interpreting these metrics are available in
 [`METHODOLOGY_EXAMPLES.md`](./METHODOLOGY_EXAMPLES.md).
+Abuse and anti-gaming rules for public aggregates are documented in
+[`ABUSE_AND_ANTI_GAMING.md`](./ABUSE_AND_ANTI_GAMING.md).
 
 ## Methodology Principles
 
@@ -251,6 +253,10 @@ This is more useful than claiming one model is universally best.
 
 OpenSasa should not reward raw usage volume.
 
+The dedicated rulebook is [`ABUSE_AND_ANTI_GAMING.md`](./ABUSE_AND_ANTI_GAMING.md).
+It defines initial flag conditions, vendor rules, ranking rules, and privacy
+limits for future public aggregate enforcement.
+
 Signals that should be discounted or flagged:
 
 - inflated task counts,
@@ -274,19 +280,19 @@ Signals that should improve trust:
 
 Vendor-submitted data, synthetic data, and seed data may be useful for testing displays or methodology, but they must be labeled.
 
-Initial data source labels:
+Initial public aggregate provenance labels:
 
 - `community`
-- `personal`
-- `team`
-- `vendor_submitted`
 - `seed`
-- `synthetic`
-- `unknown`
+- `test`
+- `vendor`
 
-Seed and synthetic data should not be presented as real community signal.
+Seed, test, and synthetic display data should not be presented as real
+community signal. Synthetic display data should use seed or test provenance in
+public aggregate records.
 
-Vendor-submitted data should not control methodology, thresholds, or ranking definitions.
+Vendor-submitted data should use vendor provenance and should not control
+methodology, thresholds, or ranking definitions.
 
 ## Public Reporting Rules
 

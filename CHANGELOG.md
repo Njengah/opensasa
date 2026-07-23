@@ -11,7 +11,7 @@ All notable changes to OpenSasa will be documented in this file.
   preview, and contribution history.
 - Local workflow helpers for config, project identity hashing, coarse git
   metadata, verification command capture, session drafts, finalization,
-  activity heartbeats, and agent status.
+  activity heartbeats, agent status, and local doctor checks.
 - VS Code extension workflow for starting and finishing local sessions, opening
   the local dashboard, showing local status, and configuring the local database
   path.

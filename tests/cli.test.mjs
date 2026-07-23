@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
@@ -22,6 +22,7 @@ test("prints help with planned MVP commands", async () => {
   assert.match(stdout, /update/);
   assert.match(stdout, /delete/);
   assert.match(stdout, /demo-seed/);
+  assert.match(stdout, /doctor/);
   assert.match(stdout, /dashboard/);
   assert.match(stdout, /sessions/);
   assert.match(stdout, /report/);
@@ -46,6 +47,14 @@ test("prints dashboard help", async () => {
   assert.match(stdout, /--db-path/);
   assert.match(stdout, /--host/);
   assert.match(stdout, /--port/);
+});
+
+test("prints doctor help", async () => {
+  const { stdout } = await execFileAsync("node", ["./dist/index.js", "doctor", "--help"]);
+
+  assert.match(stdout, /Check local OpenSasa config and database access/);
+  assert.match(stdout, /--db-path/);
+  assert.match(stdout, /--json/);
 });
 
 test("prints version", async () => {
@@ -122,6 +131,50 @@ test("reports agent status from the latest heartbeat", async () => {
   assert.equal(result.status, "active");
   assert.equal(result.last_heartbeat, heartbeatResult.heartbeat.timestamp);
   assert.equal(result.threshold_seconds, 300);
+});
+
+test("checks local config and database access with doctor", async () => {
+  const dbPath = join(tmpRoot, "doctor.db");
+  const configPath = join(tmpRoot, "doctor-config-missing.json");
+  const { stdout } = await execFileAsync(
+    "node",
+    ["./dist/index.js", "doctor", "--json", "--db-path", dbPath],
+    {
+      env: {
+        ...process.env,
+        OPENSASA_CONFIG_PATH: configPath,
+      },
+    },
+  );
+  const result = JSON.parse(stdout);
+
+  assert.equal(result.status, "ok");
+  assert.equal(result.config.status, "ok");
+  assert.equal(result.config.path, configPath);
+  assert.equal(result.config.configured_db_path, null);
+  assert.equal(result.database.status, "ok");
+  assert.equal(result.database.path, dbPath);
+  assert.equal(result.database.source, "--db-path");
+  assert.equal(result.privacy, "local checks only; no data uploaded");
+});
+
+test("reports invalid local config with doctor", async () => {
+  const configPath = join(tmpRoot, "invalid-doctor-config.json");
+  writeFileSync(configPath, "[]");
+
+  await assert.rejects(
+    execFileAsync("node", ["./dist/index.js", "doctor"], {
+      env: {
+        ...process.env,
+        OPENSASA_CONFIG_PATH: configPath,
+      },
+    }),
+    (error) => {
+      assert.match(error.stderr, /OpenSasa doctor failed/);
+      assert.match(error.stderr, /OpenSasa config must contain a JSON object/);
+      return true;
+    },
+  );
 });
 
 test("finalizes a session draft with elapsed duration", async () => {

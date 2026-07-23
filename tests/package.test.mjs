@@ -213,6 +213,8 @@ test("architecture docs cover the v0.1 local-first boundaries", async () => {
   assert.match(architectureDoc, /docs\/HOSTED_ARCHITECTURE\.md/);
   assert.match(architectureDoc, /docs\/ACCOUNT_SYSTEM_DECISION\.md/);
   assert.match(architectureDoc, /hosted\s+accounts remain disabled until a separate identity-dependent feature is\s+approved/);
+  assert.match(architectureDoc, /docs\/OPTIONAL_SYNC_DECISION\.md/);
+  assert.match(architectureDoc, /background sync\s+and automatic upload remain disabled until a separate sync-specific consent/);
 });
 
 test("hosted architecture decision preserves the local-first trust boundary", async () => {
@@ -225,6 +227,8 @@ test("hosted architecture decision preserves the local-first trust boundary", as
   assert.match(hostedArchitecture, /hosted intake API may accept only validated contribution payloads/);
   assert.match(hostedArchitecture, /server-side validation must reject excluded fields/);
   assert.match(hostedArchitecture, /public views are built from aggregate records, not raw local sessions/);
+  assert.match(hostedArchitecture, /Accepted payloads may be stored as contribution records only after a\s+separate persistence PR is approved/);
+  assert.match(hostedArchitecture, /append-only accepted contribution store after a separate persistence decision/);
   assert.match(hostedArchitecture, /sample size and confidence labels/);
   assert.match(hostedArchitecture, /source code/);
   assert.match(hostedArchitecture, /private prompts/);
@@ -234,9 +238,12 @@ test("hosted architecture decision preserves the local-first trust boundary", as
   assert.match(hostedArchitecture, /background sync/);
   assert.match(hostedArchitecture, /docs\/ACCOUNT_SYSTEM_DECISION\.md/);
   assert.match(hostedArchitecture, /accounts stay\s+disabled until a separate feature needs identity/);
+  assert.match(hostedArchitecture, /docs\/OPTIONAL_SYNC_DECISION\.md/);
+  assert.match(hostedArchitecture, /sync stays\s+disabled until a separate feature needs background data movement/);
   assert.match(hostedArchitecture, /## Current Phase 7 Sequence/);
   assert.match(hostedArchitecture, /account-system decision gate/);
-  assert.match(hostedArchitecture, /The next separate decisions are optional sync/);
+  assert.match(hostedArchitecture, /optional-sync decision gate/);
+  assert.match(hostedArchitecture, /The next separate decisions are organization or team private dashboard design/);
   assert.match(hostedArchitecture, /docs\/PUBLIC_AGGREGATE_SCHEMA\.md/);
   assert.match(hostedArchitecture, /`opensasa ingest`/);
   assert.match(hostedArchitecture, /does not persist accepted payloads yet/);
@@ -263,6 +270,30 @@ test("account system decision keeps hosted accounts gated until needed", async (
   assert.match(accountDecision, /whether contribution records can be linked back to an account/);
   assert.match(accountDecision, /This decision does not add/);
   assert.match(accountDecision, /hosted user profiles/);
+});
+
+test("optional sync decision keeps background sync gated until needed", async () => {
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
+  const syncDecision = await readFile(path.join(root, "docs", "OPTIONAL_SYNC_DECISION.md"), "utf8");
+
+  assert.match(readme, /\[docs\/OPTIONAL_SYNC_DECISION\.md\]\(\.\/docs\/OPTIONAL_SYNC_DECISION\.md\)/);
+  assert.match(syncDecision, /# Optional Sync Decision/);
+  assert.match(syncDecision, /Status: not needed for the current Phase 7 slice/);
+  assert.match(syncDecision, /OpenSasa should not add automatic sync yet/);
+  assert.match(syncDecision, /local SQLite database remains the personal source of truth/);
+  assert.match(syncDecision, /`opensasa export` writes inspected contribution-safe files only/);
+  assert.match(syncDecision, /hosted intake can validate a submitted payload without continuously reading\s+local state/);
+  assert.match(syncDecision, /public aggregate dashboards use accepted aggregate records, not a user's\s+private local database/);
+  assert.match(syncDecision, /which records sync and which records never sync/);
+  assert.match(syncDecision, /conflict resolution across devices/);
+  assert.match(syncDecision, /deletion propagation and revocation behavior/);
+  assert.match(syncDecision, /cross-device private dashboard continuity/);
+  assert.match(syncDecision, /explicit user demand that cannot be satisfied by export\/import/);
+  assert.match(syncDecision, /the exact synced record types and excluded fields/);
+  assert.match(syncDecision, /the user consent flow and default disabled state/);
+  assert.match(syncDecision, /how to inspect, pause, disable, and delete synced data/);
+  assert.match(syncDecision, /This decision does not add:\s*\n\n- background sync;\s*\n- automatic upload;/);
+  assert.match(syncDecision, /OpenSasa should keep all\s+sync behavior disabled and continue using explicit local export\/import\s+boundaries/);
 });
 
 test("contribution ingestion endpoint docs explain the non-persistent boundary", async () => {

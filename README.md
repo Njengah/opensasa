@@ -115,6 +115,8 @@ The optional hosted architecture decision lives in
 [docs/HOSTED_ARCHITECTURE.md](./docs/HOSTED_ARCHITECTURE.md).
 The account system decision gate lives in
 [docs/ACCOUNT_SYSTEM_DECISION.md](./docs/ACCOUNT_SYSTEM_DECISION.md).
+The optional sync decision gate lives in
+[docs/OPTIONAL_SYNC_DECISION.md](./docs/OPTIONAL_SYNC_DECISION.md).
 The contribution ingestion endpoint boundary lives in
 [docs/INGESTION_ENDPOINT.md](./docs/INGESTION_ENDPOINT.md).
 The server-side contribution validation contract lives in

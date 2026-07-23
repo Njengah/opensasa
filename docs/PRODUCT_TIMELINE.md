@@ -297,7 +297,7 @@ Expected PRs:
 - [x] Add confidence labels for aggregate views. (#124)
 - [x] Add seed-data-only public dashboard. (#125)
 - [x] Add real-data dashboard only after enough contributions. (#126)
-- [ ] Add account system only if needed.
+- [x] Add account system only if needed. (#127)
 - [ ] Add optional sync.
 - [ ] Add organization/team private dashboard design.
 - [ ] Add abuse and anti-gaming rules.

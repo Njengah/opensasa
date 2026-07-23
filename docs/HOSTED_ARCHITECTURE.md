@@ -67,6 +67,11 @@ The optional-sync boundary is documented in
 disabled until a separate feature needs background data movement and the project
 has documented consent, identity, deletion, recovery, and conflict-resolution
 rules.
+The organization/team private dashboard boundary is documented in
+[`docs/TEAM_PRIVATE_DASHBOARD_DESIGN.md`](./TEAM_PRIVATE_DASHBOARD_DESIGN.md);
+private hosted dashboards stay disabled until account, membership,
+access-control, sync or upload, private storage, and audit requirements are
+approved separately.
 
 The initial implementation exposes `opensasa ingest`, a small HTTP intake
 server with `GET /health` and `POST /api/contributions`. It validates incoming
@@ -149,7 +154,8 @@ The initial Phase 7 sequence now includes:
 6. seed-only public dashboard;
 7. real-data public dashboard gate;
 8. account-system decision gate;
-9. optional-sync decision gate.
+9. optional-sync decision gate;
+10. organization/team private dashboard design gate.
 
-The next separate decisions are organization or team private dashboard design,
-abuse and anti-gaming rules, and public methodology changelog.
+The next separate decisions are abuse and anti-gaming rules and public
+methodology changelog.

@@ -87,9 +87,9 @@ Already working:
 - [x] Many local report metrics and groupings.
 - [x] Tests around the CLI, storage, schema, reports, inspection, and bucket helpers.
 
-Still missing for the broader product:
+Broader product capability status:
 
-- [ ] Less manual data capture.
+- [x] Less manual data capture. (#73, #74, #75, #76, #77, #78, #79, #80, #81, #82)
 - [ ] Local dashboard.
 - [ ] Background agent.
 - [ ] VS Code integration.

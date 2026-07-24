@@ -141,6 +141,22 @@ test("product timeline tracks background agent as completed", async () => {
   assert.match(timeline, /- \[x\] Add docs for manual, wrapper, and agent modes\. \(#82\)/);
 });
 
+test("product timeline tracks VS Code integration as completed", async () => {
+  const timeline = await readFile(path.join(root, "docs", "PRODUCT_TIMELINE.md"), "utf8");
+
+  assert.match(
+    timeline,
+    /- \[x\] VS Code integration\. \(#84, #85, #86, #87, #88, #89, #90, #91, #92, #93, #94, #95\)/,
+  );
+  assert.match(timeline, /## Phase 4: VS Code Extension/);
+  assert.match(timeline, /- \[x\] Create VS Code extension package scaffold\. \(#84\)/);
+  assert.match(timeline, /- \[x\] Add start session command in VS Code\. \(#86\)/);
+  assert.match(timeline, /- \[x\] Add finish session command in VS Code\. \(#87\)/);
+  assert.match(timeline, /- \[x\] Add extension command to open dashboard\. \(#92\)/);
+  assert.match(timeline, /- \[x\] Add extension tests or smoke checks\. \(#93\)/);
+  assert.match(timeline, /- \[x\] Add release packaging workflow for extension\. \(#95\)/);
+});
+
 test("GitHub issue templates exist and reinforce safe public reporting", async () => {
   const templateDir = path.join(root, ".github", "ISSUE_TEMPLATE");
   const templates = [

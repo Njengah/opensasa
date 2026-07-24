@@ -92,7 +92,7 @@ Broader product capability status:
 - [x] Less manual data capture. (#73, #74, #75, #76, #77, #78, #79, #80, #81, #82, #134)
 - [x] Local dashboard. (#64, #65, #66, #67, #68, #69, #70, #71, #72, #135)
 - [x] Background agent. (#79, #81, #82, #136)
-- [ ] VS Code integration.
+- [x] VS Code integration. (#84, #85, #86, #87, #88, #89, #90, #91, #92, #93, #94, #95)
 - [ ] Real export/submission workflow.
 - [ ] Install/release packaging.
 - [ ] Public aggregate prototype.

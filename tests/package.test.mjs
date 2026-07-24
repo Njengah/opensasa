@@ -146,7 +146,7 @@ test("product timeline tracks VS Code integration as completed", async () => {
 
   assert.match(
     timeline,
-    /- \[x\] VS Code integration\. \(#84, #85, #86, #87, #88, #89, #90, #91, #92, #93, #94, #95\)/,
+    /- \[x\] VS Code integration\. \(#84, #85, #86, #87, #88, #89, #90, #91, #92, #93, #94, #95, #137\)/,
   );
   assert.match(timeline, /## Phase 4: VS Code Extension/);
   assert.match(timeline, /- \[x\] Create VS Code extension package scaffold\. \(#84\)/);

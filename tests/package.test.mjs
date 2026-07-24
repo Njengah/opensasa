@@ -131,6 +131,16 @@ test("product timeline tracks local dashboard as completed", async () => {
   assert.match(timeline, /- \[x\] Add Playwright\/smoke tests for dashboard rendering\. \(#72\)/);
 });
 
+test("product timeline tracks background agent as completed", async () => {
+  const timeline = await readFile(path.join(root, "docs", "PRODUCT_TIMELINE.md"), "utf8");
+
+  assert.match(timeline, /- \[x\] Background agent\. \(#79, #81, #82\)/);
+  assert.match(timeline, /## Phase 3: Local Agent And Capture Helpers/);
+  assert.match(timeline, /- \[x\] Add local activity heartbeat table\. \(#79\)/);
+  assert.match(timeline, /- \[x\] Add agent status command\. \(#81\)/);
+  assert.match(timeline, /- \[x\] Add docs for manual, wrapper, and agent modes\. \(#82\)/);
+});
+
 test("GitHub issue templates exist and reinforce safe public reporting", async () => {
   const templateDir = path.join(root, ".github", "ISSUE_TEMPLATE");
   const templates = [

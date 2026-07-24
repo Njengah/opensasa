@@ -134,7 +134,7 @@ test("product timeline tracks local dashboard as completed", async () => {
 test("product timeline tracks background agent as completed", async () => {
   const timeline = await readFile(path.join(root, "docs", "PRODUCT_TIMELINE.md"), "utf8");
 
-  assert.match(timeline, /- \[x\] Background agent\. \(#79, #81, #82\)/);
+  assert.match(timeline, /- \[x\] Background agent\. \(#79, #81, #82, #136\)/);
   assert.match(timeline, /## Phase 3: Local Agent And Capture Helpers/);
   assert.match(timeline, /- \[x\] Add local activity heartbeat table\. \(#79\)/);
   assert.match(timeline, /- \[x\] Add agent status command\. \(#81\)/);

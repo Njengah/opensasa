@@ -139,6 +139,81 @@ function handleDashboardRequest(
   sendJson(response, 404, { error: "Not found." });
 }
 
+function opensasaShellCss(): string {
+  return `
+      :root {
+        color-scheme: dark;
+        --bg: #0c100e;
+        --panel: #151b18;
+        --panel-2: #1b2320;
+        --text: #e7eee9;
+        --muted: #8b968f;
+        --line: #2a332e;
+        --accent: #e2a34a;
+        --ok: #5dcc8a;
+        --ok-dim: rgba(93, 204, 138, 0.16);
+        --bar: #3d6ea8;
+        --bar-fill: linear-gradient(90deg, #3d6ea8, #7eb3e8);
+        --cost: linear-gradient(90deg, #2f7a52, #5dcc8a);
+        --danger: #d36b6b;
+        font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background:
+        radial-gradient(1200px 500px at 10% -10%, rgba(226, 163, 74, 0.08), transparent 50%),
+        var(--bg); }
+      main { max-width: 1120px; margin: 0 auto; padding: 28px 20px 72px; }
+      .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+      .brand { display: flex; gap: 14px; align-items: center; }
+      .mark { width: 36px; height: 36px; border-radius: 10px; background:
+        conic-gradient(from 210deg, var(--accent), #5dcc8a, #3d6ea8, var(--accent));
+        box-shadow: 0 0 0 4px rgba(226, 163, 74, 0.12); flex-shrink: 0; }
+      h1 { margin: 0 0 4px; font-size: 1.55rem; letter-spacing: -0.03em; }
+      h2 { margin: 0 0 12px; font-size: 0.92rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 650; }
+      h3 { margin: 18px 0 10px; font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+      .muted { color: var(--muted); }
+      .nav { display: flex; gap: 8px; flex-wrap: wrap; }
+      .nav a { color: var(--text); text-decoration: none; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 6px 12px; font-size: 0.85rem; }
+      .nav a:hover { border-color: var(--accent); }
+      .notice { border: 1px solid rgba(93, 204, 138, 0.35); background: var(--ok-dim); border-radius: 12px; padding: 12px 16px; color: #cfe9d8; }
+      .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 20px 0; }
+      .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 16px 14px; }
+      .card span, .card .muted { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+      .card strong { display: block; font-size: 1.55rem; margin-top: 8px; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+      .comparison { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-top: 16px; }
+      .split { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+      @media (max-width: 840px) { .split { grid-template-columns: 1fr; } }
+      table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+      th, td { border-bottom: 1px solid var(--line); padding: 10px 6px; text-align: left; }
+      th { color: var(--muted); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
+      th:last-child, td:last-child { text-align: right; }
+      tr:last-child td { border-bottom: 0; }
+      .trend-row { align-items: center; display: grid; gap: 10px; grid-template-columns: minmax(88px, 140px) 1fr 92px; margin: 10px 0; font-size: 0.9rem; }
+      .trend-row span:last-child { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+      .bar-track { background: var(--panel-2); border-radius: 999px; height: 10px; overflow: hidden; }
+      .trend-bar { background: var(--bar-fill); border-radius: 999px; min-width: 2px; height: 10px; }
+      .cost-bar { background: var(--cost); border-radius: 999px; min-width: 2px; height: 10px; }
+      .empty-state { background: rgba(226, 163, 74, 0.08); border: 1px solid rgba(226, 163, 74, 0.35); border-radius: 14px; padding: 16px 18px; }
+      .bundle-summary { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin: 16px 0; }
+      .bundle-list { display: grid; gap: 10px; }
+      .bundle-item { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+      .bundle-meta { color: var(--muted); font-size: 0.9rem; }
+      .pill { background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; display: inline-block; margin-right: 8px; padding: 4px 10px; font-size: 0.8rem; }
+      .field-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+      code { background: var(--panel-2); border-radius: 6px; padding: 2px 6px; font-size: 0.88em; }
+      a { color: var(--accent); }
+      .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+      .filters h2 { grid-column: 1 / -1; margin-bottom: 0; }
+      .filters label { display: flex; flex-direction: column; gap: 6px; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+      .filters select { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; }
+      .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 24px; }
+      #status { margin-top: 20px; }
+      .foot { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; font-size: 0.9rem; }
+  `;
+}
+
 function publicDashboardHtml(): string {
   return `<!doctype html>
 <html lang="en">
@@ -146,28 +221,24 @@ function publicDashboardHtml(): string {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>OpenSasa Public Aggregate Preview</title>
-    <style>
-      :root { color-scheme: light; font-family: system-ui, sans-serif; background: #f7f5ef; color: #1c2520; }
-      body { margin: 0; }
-      main { max-width: 980px; margin: 0 auto; padding: 32px 20px 56px; }
-      h1 { margin-bottom: 8px; }
-      .notice { background: #fff3cd; border: 1px solid #ebcf79; border-radius: 12px; padding: 14px 16px; }
-      .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 24px; }
-      .card { background: #ffffff; border: 1px solid #ded8ca; border-radius: 14px; padding: 16px; }
-      .muted { color: #667064; }
-      .pill { background: #e8efe4; border-radius: 999px; display: inline-block; margin: 4px 6px 0 0; padding: 4px 9px; }
-      code { background: #eee7d7; border-radius: 4px; padding: 2px 5px; }
-    </style>
+    <style>${opensasaShellCss()}</style>
   </head>
   <body>
     <main>
-      <h1>OpenSasa Public Aggregate Preview</h1>
-      <p class="muted">Seed-only public dashboard for methodology and UI validation.</p>
+      <div class="topbar">
+        <div class="brand">
+          <span class="mark" aria-hidden="true"></span>
+          <div>
+            <h1>OpenSasa Public Aggregate Preview</h1>
+            <p class="muted">Seed-only public dashboard for methodology and UI validation.</p>
+          </div>
+        </div>
+        <nav class="nav"><a href="/">Local dashboard</a></nav>
+      </div>
       <p class="notice">This page shows illustrative seed data only. It does not use real contribution data, upload data, or publish rankings.</p>
       <p id="real-data-gate" class="notice">Checking real-data dashboard gate...</p>
       <section id="records" class="grid"><article class="card">Loading seed aggregates...</article></section>
-      <p><a href="/api/public/aggregates">View seed aggregate JSON</a></p>
-      <p><a href="/">Back to local dashboard</a></p>
+      <p class="foot"><a href="/api/public/aggregates">View seed aggregate JSON</a><a href="/">Back to local dashboard</a></p>
     </main>
     <script>
       const records = document.querySelector("#records");
@@ -306,40 +377,23 @@ function dashboardHtml(): string {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>OpenSasa Dashboard</title>
-    <style>
-      :root { color-scheme: light; font-family: system-ui, sans-serif; background: #f6f7f9; color: #17202a; }
-      body { margin: 0; }
-      main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
-      header { margin-bottom: 28px; }
-      h1 { margin: 0 0 8px; font-size: 2rem; }
-      .muted { color: #5f6b76; }
-      .notice { border: 1px solid #b8d9c2; background: #edf8f0; border-radius: 10px; padding: 12px 16px; }
-      .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 24px 0; }
-      .card { background: white; border: 1px solid #dfe4e8; border-radius: 10px; padding: 16px; }
-      .card strong { display: block; font-size: 1.45rem; margin-top: 6px; }
-      .comparison { background: white; border: 1px solid #dfe4e8; border-radius: 10px; padding: 16px; margin-top: 16px; }
-      table { border-collapse: collapse; width: 100%; }
-      th, td { border-bottom: 1px solid #edf0f2; padding: 10px 4px; text-align: left; }
-      th:last-child, td:last-child { text-align: right; }
-      .trend-bar { background: #dcecff; border-radius: 4px; min-width: 2px; height: 18px; }
-      .trend-row { align-items: center; display: grid; gap: 10px; grid-template-columns: 100px 1fr 80px; margin: 10px 0; }
-      .cost-bar { background: #d8f0df; border-radius: 4px; min-width: 2px; height: 18px; }
-      .empty-state { background: #fffaf0; border: 1px solid #f0d9a3; border-radius: 10px; padding: 16px; }
-      .bundle-summary { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin: 16px 0; }
-      .bundle-list { display: grid; gap: 10px; }
-      .bundle-item { background: #f8fafb; border: 1px solid #dfe4e8; border-radius: 10px; padding: 12px; }
-      .bundle-meta { color: #5f6b76; font-size: 0.95rem; }
-      .pill { background: #e7f1ff; border-radius: 999px; display: inline-block; margin-right: 8px; padding: 4px 10px; }
-      .field-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-      code { background: #eef1f4; border-radius: 4px; padding: 2px 5px; }
-      a { color: #1459a6; }
-    </style>
+    <style>${opensasaShellCss()}</style>
   </head>
   <body>
     <main>
-      <header>
-        <h1>OpenSasa Dashboard</h1>
-        <p class="muted">Your private AI coding workflow report.</p>
+      <header class="topbar">
+        <div class="brand">
+          <span class="mark" aria-hidden="true"></span>
+          <div>
+            <h1>OpenSasa Dashboard</h1>
+            <p class="muted">Your private AI coding workflow report.</p>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="/">Local</a>
+          <a href="/public">Public preview</a>
+          <a href="/api/report">Report JSON</a>
+        </nav>
       </header>
       <p class="notice">This dashboard reads only your local OpenSasa database. No data is uploaded.</p>
       <section id="empty-state" class="empty-state" hidden>
@@ -348,7 +402,7 @@ function dashboardHtml(): string {
         <p><code>node ./dist/index.js demo-seed</code></p>
         <p>After seeding, refresh this page to see the dashboard populate.</p>
       </section>
-      <form id="filters" class="comparison" aria-label="Dashboard filters">
+      <form id="filters" class="comparison filters" aria-label="Dashboard filters">
         <h2>Filters</h2>
         <label>Provider <select name="provider"><option value="">All</option></select></label>
         <label>Model <select name="model"><option value="">All</option></select></label>
@@ -364,6 +418,7 @@ function dashboardHtml(): string {
         <article class="card">Estimated cost<strong id="estimated-cost">Loading…</strong></article>
         <article class="card">Confidence<strong id="confidence">Loading…</strong></article>
       </section>
+      <div class="split">
       <section class="comparison" aria-labelledby="model-comparison-title">
         <h2 id="model-comparison-title">Models</h2>
         <table><thead><tr><th>Model</th><th>Sessions</th><th>Cost</th></tr></thead><tbody id="model-comparison"><tr><td colspan="3">Loading…</td></tr></tbody></table>
@@ -372,6 +427,8 @@ function dashboardHtml(): string {
         <h2 id="tool-comparison-title">Tools</h2>
         <table><thead><tr><th>Tool</th><th>Sessions</th><th>Cost</th></tr></thead><tbody id="tool-comparison"><tr><td colspan="3">Loading…</td></tr></tbody></table>
       </section>
+      </div>
+      <div class="split">
       <section class="comparison" aria-labelledby="trend-title">
         <h2 id="trend-title">Daily trend</h2>
         <div id="daily-trend"><p class="muted">Loading…</p></div>
@@ -384,6 +441,7 @@ function dashboardHtml(): string {
         <h3>By tool</h3>
         <div id="tool-cost-chart"><p class="muted">Loading…</p></div>
       </section>
+      </div>
       <section class="comparison" aria-labelledby="outcome-title">
         <h2 id="outcome-title">Outcomes</h2>
         <div id="outcome-chart"><p class="muted">Loading…</p></div>
@@ -405,9 +463,11 @@ function dashboardHtml(): string {
         <div id="contribution-history-list" class="bundle-list"><p class="muted">Loading…</p></div>
       </section>
       <p id="status" class="muted">Loading your local report…</p>
-      <p><a href="/api/report">View local report JSON</a></p>
-      <p><a href="/api/contribution-bundle">View contribution bundle JSON</a></p>
-      <p><a href="/api/contribution-history">View contribution history JSON</a></p>
+      <p class="foot">
+        <a href="/api/report">View local report JSON</a>
+        <a href="/api/contribution-bundle">View contribution bundle JSON</a>
+        <a href="/api/contribution-history">View contribution history JSON</a>
+      </p>
     </main>
     <script>
       const formatRate = (metric) => metric.rate === null ? "unknown" : (metric.rate * 100).toFixed(1) + "%";
@@ -451,7 +511,7 @@ function dashboardHtml(): string {
         const maximum = Math.max(...points.map((point) => point.sessions));
         element.innerHTML = points.map((point) => {
           const width = Math.max(2, (point.sessions / maximum) * 100);
-          return '<div class="trend-row"><span>' + point.date + '</span><div class="trend-bar" style="width:' + width + '%" title="' + point.sessions + ' sessions"></div><span>' + point.usefulSessions + '/' + point.sessions + ' useful</span></div>';
+          return '<div class="trend-row"><span>' + point.date + '</span><div class="bar-track"><div class="trend-bar" style="width:' + width + '%" title="' + point.sessions + ' sessions"></div></div><span>' + point.usefulSessions + '/' + point.sessions + ' useful</span></div>';
         }).join("");
       };
       const renderCostChart = (elementId, costs) => {
@@ -461,7 +521,7 @@ function dashboardHtml(): string {
         const maximum = Math.max(...rows.map((row) => row[1]));
         element.innerHTML = rows.map(([name, cost]) => {
           const width = Math.max(2, (cost / maximum) * 100);
-          return '<div class="trend-row"><span>' + name + '</span><div class="cost-bar" style="width:' + width + '%" title="' + formatCost(cost) + '"></div><span>' + formatCost(cost) + '</span></div>';
+          return '<div class="trend-row"><span>' + name + '</span><div class="bar-track"><div class="cost-bar" style="width:' + width + '%" title="' + formatCost(cost) + '"></div></div><span>' + formatCost(cost) + '</span></div>';
         }).join("");
       };
       const renderCountChart = (elementId, counts) => {
@@ -471,14 +531,14 @@ function dashboardHtml(): string {
         const maximum = Math.max(...rows.map((row) => row[1]));
         element.innerHTML = rows.map(([name, count]) => {
           const width = Math.max(2, (count / maximum) * 100);
-          return '<div class="trend-row"><span>' + name + '</span><div class="trend-bar" style="width:' + width + '%" title="' + count + ' sessions"></div><span>' + count + '</span></div>';
+          return '<div class="trend-row"><span>' + name + '</span><div class="bar-track"><div class="trend-bar" style="width:' + width + '%" title="' + count + ' sessions"></div></div><span>' + count + '</span></div>';
         }).join("");
       };
       const renderVerification = (summary) => {
         const element = document.querySelector("#verification-chart");
         element.innerHTML = Object.entries(summary).map(([field, counts]) => {
           const recorded = Object.entries(counts).filter(([outcome]) => outcome !== "unknown").reduce((total, [, count]) => total + count, 0);
-          return '<div class="trend-row"><span>' + field.replace("_outcome", "") + '</span><div class="trend-bar" style="width:' + Math.min(100, recorded * 10) + '%" title="' + recorded + ' recorded"></div><span>' + recorded + ' recorded</span></div>';
+          return '<div class="trend-row"><span>' + field.replace("_outcome", "") + '</span><div class="bar-track"><div class="trend-bar" style="width:' + Math.min(100, recorded * 10) + '%" title="' + recorded + ' recorded"></div></div><span>' + recorded + ' recorded</span></div>';
         }).join("");
       };
       const renderContributionBundle = (bundle) => {

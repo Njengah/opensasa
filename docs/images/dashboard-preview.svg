@@ -3,29 +3,29 @@
   <desc id="desc">Synthetic preview image of the local OpenSasa dashboard showing overview cards, model and tool tables, daily trend, cost summary, outcomes, contribution bundle preview, and contribution history.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#121916" />
-      <stop offset="100%" stop-color="#0c100e" />
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#edf2f7" />
     </linearGradient>
     <style>
       .page { fill: url(#bg); }
-      .panel { fill: #151b18; stroke: #2a332e; stroke-width: 2; rx: 18; }
-      .notice { fill: #173024; stroke: #3d7a58; stroke-width: 2; rx: 18; }
-      .card { fill: #151b18; stroke: #2a332e; stroke-width: 2; rx: 18; }
-      .muted { fill: #8b968f; font: 28px system-ui, sans-serif; }
-      .small { fill: #8b968f; font: 22px system-ui, sans-serif; }
-      .heading { fill: #e7eee9; font: 700 54px system-ui, sans-serif; }
-      .section { fill: #8b968f; font: 700 28px system-ui, sans-serif; letter-spacing: 2px; }
-      .label { fill: #e7eee9; font: 600 24px system-ui, sans-serif; }
-      .value { fill: #e7eee9; font: 700 38px system-ui, sans-serif; }
-      .pill { fill: #1b2320; rx: 999; }
-      .pill-text { fill: #e2a34a; font: 600 21px system-ui, sans-serif; }
-      .rule { stroke: #2a332e; stroke-width: 2; }
-      .trend { fill: #3d6ea8; }
-      .cost { fill: #2f7a52; }
-      .bundle { fill: #1b2320; stroke: #2a332e; stroke-width: 2; rx: 14; }
-      .field { fill: #1b2320; rx: 999; }
-      .accent { fill: #e2a34a; font: 700 22px system-ui, sans-serif; }
-      .mono { fill: #e7eee9; font: 600 22px "Courier New", monospace; }
+      .panel { fill: #ffffff; stroke: #dfe4e8; stroke-width: 2; rx: 18; }
+      .notice { fill: #edf8f0; stroke: #b8d9c2; stroke-width: 2; rx: 18; }
+      .card { fill: #ffffff; stroke: #dfe4e8; stroke-width: 2; rx: 18; }
+      .muted { fill: #5f6b76; font: 28px system-ui, sans-serif; }
+      .small { fill: #5f6b76; font: 22px system-ui, sans-serif; }
+      .heading { fill: #17202a; font: 700 54px system-ui, sans-serif; }
+      .section { fill: #17202a; font: 700 34px system-ui, sans-serif; }
+      .label { fill: #17202a; font: 600 24px system-ui, sans-serif; }
+      .value { fill: #17202a; font: 700 38px system-ui, sans-serif; }
+      .pill { fill: #e7f1ff; rx: 999; }
+      .pill-text { fill: #1459a6; font: 600 21px system-ui, sans-serif; }
+      .rule { stroke: #edf0f2; stroke-width: 2; }
+      .trend { fill: #dcecff; }
+      .cost { fill: #d8f0df; }
+      .bundle { fill: #f8fafb; stroke: #dfe4e8; stroke-width: 2; rx: 14; }
+      .field { fill: #eef1f4; rx: 999; }
+      .accent { fill: #1459a6; font: 700 22px system-ui, sans-serif; }
+      .mono { fill: #17202a; font: 600 22px "Courier New", monospace; }
     </style>
   </defs>
 

@@ -1,665 +1,92 @@
 # OpenSasa
 
-OpenSasa is an early-stage open-source project for real-world AI coding intelligence.
+Local-first CLI that records **safe metadata** about AI coding sessions so you can see which models actually work in your repos — cost, retries, verification, accepted vs rejected — without uploading source code or prompts.
 
-The goal is to help developers understand which AI models actually work in software engineering workflows, not only which models perform well on static benchmarks or vendor-published charts.
+It is not a public leaderboard and not a vendor benchmark page.
 
-## Rationale
+## What runs today
 
-AI coding models are changing quickly. New models ship, pricing changes, context windows expand, benchmarks move, and developers keep asking the same practical questions:
+- CLI: `log`, `update`, `delete`, `demo-seed`, `sessions`, `report`, `inspect`, `export`, `doctor`, `verify`, `draft`, `finalize`, `heartbeat`, `dashboard`
+- Storage: local SQLite (`~/.opensasa/opensasa.db` by default)
+- Local dashboard on `127.0.0.1` (overview, model/tool comparison, cost, verification). **No upload.**
+- Optional sanitized contribution JSON export (consent + `--yes` required). No automatic sync.
 
-- Which model is best for this kind of coding task?
-- How much does it cost to get a useful result?
-- Which models waste the most retries?
-- Which models produce changes that pass tests?
-- Which models are improving or getting worse after releases?
-- Which tools and agents work best in real repositories?
-
-Benchmarks are useful, but they do not fully capture what happens in everyday development: failed patches, accepted changes, retries, task complexity, cost per useful outcome, verification results, and model drift over time.
-
-OpenSasa is built around a simple belief:
-
-> If AI models are going to shape software engineering, software engineers should help define how they are measured.
-
-## Project Scope
-
-OpenSasa is intended to become a privacy-first system for tracking and comparing AI coding workflows using safe, opt-in developer metadata.
-
-The long-term product direction includes:
-
-- a local tracker for AI coding sessions,
-- a private developer dashboard,
-- a public AI coding model index,
-- transparent scoring methodology,
-- model release drift tracking,
-- cost-per-useful-outcome reporting,
-- and shareable reports for the developer community.
-
-## Project Boundaries
-
-OpenSasa is not:
-
-- another generic LLM leaderboard,
-- a vendor ranking page,
-- a benchmark-only aggregator,
-- a coding-hours vanity board,
-- a source-code harvesting tool,
-- or a closed analytics product with unverifiable methodology.
-
-The project should be useful to individual developers first, and only then contribute to a broader public index through explicit opt-in.
-
-## Privacy Principles
-
-OpenSasa should be local-first and privacy-first by default.
-
-The intended default is:
-
-> No source code uploaded. No private prompts exposed. Developers choose what they share.
-
-Safe metadata may include information such as model name, provider, coding tool, task type, language, estimated tokens, estimated cost, duration, retry count, check outcomes, and accepted or rejected status.
-
-Data excluded by default should include source code, private prompts, model responses, exact file paths, repository names, company names, secrets, and terminal output that could contain private information.
-
-## Project Status
-
-This repository now contains the first CLI-first MVP workflow for local manual
-tracking.
-
-Implemented local commands:
-
-- `opensasa log`
-- `opensasa update`
-- `opensasa delete`
-- `opensasa demo-seed`
-- `opensasa sessions`
-- `opensasa report`
-- `opensasa inspect`
-- `opensasa export`
-
-The current product is intentionally local-only. It can log safe AI coding
-session metadata, store records in a local SQLite database, update or delete
-local records, list previous sessions, generate a personal report, and preview
-a sanitized contribution payload. It can also export that sanitized payload to
-a local JSON file. For `v0.1`, that manual export remains the contribution
-boundary: there is no automatic upload, account sync, or public ranking flow.
-The optional Phase 7 ingestion endpoint validates safe payloads but does not
-store them yet.
-
-The public development and versioning approach is described in
-[Development Cycle](./docs/DEVELOPMENT_CYCLE.md). The MVP workflow is described
-in [MVP Workflow](./docs/MVP_WORKFLOW.md).
-Seed-only methodology examples are available in
-[Methodology Examples](./docs/METHODOLOGY_EXAMPLES.md).
-
-For a quick reminder of what currently runs and where development stopped, see
-[Project Snapshot](./docs/PROJECT_SNAPSHOT.md).
-
-The current local-first product architecture is summarized in
-[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
-Security and privacy behavior for `v0.1` is covered in
-[docs/SECURITY_PRIVACY_FAQ.md](./docs/SECURITY_PRIVACY_FAQ.md).
-Contributor-friendly starter work is described in
-[docs/GOOD_FIRST_ISSUES.md](./docs/GOOD_FIRST_ISSUES.md).
-
-VS Code extension development notes live in
-[vscode-extension/README.md](./vscode-extension/README.md).
-CLI install steps live in
-[docs/INSTALL.md](./docs/INSTALL.md).
-The quickest hands-on evaluation path lives in
-[docs/DEMO_WALKTHROUGH.md](./docs/DEMO_WALKTHROUGH.md).
-The beta release operator checklist lives in
-[docs/FIRST_RELEASE_CHECKLIST.md](./docs/FIRST_RELEASE_CHECKLIST.md).
-The public beta launch case study lives in
-[docs/LAUNCH_CASE_STUDY.md](./docs/LAUNCH_CASE_STUDY.md).
-The optional hosted architecture decision lives in
-[docs/HOSTED_ARCHITECTURE.md](./docs/HOSTED_ARCHITECTURE.md).
-The account system decision gate lives in
-[docs/ACCOUNT_SYSTEM_DECISION.md](./docs/ACCOUNT_SYSTEM_DECISION.md).
-The optional sync decision gate lives in
-[docs/OPTIONAL_SYNC_DECISION.md](./docs/OPTIONAL_SYNC_DECISION.md).
-The organization/team private dashboard design gate lives in
-[docs/TEAM_PRIVATE_DASHBOARD_DESIGN.md](./docs/TEAM_PRIVATE_DASHBOARD_DESIGN.md).
-The abuse and anti-gaming rulebook lives in
-[docs/ABUSE_AND_ANTI_GAMING.md](./docs/ABUSE_AND_ANTI_GAMING.md).
-The public methodology changelog lives in
-[docs/METHODOLOGY_CHANGELOG.md](./docs/METHODOLOGY_CHANGELOG.md).
-The contribution ingestion endpoint boundary lives in
-[docs/INGESTION_ENDPOINT.md](./docs/INGESTION_ENDPOINT.md).
-The server-side contribution validation contract lives in
-[docs/SERVER_SIDE_VALIDATION.md](./docs/SERVER_SIDE_VALIDATION.md).
-The seed-only public aggregate dashboard boundary lives in
-[docs/PUBLIC_DASHBOARD.md](./docs/PUBLIC_DASHBOARD.md).
-
-## Dashboard Preview
-
-For the seeded dashboard preview image and the fastest local walkthrough, see
-[docs/DEMO_WALKTHROUGH.md](./docs/DEMO_WALKTHROUGH.md).
-
-That preview mirrors the local-only dashboard sections that ship today:
-overview cards, model and tool comparisons, daily trend, cost summary,
-verification outcomes, contribution bundle preview, and contribution history.
-The dashboard still reads only your local SQLite database and does not upload
-session data.
-
-## Local CLI Usage
-
-Install dependencies and build the CLI:
+## Install
 
 ```bash
 npm install
 npm run build
-```
-
-Run the CLI locally:
-
-```bash
 node ./dist/index.js --help
 ```
 
-When installed as a package, the executable name is:
+Package name when linked: `opensasa`. Full install: [docs/INSTALL.md](./docs/INSTALL.md).
+
+## Demo (no real project data)
 
 ```bash
-opensasa
+node ./dist/index.js demo-seed --db-path ./opensasa-demo.db
+node ./dist/index.js sessions --db-path ./opensasa-demo.db
+node ./dist/index.js report --db-path ./opensasa-demo.db --compact
+node ./dist/index.js dashboard --db-path ./opensasa-demo.db
 ```
 
-For the full install and local linking flow, see
-[docs/INSTALL.md](./docs/INSTALL.md).
+## Dashboard Preview
 
-### Log A Session
+The dashboard prints a local URL. It does not upload session data. Walkthrough: [docs/DEMO_WALKTHROUGH.md](./docs/DEMO_WALKTHROUGH.md).
 
-`opensasa log` records one AI-assisted coding session manually.
-
-Required fields:
-
-- provider,
-- model ID,
-- task type,
-- final outcome.
-
-Example:
+## Log a session
 
 ```bash
 node ./dist/index.js log \
-  --provider OpenAI \
-  --model-id gpt-5 \
+  --provider Anthropic \
+  --model-id claude-opus-4 \
   --task-type bug_fix \
   --final-outcome accepted \
   --tests-outcome passed \
   --estimated-cost-usd 0.42
 ```
 
-The command stores the record locally and prints the generated session ID.
+`--db-path` or `OPENSASA_DB_PATH` overrides the default database.
 
-Use JSON output for scripting:
+## Privacy
 
-```bash
-node ./dist/index.js log \
-  --json \
-  --provider OpenAI \
-  --model-id gpt-5 \
-  --task-type bug_fix \
-  --final-outcome accepted
-```
+Default: **no source code, no prompts, no model responses, no exact paths, no repo names, no secrets, no raw terminal output.**
 
-Useful optional fields include:
+Stored fields are things like model, provider, tool, task type, duration, retries, token estimates, cost, and check outcomes. Project identity is a one-way SHA-256 hash when you pass `--project-path`. Details: [docs/SHARING_BOUNDARY.md](./docs/SHARING_BOUNDARY.md).
 
-- `--timestamp`
-- `--model-version`
-- `--tool`
-- `--language`
-- `--framework`
-- `--duration-seconds`
-- `--retry-count`
-- `--error-count`
-- `--input-tokens-estimate`
-- `--output-tokens-estimate`
-- `--cached-tokens-estimate`
-- `--cost-source`
-- `--repo-size-bucket`
-- `--file-count-bucket`
-- `--changed-file-count-bucket`
-- `--lines-added-bucket`
-- `--lines-removed-bucket`
-- `--tests-outcome`
-- `--build-outcome`
-- `--lint-outcome`
-- `--typecheck-outcome`
-- `--manual-review-outcome`
-- `--contribution-consent`
-
-For tests or temporary runs, override the database path:
+## Tests
 
 ```bash
-node ./dist/index.js log \
-  --db-path ./opensasa-dev.db \
-  --provider OpenAI \
-  --model-id gpt-5 \
-  --task-type feature \
-  --final-outcome partially_accepted
+npm test
 ```
 
-### Update A Session
-
-```bash
-node ./dist/index.js update <session-id> \
-  --final-outcome accepted \
-  --tests-outcome passed \
-  --retry-count 2 \
-  --contribution-consent granted
-```
-
-Use JSON output for scripting:
-
-```bash
-node ./dist/index.js update <session-id> \
-  --json \
-  --final-outcome accepted
-```
-
-The update command accepts the same safe metadata fields as `log`. It validates
-the full session before writing and does not add prompts, source code, model
-responses, exact paths, secrets, or terminal output.
-
-### Delete A Session
-
-```bash
-node ./dist/index.js delete <session-id> --yes
-```
-
-Use JSON output for scripting:
-
-```bash
-node ./dist/index.js delete <session-id> --yes --json
-```
-
-The delete command removes one local session record from the local SQLite
-database. It requires `--yes` so deletion is explicit.
-
-### Seed Demo Data
-
-```bash
-node ./dist/index.js demo-seed
-```
-
-Use JSON output for scripting:
-
-```bash
-node ./dist/index.js demo-seed --json
-```
-
-The demo seed command creates safe synthetic sessions in the local database so
-you can try `sessions`, `report`, and `inspect` without entering your own data.
-It does not store source code, prompts, model responses, exact paths, or raw
-terminal output.
-
-### List Sessions
-
-```bash
-node ./dist/index.js sessions
-```
-
-Use JSON output for scripting:
-
-```bash
-node ./dist/index.js sessions --json
-```
-
-Limit the list to the newest sessions:
-
-```bash
-node ./dist/index.js sessions --limit 10
-```
-
-Filter the list by safe metadata fields:
-
-```bash
-node ./dist/index.js sessions \
-  --provider OpenAI \
-  --model-id gpt-5 \
-  --tool Codex \
-  --language TypeScript \
-  --framework Node.js \
-  --work-mode manual_log \
-  --task-type bug_fix \
-  --final-outcome accepted
-```
-
-Filter the list by timestamp range:
-
-```bash
-node ./dist/index.js sessions \
-  --since 2026-06-01T00:00:00.000Z \
-  --until 2026-06-30T23:59:59.999Z
-```
-
-The list output shows:
-
-- session ID,
-- timestamp,
-- provider,
-- model ID,
-- task type,
-- final outcome,
-- verified success status,
-- estimated cost when known.
-
-### Generate A Local Report
-
-```bash
-node ./dist/index.js report
-```
-
-Use compact output when you only need the headline metrics in a terminal:
-
-```bash
-node ./dist/index.js report --compact
-```
-
-Use JSON output for scripting:
-
-```bash
-node ./dist/index.js report --json
-```
-
-JSON reports include `reportSchemaVersion` and `metadataSchemaVersion` fields
-so downstream tools can detect report format changes.
-
-### Start The Local Dashboard
-
-Start the local-only dashboard server:
-
-```bash
-node ./dist/index.js dashboard
-```
-
-The server binds to `127.0.0.1` by default and prints its local URL. You can
-override the interface, port, or database path with `--host`, `--port`, and
-`--db-path`. The dashboard reads local SQLite data only; it does not upload
-sessions or send telemetry. It also includes a local-only contribution bundle
-preview for consent-granted sessions alongside the personal report views, plus
-local contribution history for previous exports.
-
-Run the dashboard smoke tests independently with:
-
-```bash
-npm run test:dashboard
-```
-
-Limit the report to the newest sessions:
-
-```bash
-node ./dist/index.js report --limit 10
-```
-
-Filter the report by safe metadata fields:
-
-```bash
-node ./dist/index.js report \
-  --provider OpenAI \
-  --model-id gpt-5 \
-  --tool Codex \
-  --language TypeScript \
-  --framework Node.js \
-  --work-mode manual_log \
-  --task-type bug_fix \
-  --final-outcome accepted
-```
-
-Filter the report by timestamp range:
-
-```bash
-node ./dist/index.js report \
-  --since 2026-06-01T00:00:00.000Z \
-  --until 2026-06-30T23:59:59.999Z
-```
-
-The report is generated from local data only. It includes:
-
-- total sessions,
-- sessions by provider,
-- sessions by model,
-- sessions by tool,
-- sessions by language,
-- sessions by framework,
-- sessions by work mode,
-- sessions by cost source,
-- sessions by repo size bucket,
-- sessions by file count bucket,
-- sessions by changed file count bucket,
-- sessions by lines added bucket,
-- sessions by lines removed bucket,
-- sessions by duration bucket,
-- sessions by error count bucket,
-- sessions by task type,
-- accepted and partially accepted count,
-- rejected count,
-- unknown outcome count,
-- estimated total cost,
-- token estimate summary,
-- cost per useful task,
-- failure cost,
-- cost by provider,
-- cost by model,
-- cost by tool,
-- cost by language,
-- cost by framework,
-- cost by work mode,
-- cost by cost source,
-- cost by repo size bucket,
-- cost by file count bucket,
-- cost by changed file count bucket,
-- cost by lines added bucket,
-- cost by lines removed bucket,
-- cost by duration bucket,
-- cost by error count bucket,
-- error count summary,
-- speed to useful output,
-- retry summary,
-- failure retry burden,
-- confidence summary,
-- verification outcome summary,
-- useful outcome rate,
-- unknown outcome rate,
-- verified success rate.
-
-Unknown or missing data is labeled directly.
-Empty report sections say when no matching local data was recorded.
-
-### Inspect A Session
-
-```bash
-node ./dist/index.js inspect <session-id>
-```
-
-Use JSON output for scripting:
-
-```bash
-node ./dist/index.js inspect <session-id> --json
-```
-
-This shows the local record for one session and repeats the privacy boundary.
-
-### Preview A Contribution Payload
-
-```bash
-node ./dist/index.js inspect <session-id> --contribution
-```
-
-Use JSON output for scripting:
-
-```bash
-node ./dist/index.js inspect <session-id> --contribution --json
-```
-
-This generates a local preview of what a future contribution payload could
-include. The preview shows included fields, excluded fields, bucketed values,
-schema version, payload version, data source, consent status, validation
-status, validation counts, and no-upload status.
-
-Contribution consent is stored locally as `not_granted`, `granted`, or
-`revoked`. Setting it does not enable uploads in the MVP.
-
-Uploads are not enabled in the MVP.
-
-### Export A Contribution Payload
-
-```bash
-node ./dist/index.js export <session-id> --out ./contribution.json --yes
-```
-
-Use JSON output for scripting:
-
-```bash
-node ./dist/index.js export <session-id> --out ./contribution.json --yes --json
-```
-
-Optional export metadata sidecar:
-
-```bash
-OPENSASA_SIGNING_KEY=your-local-secret node ./dist/index.js export <session-id> --out ./contribution.json --metadata-out ./contribution.metadata.json --signing-key-env OPENSASA_SIGNING_KEY --yes
-```
-
-This writes the sanitized contribution payload itself to a local JSON file.
-It does not upload anything. The export path must be supplied explicitly in
-this first export workflow. Export also requires the session's local
-`contribution_consent` state to already be `granted`, plus an explicit
-`--yes` confirmation when you run the command. Exported payloads currently use
-`payload_version: "v0.2.0"`. The export command also reports local validation
-results, and `--json` includes the full validation report metadata alongside
-the export path and contribution ID. Successful exports are also recorded in
-local contribution history for later inspection in the dashboard. That history
-keeps the original export record immutable and shows the current local consent
-state, so later revocations remain visible during review.
-When `--metadata-out` is supplied, OpenSasa also writes a detached metadata
-JSON sidecar with the payload hash, byte size, export timestamp, and validation
-status. Adding `--signing-key-env` signs that sidecar with an HMAC-SHA256
-signature derived from the named local environment variable.
-For a checked-in synthetic example of the exported JSON shape, see
-[docs/examples/sample-contribution-payload.json](./docs/examples/sample-contribution-payload.json).
-
-## Local Storage
-
-By default, OpenSasa stores records at:
-
-```text
-~/.opensasa/opensasa.db
-```
-
-The database path can be overridden with `--db-path` or `OPENSASA_DB_PATH`.
-
-For a persistent local override, create `~/.opensasa/config.json`:
-
-```json
-{
-  "db_path": "/path/to/opensasa.db"
-}
-```
-
-An explicit `--db-path` wins over the environment variable and config file.
-
-Check local config and database access without uploading anything:
-
-```bash
-node ./dist/index.js doctor
-```
-
-For script-friendly checks or a temporary database path:
-
-```bash
-node ./dist/index.js doctor --db-path ./opensasa-dev.db --json
-```
-
-To associate sessions with a project without storing its name or path, pass a
-path when logging:
-
-```bash
-node ./dist/index.js log \
-  --provider OpenAI \
-  --model-id gpt-5 \
-  --task-type bug_fix \
-  --final-outcome accepted \
-  --project-path .
-```
-
-OpenSasa stores only a one-way SHA-256 identity hash.
-
-See [Workflow Modes](docs/WORKFLOW_MODES.md) for the manual, wrapper, and agent
-capture flows.
-
-See [What OpenSasa Shares](docs/SHARING_BOUNDARY.md) for the local storage and
-future contribution boundary.
-
-Run a local verification command for a session without storing its command text
-or terminal output:
-
-```bash
-node ./dist/index.js verify <session-id> \
-  --kind tests \
-  --command "npm test"
-```
-
-Only the verification outcome is written back to the session.
-
-Imported or wrapped records can include provenance labels with
-`--import-source` and `--import-source-version`; these identify the metadata
-source without storing private tool logs.
-
-Start a lightweight session draft when you know the model and task but not the
-final outcome yet:
-
-```bash
-node ./dist/index.js draft \
-  --provider OpenAI \
-  --model-id gpt-5 \
-  --task-type bug_fix
-```
-
-Finalize the draft when the work is complete:
-
-```bash
-node ./dist/index.js finalize <session-id> \
-  --final-outcome accepted \
-  --tests-outcome passed
-```
-
-Finalization records elapsed duration from the draft timestamp.
-
-Record a privacy-safe local activity heartbeat when a coding session is active:
-
-```bash
-node ./dist/index.js heartbeat --project-path .
-```
-
-Heartbeats contain only a timestamp and optional project identity hash.
-
-Inspect recent local activity:
-
-```bash
-node ./dist/index.js agent status
-```
-
-The status is `active` when a heartbeat is within the five-minute default
-window, otherwise `idle`; a new database reports `never_started`.
-
-## Current Limitations
-
-The MVP does not include:
-
-- public uploads,
-- public rankings,
-- hosted backend,
-- web dashboard,
-- team dashboard,
-- automatic imports from AI coding tools,
-- contribution submission.
-
-Bucket thresholds and report formatting are early implementation defaults and
-may change as the methodology matures.
-
-## Positioning
-
-> OpenSasa is real-world intelligence for AI coding.
-
-More specifically:
-
-> OpenSasa helps developers and teams understand which AI models actually work in real software engineering workflows.
+## Not in this repo yet
+
+- Public uploads or rankings
+- Hosted backend or team accounts
+- Automatic import from Cursor / Claude Code / Copilot
+
+Those are documented as future gates, not shipped features. An optional Phase 7 ingestion endpoint validates safe payloads but does not store them yet.
+
+## Docs
+
+- [docs/INSTALL.md](./docs/INSTALL.md)
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+- [docs/SECURITY_PRIVACY_FAQ.md](./docs/SECURITY_PRIVACY_FAQ.md)
+- [docs/GOOD_FIRST_ISSUES.md](./docs/GOOD_FIRST_ISSUES.md)
+- [vscode-extension/README.md](./vscode-extension/README.md)
+- [docs/FIRST_RELEASE_CHECKLIST.md](./docs/FIRST_RELEASE_CHECKLIST.md)
+- [docs/LAUNCH_CASE_STUDY.md](./docs/LAUNCH_CASE_STUDY.md)
+- [docs/HOSTED_ARCHITECTURE.md](./docs/HOSTED_ARCHITECTURE.md)
+- [docs/ACCOUNT_SYSTEM_DECISION.md](./docs/ACCOUNT_SYSTEM_DECISION.md)
+- [docs/OPTIONAL_SYNC_DECISION.md](./docs/OPTIONAL_SYNC_DECISION.md)
+- [docs/TEAM_PRIVATE_DASHBOARD_DESIGN.md](./docs/TEAM_PRIVATE_DASHBOARD_DESIGN.md)
+- [docs/ABUSE_AND_ANTI_GAMING.md](./docs/ABUSE_AND_ANTI_GAMING.md)
+- [docs/METHODOLOGY_CHANGELOG.md](./docs/METHODOLOGY_CHANGELOG.md)
+- [docs/INGESTION_ENDPOINT.md](./docs/INGESTION_ENDPOINT.md)
+- [docs/SERVER_SIDE_VALIDATION.md](./docs/SERVER_SIDE_VALIDATION.md)
+- [docs/PUBLIC_DASHBOARD.md](./docs/PUBLIC_DASHBOARD.md)
+
+## License
+
+MIT. See [`LICENSE`](./LICENSE).
